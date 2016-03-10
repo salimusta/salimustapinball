@@ -1,6 +1,8 @@
 /*
-Ce programme pilote 7 afficheurs 7 segments a l aide d un CD4543
+This program drives a score board composed of 7 Common-Anode 7-Segment digits
+Using a BCD decoder CD4543BE
 */
+//Include the Wire for I2C communication
 #include <Wire.h>
 
 long nb = 0;
@@ -101,7 +103,7 @@ void loop() {
    int dizaine = (((nb%10000)%1000)%100)/10;
    int unite = nb%10;
    
-  //UNITES--------
+  //UNITS--------
   if(blinkStatus == false) digitalWrite(7, HIGH);
   else digitalWrite(7, LOW);
   digitalWrite(6, LOW);
@@ -115,7 +117,7 @@ void loop() {
   
   delayMicroseconds(freq);
   
-  //DIZAINE------------
+  //TENS------------
   if(nb > 9){
     digitalWrite(7, LOW);
     if(blinkStatus == false) digitalWrite(6, HIGH);
@@ -129,7 +131,7 @@ void loop() {
     
     delayMicroseconds(freq);
   }
-  //CENTAINE----------
+  //HUNDREDS----------
   if(nb > 99){
     digitalWrite(7, LOW);
     digitalWrite(6, LOW);
@@ -143,7 +145,7 @@ void loop() {
     
     delayMicroseconds(freq);
   }
-  //MILLIERS
+  //THOUSANDS
   if(nb > 999){
     digitalWrite(7, LOW);
     digitalWrite(6, LOW);
@@ -157,7 +159,7 @@ void loop() {
     
     delayMicroseconds(freq);
   }
-  //DIZAINE DE MILLIERS
+  //TEN THOUSANDS
   if(nb > 9999){
     digitalWrite(7, LOW);
     digitalWrite(6, LOW);
