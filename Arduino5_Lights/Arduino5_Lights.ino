@@ -4,6 +4,7 @@
 #define ALL_OFF 2
 #define VERT_SNAKE_ALL 81
 #define ALL_IDLE 82
+#define VERT_SNAKE_KEEP_ALL 83
 
 #define FLASH_TOP_LIGHTS 3
 #define LIGHT_TOP_LIGHTS 4
@@ -110,6 +111,8 @@ int dataPin = 2; int clockPin = 3;
 //ALL param
 byte allAnimModeState = 1;
 byte allAnimMode = ALL_IDLE;
+byte allAnimModeFrame = 0;
+bool allAnim = false;
 
 //LEFT RED TARGET
 byte LeftRedAnim = 0;
@@ -255,17 +258,59 @@ void setup() {
 }
 
 
-
+void SetAllAnim(){
+ LeftRedAnim = 1;
+  LeftRedTargetAnimMode = SNAKE_LEFT_RED_TARGET;
+  
+  RightRedAnim = 1;
+  RightRedTargetAnimMode = SNAKE_RIGHT_RED_TARGET;
+  
+  LeftGreenAnim = 1;
+  LeftGreenTargetAnimMode = SNAKE_LEFT_GREEN_TARGET;
+  
+  RightGreenAnim = 1;
+  RightGreenTargetAnimMode = SNAKE_RIGHT_GREEN_TARGET;
+  
+  MiddleYellowAnim = 1;
+  YellowTargetAnimMode = SNAKE_YELLOW_TARGET;
+  
+  ModesAnim = 1;
+  ModesAnimMode = SNAKE_MODES;
+  
+  LauncherAnim = 1;
+  LauncherAnimMode = SNAKE_LAUNCHER;
+  LooseAnim = 0;
+  
+  FlashAnim = 0b01010101;
+  FlashAnimMode = ALTERN_TOP_LIGHTS;
+  
+  LettersAnimMode = SNAKE_LETTERS;
+  Pletter = 1;
+  Sletter = Iletter = Tletter = 0;
+  
+  KO1Anim = 1;
+  KO1AnimMode = SNAKE_KO1;
+  
+  KO2Anim = 1;
+  KO2AnimMode = SNAKE_KO2;
+  
+  Bumper1Time = Bumper2Time = Bumper3Time = 0;
+  Bumper1Light = 1;
+  Bumper1Mode = Bumper2Mode = Bumper3Mode = SNAKE_BUMPERS;
+  
+  Gate1Light = Gate2Light = Gate3Light = 1; 
+}
 
 
 void receiveEvent(int howMany) {
   byte duration = 0;
+  allAnim = false;
   if(howMany == 1 || howMany == 2){
     byte byte0 = Wire.read();
     //TOP LIGHT--------------------------------------------------------------
     if(howMany == 2) duration = Wire.read();
     
-    if(byte0 == ALL_OFF || byte0 == VERT_SNAKE_ALL){
+    if(byte0 == ALL_OFF || byte0 == VERT_SNAKE_ALL || byte0 == VERT_SNAKE_KEEP_ALL){
       LeftRedAnim = 0;
       LeftRedTargetAnimMode = OFF_LEFT_RED_TARGET;
       LeftRedTargetAnimMode_Old = LeftRedTargetAnimMode;
@@ -332,49 +377,15 @@ void receiveEvent(int howMany) {
       if(byte0 == VERT_SNAKE_ALL){
         allAnimModeState = 1;
         allAnimMode = VERT_SNAKE_ALL;
+      }else if(byte0 == VERT_SNAKE_KEEP_ALL){
+        allAnimModeState = 1;
+        allAnimMode = VERT_SNAKE_KEEP_ALL;
       }
     }else if(byte0 == ANIM_ALL){
-      LeftRedAnim = 1;
-      LeftRedTargetAnimMode = SNAKE_LEFT_RED_TARGET;
-      
-      RightRedAnim = 1;
-      RightRedTargetAnimMode = SNAKE_RIGHT_RED_TARGET;
-      
-      LeftGreenAnim = 1;
-      LeftGreenTargetAnimMode = SNAKE_LEFT_GREEN_TARGET;
-      
-      RightGreenAnim = 1;
-      RightGreenTargetAnimMode = SNAKE_RIGHT_GREEN_TARGET;
-      
-      MiddleYellowAnim = 1;
-      YellowTargetAnimMode = SNAKE_YELLOW_TARGET;
-      
-      ModesAnim = 1;
-      ModesAnimMode = SNAKE_MODES;
-      
-      LauncherAnim = 1;
-      LauncherAnimMode = SNAKE_LAUNCHER;
-      LooseAnim = 0;
-      
-      FlashAnim = 0b01010101;
-      FlashAnimMode = ALTERN_TOP_LIGHTS;
-      
-      LettersAnimMode = SNAKE_LETTERS;
-      Pletter = 1;
-      Sletter = Iletter = Tletter = 0;
-      
-      KO1Anim = 1;
-      KO1AnimMode = SNAKE_KO1;
-      
-      KO2Anim = 1;
-      KO2AnimMode = SNAKE_KO2;
-      
-      Bumper1Light = Bumper2Light = Bumper3Light = 1;
-      Bumper1Mode = BUMPER_1_ON;
-      Bumper2Mode = BUMPER_2_ON;
-      Bumper3Mode = BUMPER_3_ON;
-      
-      Gate1Light = Gate2Light = Gate3Light = 1;
+      allAnim = true;
+      allAnimModeFrame = 1;
+      allAnimMode = ANIM_ALL;
+      SetAllAnim();
 
       
     }else if(byte0 == FLASH_TOP_LIGHTS){
@@ -815,6 +826,7 @@ void receiveEvent(int howMany) {
   }
 }
 
+
 void loop() {
     time++;
 
@@ -867,6 +879,20 @@ void loop() {
     
     delay(50);
     
+    //Managing the anim mode frames
+    if(allAnim){
+      if(time%50 == 0){
+        allAnimModeFrame++;
+        allAnimModeState = 1;
+        if(allAnimModeFrame == 4) allAnimModeFrame = 1;
+        
+        if(allAnimModeFrame == 1) SetAllAnim();
+        else if(allAnimModeFrame == 2) allAnimMode = VERT_SNAKE_ALL;
+        else if(allAnimModeFrame == 3) allAnimMode = VERT_SNAKE_KEEP_ALL;
+
+      }
+    }
+    
     
     //ALL
     if(allAnimMode == VERT_SNAKE_ALL){
@@ -881,7 +907,7 @@ void loop() {
         KO2Anim = 0b11;
       }else if(allAnimModeState == 5){
         ModesAnim = 0;
-        KO2Anim = 0b11000;
+        KO2Anim = 0b11100;
         MiddleYellowAnim = 1;
         LeftGreenAnim = RightGreenAnim = 0b111;
         LeftRedAnim = RightRedAnim = 0b1;
@@ -918,6 +944,45 @@ void loop() {
         FlashAnim = 0b11111111;
       }else if(allAnimModeState == 12){
         FlashAnim = 0;
+      }
+      
+      if(time%1 == 0){
+        allAnimModeState++;
+        if(allAnimModeState == 13) allAnimModeState = 1; 
+      }
+    }else if(allAnimMode == VERT_SNAKE_KEEP_ALL){
+      if(allAnimModeState == 1){
+        LooseAnim = 0b111;
+      }else if(allAnimModeState == 3){
+        ModesAnim = 14;
+      }else if(allAnimModeState == 4){
+        ModesAnim = 255;
+        KO2Anim = 0b11;
+      }else if(allAnimModeState == 5){
+        KO2Anim = 0b11111;
+        MiddleYellowAnim = 1;
+        LeftGreenAnim = RightGreenAnim = 0b111;
+        LeftRedAnim = RightRedAnim = 0b1;
+        Pletter = Sletter = Iletter = Tletter = 1;
+        
+      }else if(allAnimModeState == 6){
+        MiddleYellowAnim = 0b11111;
+        LeftGreenAnim = RightGreenAnim = 0b11111;
+        LeftRedAnim = RightRedAnim = 0b11111;
+        
+      }else if(allAnimModeState == 8){
+       Bumper2Light = Bumper3Light = 1;
+        KO1Anim = 0b10000;
+        
+      }else if(allAnimModeState == 9){
+        Bumper1Light = 1;
+        KO1Anim = 0b11111;
+        
+      }else if(allAnimModeState == 10){
+        Gate1Light = Gate2Light = Gate3Light = 1;
+        
+      }else if(allAnimModeState == 11){
+        FlashAnim = 0b11111111;
       }
       
       if(time%1 == 0){
