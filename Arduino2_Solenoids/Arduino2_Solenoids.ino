@@ -73,16 +73,16 @@ const int HOLDON_PERIOD_MS =  16;
 const int HOLDON_DURATION_MS =  5;
 
 const int BUMPER1_FIRE_DURATION = 130;
-const int BUMPER2_FIRE_DURATION = 180;
-const int BUMPER3_FIRE_DURATION = 120;
+const int BUMPER2_FIRE_DURATION = 200;
+const int BUMPER3_FIRE_DURATION = 150;
 
 const int KICKER_FIRE_DURATION = 150;
 int KICKOUT1_FIRE_DURATION = 100;
 int KICKOUT2_FIRE_DURATION = 100;
 
 short decalage = 130;
-short decalage2 = 140;
-short decalage3 = 100;
+short decalage2 = 110;
+short decalage3 = 130;
 
 long randomTime = 0;
 
@@ -313,7 +313,7 @@ void loop() {
   //Push the ball trough sequence, we shoot a need ball
   if(rampABallRequested){
     unsigned long timeSinceRequested = time - timeRampABall;
-    if(timeSinceRequested > 1437 && timeSinceRequested < 10000){
+    if(timeSinceRequested > 1429 && timeSinceRequested < 10000){
       SolenoidOff(3);
       SolenoidOff(2);
       rampABallRequested = false;
