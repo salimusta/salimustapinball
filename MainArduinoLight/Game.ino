@@ -1,18 +1,22 @@
 #define BUMPER_BONUS_INTERVAL 200
 
+unsigned long score;
+byte nbBall = 0;
+bool gate1Passed;
+bool gate2Passed;
+bool gate3Passed;
+bool psitModeActive;
+byte psitModeState;
+short nbBump;
+short nbTarget;
 
 byte nbPlayer = 1;
-byte currentPlayer = 1;
-Player players[4];
-
-void addPlayer(byte index){
-  Player *player1 = (Player*)malloc(sizeof(Player));
-  players[index] = *player1;
-}
+byte currentPlayer = 0;
+byte selectedPlayer = 0;
 
 //Variables generales
-byte nbBall = 0;
-long score = 0;
+//byte nbBall = 0;
+//long score = 0;
 bool gameIsOn = false;
 bool ballIsInPlay = false;
 byte ballInPlay = 0;
@@ -25,9 +29,9 @@ int timeInHole2 = 0;
 bool ballCatchedInHole2 = false;
 
 //Gates Status
-bool gate1Passed = false;
-bool gate2Passed = false;
-bool gate3Passed = false;
+//bool gate1Passed = false;
+//bool gate2Passed = false;
+//bool gate3Passed = false;
 
 //GESTION DES MODE
 byte activeMode = NO_MODE;
@@ -36,10 +40,10 @@ bool modeStarted = false;
 unsigned long time = 0;
 unsigned long timeSinceUpdateScreen = 0;
 byte nb_hits = 0;
-bool alreadyActivatedModes[8] = {false, false, false, false, false, false, false, false};
+bool alreadyActivatedModes[9] = {false, false, false, false, false, false, false, false, false};
 
-bool psitModeActive = false;
-byte psitModeState = 0;
+//bool psitModeActive = false;
+//byte psitModeState = 0;
 
 //Bumpers
 byte bumpersState = 0;
@@ -53,8 +57,8 @@ int timeSinceLeftGreenTargetHit = 100; int timeSinceRightGreenTargetHit = 100;
 int timeSinceYellowTargetHit = 100;
 
 //Comptage des coups
-short nbBump = 0;
-short nbTarget = 0;
+//short nbBump = 0;
+//short nbTarget = 0;
 char name[11];
 
 //Timings
@@ -62,12 +66,27 @@ unsigned long timeSinceNewBall = 0;
 
 void ManageGame() {
 
-  
-
   AmbiLight(ALL_OFF);
   AnimLight(ALL_ANIM_OFF);
 
-  //GAME OVER--------------------
+  if (gameIsOn){
+    SendLedMatrixScore(selectedPlayer);
+    selectedPlayer++;
+    bool newRound = false;
+    if(selectedPlayer == nbPlayer){
+      selectedPlayer = 0;
+      newRound = true;
+    }
+    SelectPlayer(selectedPlayer);
+    SendScreenData(PLAYER_SELECTED, selectedPlayer);
+    
+    if(newRound && nbBall > 0 && nbPlayer > 1){
+      DisplayScreen(SCREEN_PLAYER_SCORES, PRIORITY_LOW);
+      delay(4000);
+    }
+    
+  }
+  //GAME OVER- if the game is on, no more ball and no more player
   if (gameIsOn && nbBall <= 0) {
     //Game finished
     StopMusic();
@@ -80,53 +99,82 @@ void ManageGame() {
     AnimLight(ANIM_ALL);
     delay(2000);
     
-    SendScreenData(NB_HITS, nbBump);
-    DisplayScreen(SCREEN_BUMPERS_RESULT, PRIORITY_LOW);
-    score += nbBump*50;
-    EnableIncrementalScore();
-    DisplayScore();
-    delay(3000);
+    
+    //calculate bonuses and display Final score, per player
+    for(byte k = 0; k < nbPlayer ; k++){
+      SelectPlayer(k);
+      SendScreenData(PLAYER_SELECTED, k);
+    
+      SendScreenData(NB_HITS, nbBump);
+      DisplayScreen(SCREEN_BUMPERS_RESULT, PRIORITY_LOW);
+      score += nbBump*50;
+      EnableIncrementalScore();
+      DisplayScore();
+      delay(3000);
     
 
-    SendScreenData(NB_HITS, nbTarget);
-    DisplayScreen(SCREEN_TARGETS_RESULT, PRIORITY_LOW);
-    score += nbTarget*50;
+      SendScreenData(NB_HITS, nbTarget);
+      DisplayScreen(SCREEN_TARGETS_RESULT, PRIORITY_LOW);
+      score += nbTarget*50;
+      if(nbBump == nbTarget && nbTarget > 5) score += 500;
+      EnableIncrementalScore();
+      DisplayScore();
+      delay(3000);
     
-    if(nbBump == nbTarget && nbTarget > 5) score += 500;
-    EnableIncrementalScore();
-    DisplayScore();
-    delay(3000);
+      DisableIncrementalScore();
+      DisplayScreen(SCREEN_SCORE, PRIORITY_LOW);
+      delay(1000);
+      SendLedMatrixScore();
+      DisplayScreen(SCREEN_SCORE_RESULT, PRIORITY_LOW);
+      SendLedMatrixScore(k);
+      if(nbPlayer > 1) delay(2000);
+      else delay(5000);
+    }
     
-    
-
-    DisableIncrementalScore();
-    DisplayScreen(SCREEN_SCORE, PRIORITY_LOW);
-    delay(1000);
-    SendLedMatrixScore();
-    DisplayScreen(SCREEN_SCORE_RESULT, PRIORITY_LOW);
-    delay(5000);
-
-    //Enter Score Mode if score ok
-    if (score > getMinScore()) {
-      DisplayScreen(SCREEN_ENTER_NAME, PRIORITY_LOW);
-      PlaySound(OMGYOUWON_HIGHSCORE);
-      //Retrieve the Player name
-      while (1) {
-        ReadSolenoidSwitches();
-        byte flippers_state = RIGHT_FLIPPER;
-        flippers_state = (flippers_state << 1) | LEFT_FLIPPER;
-        SendScreenData(FLIPPERS_STATE, flippers_state);
-
-        delay(30);
-        ReadPlayerName(name);
-        if (name[0] != 40) break;
-        delay(30);
-      }
-      if(name[0] != 39){
-        addHighScore(score, name);
-        WriteScoreMemory();
-        delay(1000);
-        SendHighScores();
+    //If multiplayer, Display all the scores
+    if(nbPlayer > 1){
+      DisplayScreen(SCREEN_PLAYER_SCORES, PRIORITY_LOW);
+      delay(5000);
+      DisplayScreen(SCREEN_PLAYER_WIN, PRIORITY_LOW);
+      delay(2000);
+    }
+     
+    for(byte k = 0; k < nbPlayer ; k++){
+      SelectPlayer(k);
+      SendScreenData(PLAYER_SELECTED, k);
+      DisplayScore();
+      //Enter Score Mode if score ok
+      if (score >= getMinScore()) {
+        
+        //Retrieve the Player name
+        ReadSolenoidSwitches(); delay(50);
+        RIGHT_FLIPPER = 0; LEFT_FLIPPER = 0;
+        SendScreenData(FLIPPERS_STATE, 0);
+        delay(50);
+        
+        DisplayScreen(SCREEN_ENTER_NAME, PRIORITY_LOW);
+        PlaySound(OMGYOUWON_HIGHSCORE);
+        while (1) {
+          ReadSolenoidSwitches();
+          byte flippers_state = RIGHT_FLIPPER;
+          flippers_state = (flippers_state << 1) | LEFT_FLIPPER;
+          SendScreenData(FLIPPERS_STATE, flippers_state);
+  
+          delay(50);
+          ReadPlayerName(name);
+          Serial.print(name[0]);
+          if (name[0] != 40) break;
+          delay(30);
+        }
+        Serial.print("OUT\n");
+        if(name[0] != 39){
+          Serial.print("SAVES\n");
+          addHighScore(score, name);
+          WriteScoreMemory();
+          delay(1000);
+          SendHighScores();
+          delay(500);
+        }
       }
     }
     //--------------
@@ -136,19 +184,44 @@ void ManageGame() {
     StopMusic();
     delay(3000);
     WaitForRestart();
-
+    
     score = 0;
     DisplayScore();
     delay(500);
     gameIsOn = false;
   }
+  //Game start 
   if (gameIsOn == false) {
     lcd.setCursor(0, 0); lcd.print("Game Mode");
     lcd.setCursor(0, 1); lcd.print("----------------");
+    
+    //Ask for player Number
+    delay(1000);
+    DisplayScreen(SCREEN_PLAYER_SELECTION, PRIORITY_LOW);
+    
+    while (1) {
+      ReadSolenoidSwitches();
+      byte flippers_state = RIGHT_FLIPPER;
+      flippers_state = (flippers_state << 1) | LEFT_FLIPPER;
+      SendScreenData(FLIPPERS_STATE, flippers_state);
+
+      delay(30);
+      nbPlayer = ReadPlayerNumber();
+      if (RIGHT_FLIPPER && LEFT_FLIPPER ) break;
+      delay(30);
+    }
+    //Here we have chosen the number of players
+    initPlayers(nbPlayer);
+    selectedPlayer = 0;
+    
+    RestoreModesRandom();
+    SelectPlayer(selectedPlayer);
+    SendScreenData(PLAYER_SELECTED, selectedPlayer);
+    
     AmbiLight(ALL_OFF);
     AmbiLight(RED_ON);
     AnimLight(LAUNCHER_OFF);
-    score = 0;
+    //score = 0;
     DisplayScore();
     PlayRandomMusic();
     DisplayScreen(SCREEN_YOUHAVE, PRIORITY_LOW); delay(1500);
@@ -156,19 +229,14 @@ void ManageGame() {
     //Initialisation du nombre de balle
     EnableIncrementalScore();
 
-    nbBall = 3; ballInPlay = 0;
-    nbBump = 0; nbTarget = 0;
-    
-    gate1Passed = false; gate2Passed = false; gate3Passed = false;
-
-    psitModeActive = false; psitModeState = 0;
-
-    RestoreModesRandom();
   }
-  if (nbBall < 3) PlayRandomMusic();
+  
+  //Came truth before every single ball play
+  if(nbBall !=3  || selectedPlayer > 0) PlayRandomMusic();
   EnableFlippers();
   gameIsOn = true;
-
+  DisableIncrementalScore();delay(50);
+  DisplayScore();
   ProvideANewBall();
   DisplayScreen(SCREEN_GETREADY, PRIORITY_LOW); delay(1500);
   DisplayScreen(SCREEN_GO, PRIORITY_LOW);
@@ -182,9 +250,10 @@ void ManageGame() {
 
   modeBeginTime = 0;
   bumpersState = 0;
-
   RestoreLight();
-
+  EnableIncrementalScore();
+  //Serial.print("nbBall =  "); Serial.print(nbBall); Serial.print("\n");
+  
   //Game is on
   while (ballIsInPlay) {
     time = millis();
@@ -538,7 +607,6 @@ void ManageGame() {
         ProvideANewBall();
         delay(500);
       
-      
       //if first ball catched & no mode, launch a ball
       }else if (timeInHole1 >= 3000 && !ballCatchedInHole2) {
         if (modeStarted == false) AnimLight(SNAKE_KO1);
@@ -658,15 +726,15 @@ void ManageGame() {
           //Si on est en multiball ou en cours de mode, on relache direct
           if (ballInPlay > 1 || activeMode != NO_MODE || ballCatchedInHole1) timeInHole2 = 280;
           else {
-            byte hasardMode = random(8);
-            while (psitModeActive && hasardMode == 6) hasardMode = random(8);
+            byte hasardMode = random(9);
+            while (psitModeActive && hasardMode == 6) hasardMode = random(9);
 
             if ( alreadyActivatedModes[0] && alreadyActivatedModes[1] && alreadyActivatedModes[2] && alreadyActivatedModes[3] && alreadyActivatedModes[4] &&
-                 alreadyActivatedModes[5] && alreadyActivatedModes[6] && alreadyActivatedModes[7]) {
+                 alreadyActivatedModes[5] && alreadyActivatedModes[6] && alreadyActivatedModes[7] && alreadyActivatedModes[8]) {
               RestoreModesRandom();
             }
-            while (alreadyActivatedModes[hasardMode]) hasardMode = random(8);
-            //hasardMode = 6;
+            while (alreadyActivatedModes[hasardMode]) hasardMode = random(9);
+            //hasardMode = 8;
             modeStarted = false;
             DisableKickers();
             if (hasardMode == 0) {
@@ -821,10 +889,30 @@ void ManageGame() {
               DisplayScreen(SCREEN_WORD_GAME, PRIORITY_LOW);
               PlayWordGame();
               timeInHole2 = 300;
+              
+            }else if (hasardMode == 8) {
+              alreadyActivatedModes[8] = true;
+              activeMode = STARWARS_MODE;
+              //ALL LIGHTS OFF
+              AmbiLight(ALL_OFF);
+              AnimLight(ALL_ANIM_OFF);
+              AnimLight(ALL_MODE_OFF);
+              DisableFlippers();
+              StopMusic();
+              DisplayScreen(SCREEN_STARWARS_INTRO_2, PRIORITY_LOW);
+              delay(3000);
+              PlayMusic(STARWARSTHEME);
+              delay(500);
+              DisplayScreen(SCREEN_STARWARS_INTRO, PRIORITY_LOW);
+              delay(33000);
+              AnimLight(MODE_EXTRA_BALL);
+              DisplayScreen(SCREEN_STARWARS_GAME, PRIORITY_LOW);
+              PlayStarWarsGame();
+              timeInHole2 = 300;
             }
 
             //Pas de delais supplementaire si on est dans un jeu
-            if (activeMode != EXTRA_BALL_MODE && activeMode != WORD_GAME_MODE && hasardMode != 6) delay(100);
+            if (activeMode != EXTRA_BALL_MODE && activeMode != WORD_GAME_MODE && activeMode != STARWARS_MODE && hasardMode != 6) delay(100);
             else EnableFlippers();
           }
         }
@@ -851,8 +939,7 @@ void ManageGame() {
       else if (activeMode == RED_TARGET_MODE) modeSucceded = false;
       else if (activeMode == MIDDLE_TARGET_MODE) modeSucceded = (nb_hits == 5);
       else if (activeMode == ALL_TARGET_MODE) modeSucceded = false;
-      else if (activeMode == EXTRA_BALL_MODE) modeSucceded = true;
-      else if (activeMode == WORD_GAME_MODE) modeSucceded = true;
+      else if (activeMode == EXTRA_BALL_MODE || activeMode == WORD_GAME_MODE || activeMode == STARWARS_MODE) modeSucceded = true;
 
       if (millis() - modeBeginTime >= 25000 || modeSucceded) { //END OF THE MODE
         //Serial.print("END OF MODE\n");
@@ -899,6 +986,7 @@ void ManageGame() {
       if(ballCatchedInHole1){
          FireKickout1();
          PlaySound(KICKOUT_RELEASE_1);
+         AnimLight(SNAKE_KO1);
          ballCatchedInHole1 = false;
          timeInHole1 = 0;
       }
@@ -911,6 +999,7 @@ void ManageGame() {
       delay(3000);
       AnimLight(LOOSE_OFF);
       nbBall = nbBall - 1;
+      Serial.print("nbBall =  "); Serial.print(nbBall); Serial.print("\n");
       DisplayScreen(SCREEN_BALLLEFT, PRIORITY_LOW);
       delay(2000);
       ballIsInPlay = false;
@@ -1006,4 +1095,5 @@ void RestoreModesRandom() {
   alreadyActivatedModes[5] = false;
   alreadyActivatedModes[6] = false;
   alreadyActivatedModes[7] = false;
+  alreadyActivatedModes[8] = false;
 }

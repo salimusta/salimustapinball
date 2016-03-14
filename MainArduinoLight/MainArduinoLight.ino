@@ -67,8 +67,8 @@ void setup() {
 void loop() {
   SendHighScores();
   
-  /* GAME TEST 
-  //DisplayScreen(SCREEN_BALL_GAME, PRIORITY_LOW);
+/*
+  DisplayScreen(SCREEN_STARWARS_GAME, PRIORITY_LOW);
   while(1){
   
     byte flippers_state = digitalRead(rightBoutonPin);;
@@ -80,7 +80,7 @@ void loop() {
   DisplayScreen(SCREEN_SALIMUSTAPINBALL, PRIORITY_LOW);
 
   printLine("<- MAINTENANCE", "    GAME MODE ->");
-
+/*
   leftButton_State = digitalRead(leftBoutonPin);
   rightButton_State = digitalRead(rightBoutonPin);
   while(leftButton_State == LOW && rightButton_State == LOW){
@@ -94,6 +94,8 @@ void loop() {
   }else{
     printLine("------GAME------", "------MODE------");
   }
+  */
+  maintenanceMode = false;
   delay(100);
   if(maintenanceMode){
     AmbiLight(ALL_OFF);

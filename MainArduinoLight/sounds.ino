@@ -25,7 +25,7 @@ void PlaySound(byte sound){
 
 void StopMusic(){
  byte i;
-  for(i = 100; i< 117; i++) {wTrig.trackStop(i);delay(20);}
+  for(i = 100; i< 118; i++) {wTrig.trackStop(i);delay(20);}
   delay(100);
 }
 
@@ -69,9 +69,9 @@ int PlayRandomMusic(){
   wTrig.masterGain(0);
   byte i;
   int timeRelease = 0;
-  for(i = 100; i< 117; i++){
+  for(i = 100; i< 118; i++){
     wTrig.trackLoop(i, true);
-    wTrig.trackGain(i, -20);
+    wTrig.trackGain(i, -10);
   }
   
   if(hasardSound == 0){
@@ -128,5 +128,20 @@ int PlayRandomMusic(){
   }
   
   return timeRelease;
+
+}
+
+void PlayMusic(short musicId){
+  StopMusic();
+  
+  wTrig.masterGain(0);
+  byte i;
+  int timeRelease = 0;
+  for(i = 100; i< 118; i++){
+    wTrig.trackLoop(i, true);
+    wTrig.trackGain(i, -10);
+  }
+  
+  PlaySound(musicId);
 
 }

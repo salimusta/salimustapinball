@@ -5,12 +5,12 @@ void TestSwitches() {
     ReadSwitches();
     ReadSolenoidSwitches();
     lcd.setCursor(0, 1);
-    if (BSW1) lcd.print("BSW1"); if (BSW2) lcd.print("BSW2"); if (BSW3) lcd.print("BSW3");
+    /*if (BSW1) lcd.print("BSW1"); if (BSW2) lcd.print("BSW2"); if (BSW3) lcd.print("BSW3");
     if (ROSW1) lcd.print("ROSW1"); if (ROSW2) lcd.print("ROSW2-"); if (ROSW3) lcd.print("ROSW3");
     if (TRIEUR) lcd.print("TRIEUR"); if (KO2) lcd.print("KO2"); if (RKSW) lcd.print("Right Kick"); if (LKSW) lcd.print("Left Kick");
     if (LOSW) lcd.print("LOSW"); if (RLOSW) lcd.print("RLOSW"); if (LLOSW) lcd.print("LLOSW");
     if (CT) lcd.print("CT"); if (CTP) lcd.print("CTP"); if (RT1) lcd.print("RT1"); if (RT1P) lcd.print("RT1P"); if (RT2) lcd.print("RT2");
-    if (LT1) lcd.print("LT1"); if (LT2) lcd.print("LT2"); if (LT2P) lcd.print("LT2P"); if (KO1) lcd.print("KO1"); if (RAMP) lcd.print("RAMP");
+    if (LT1) lcd.print("LT1"); if (LT2) lcd.print("LT2"); if (LT2P) lcd.print("LT2P"); if (KO1) lcd.print("KO1"); if (RAMP) lcd.print("RAMP");*/
     if (digitalRead(BackBoutonPin) == HIGH) break;
   }
 }

@@ -40,6 +40,15 @@ void ReadPlayerName(char buf[11]) {
   }
 }
 
+byte ReadPlayerNumber(){
+  Wire.requestFrom(4, 1);
+  byte nbPlayer = 0;
+  while (Wire.available()) {
+    nbPlayer = Wire.read();
+  }
+  return nbPlayer;
+}
+
 void SendLedMatrixScore(){
   byte byte0 = score & 0xFF;
   byte byte1 = (score & 0xFF00)>>8;
@@ -48,6 +57,17 @@ void SendLedMatrixScore(){
   
   Wire.beginTransmission(4);
   Wire.write(byte3); Wire.write(byte2); Wire.write(byte1); Wire.write(byte0);
+  Wire.endTransmission();
+}
+
+void SendLedMatrixScore(byte playerId){
+  byte byte0 = score & 0xFF;
+  byte byte1 = (score & 0xFF00)>>8;
+  byte byte2 = (score & 0xFF0000)>>16;
+  byte byte3 = (score & 0xFF000000)>>24;
+  
+  Wire.beginTransmission(4);
+  Wire.write(playerId); Wire.write(byte3); Wire.write(byte2); Wire.write(byte1); Wire.write(byte0);
   Wire.endTransmission();
 }
 
