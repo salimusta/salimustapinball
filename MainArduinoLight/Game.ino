@@ -477,17 +477,17 @@ void ManageGame() {
       else PlaySound(WHATASHOT);
 
       if (activeMode == NO_MODE) {
-        score += 50;
+        score += 100;
         AnimLightFor(BLINK_RIGHT_RED_TARGET, 30);
         DisplayScreen(SCREEN_RED_SHOT, PRIORITY_HIGH);
       } else if (activeMode == RED_TARGET_MODE  || activeMode == ALL_TARGET_MODE) {
-        score += 100;
+        score += 200;
         AnimLightFor(BLINK_RIGHT_RED_TARGET, 30);
         AnimLightFor(FLASH_TOP_LIGHTS, 10);
         nb_hits++;
         SendScreenData(NB_HITS, nb_hits);
       } else {
-        score += 50;
+        score += 100;
       }
       //PSIT MODE
       if (psitModeActive && ((psitModeState & 0b0010) >> 1 == 0)) {
@@ -507,17 +507,17 @@ void ManageGame() {
       if (randSound == 0) PlaySound(TARGET_1);
       else PlaySound(YOUHITTHATRIGHT);
       if (activeMode == NO_MODE) {
-        score += 50;
+        score += 100;
         AnimLightFor(BLINK_LEFT_RED_TARGET, 30);
         DisplayScreen(SCREEN_RED_SHOT, PRIORITY_HIGH);
       } else if (activeMode == RED_TARGET_MODE  || activeMode == ALL_TARGET_MODE) {
-        score += 100;
+        score += 200;
         AnimLightFor(BLINK_LEFT_RED_TARGET, 30);
         AnimLightFor(FLASH_TOP_LIGHTS, 10);
         nb_hits++;
         SendScreenData(NB_HITS, nb_hits);
       } else {
-        score += 50;
+        score += 100;
       }
       //PSIT MODE
       if (psitModeActive && ((psitModeState & 0b0100) >> 2 == 0)) {
