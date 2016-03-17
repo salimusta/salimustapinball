@@ -32,7 +32,7 @@ void PlayBallGame(){
       DisplayScreen(SCREEN_MULTIBALL, PRIORITY_HIGH);
       ProvideANewBall();
     }
-    DisplayScore();
+    DisplayScore(score);
     delay(50);
   } 
 }
@@ -64,7 +64,7 @@ void PlayWordGame(){
       DisplayScreen(SCREEN_MULTIBALL, PRIORITY_HIGH);
       ProvideANewBall();
     }
-    DisplayScore();
+    DisplayScore(score);
     delay(50);
   } 
 }
@@ -72,6 +72,7 @@ void PlayWordGame(){
 void PlayStarWarsGame(){
   
   byte gameStatus;
+  unsigned long gameScore = 0;
    modeBeginTime = millis();
   gameStatus = GAME_IDLE;
   while(gameStatus != GAME_WIN && gameStatus != GAME_LOST){
@@ -90,6 +91,7 @@ void PlayStarWarsGame(){
     }else if(gameStatus == ENEMI_DESTROYED){
       PlaySound(PETITEEXPLOSION);
       AnimLightFor(FLASH_TOP_LIGHTS, 5);
+      gameScore++;
     }else if(gameStatus == SHIP_DESTROYED){
       PlaySound(BIGEXPLOSION);
       AnimLightFor(FLASH_TOP_LIGHTS, 30);
@@ -105,7 +107,12 @@ void PlayStarWarsGame(){
       DisplayScreen(SCREEN_MULTIBALL, PRIORITY_HIGH);
       ProvideANewBall();
     }
-    DisplayScore();
+    DisplayScore(gameScore);
     delay(50);
-  } 
+  }
+  
+  //Restore the game score
+  DisableIncrementalScore();
+  DisplayScore(score);
+  EnableIncrementalScore();
 }

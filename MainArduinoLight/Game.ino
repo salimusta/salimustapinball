@@ -88,7 +88,7 @@ void ManageGame() {
     StopMusic();
     DisplayScreen(SCREEN_GAMEOVER, PRIORITY_LOW);
     DisableIncrementalScore();
-    DisplayScore();
+    DisplayScore(score);
     BlinkScore();
     DisableFlippers();
     AmbiLight(ANIME_ALL);
@@ -105,7 +105,7 @@ void ManageGame() {
       DisplayScreen(SCREEN_BUMPERS_RESULT, PRIORITY_LOW);
       score += nbBump*50;
       EnableIncrementalScore();
-      DisplayScore();
+      DisplayScore(score);
       delay(3000);
     
 
@@ -114,7 +114,7 @@ void ManageGame() {
       score += nbTarget*50;
       if(nbBump == nbTarget && nbTarget > 5) score += 500;
       EnableIncrementalScore();
-      DisplayScore();
+      DisplayScore(score);
       delay(3000);
     
       DisableIncrementalScore();
@@ -138,7 +138,7 @@ void ManageGame() {
     for(byte k = 0; k < nbPlayer ; k++){
       SelectPlayer(k);
       SendScreenData(PLAYER_SELECTED, k);
-      DisplayScore();
+      DisplayScore(score);
       //Enter Score Mode if score ok
       if (score >= getMinScore()) {
         
@@ -180,7 +180,7 @@ void ManageGame() {
     WaitForRestart();
     
     score = 0;
-    DisplayScore();
+    DisplayScore(score);
     delay(500);
     gameIsOn = false;
   }
@@ -217,7 +217,7 @@ void ManageGame() {
     AnimLight(LAUNCHER_OFF);
     AnimLight(OFF_TOP_LIGHTS);
     //score = 0;
-    DisplayScore();
+    DisplayScore(score);
     PlayRandomMusic();
     DisplayScreen(SCREEN_YOUHAVE, PRIORITY_LOW); delay(1500);
     DisplayScreen(SCREEN_XBALLS, PRIORITY_LOW); delay(1500);
@@ -231,7 +231,7 @@ void ManageGame() {
   EnableFlippers();
   gameIsOn = true;
   DisableIncrementalScore();delay(50);
-  DisplayScore();
+  DisplayScore(score);
   ProvideANewBall();
   DisplayScreen(SCREEN_GETREADY, PRIORITY_LOW); delay(1500);
   DisplayScreen(SCREEN_GO, PRIORITY_LOW);
@@ -765,7 +765,7 @@ void ManageGame() {
               RestoreModesRandom();
             }
             while (alreadyActivatedModes[hasardMode]) hasardMode = random(9);
-            //hasardMode = 8;
+            hasardMode = 8;
             modeStarted = false;
             DisableKickers();
             if (hasardMode == 0) {
@@ -1015,7 +1015,7 @@ void ManageGame() {
       ProvideANewBall();
     }
 
-    DisplayScore();
+    DisplayScore(score);
 
     //Balle perdu
     if (LOSW) {
