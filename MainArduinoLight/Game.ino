@@ -15,8 +15,6 @@ byte currentPlayer = 0;
 byte selectedPlayer = 0;
 
 //Variables generales
-//byte nbBall = 0;
-//long score = 0;
 bool gameIsOn = false;
 bool ballIsInPlay = false;
 byte ballInPlay = 0;
@@ -28,11 +26,6 @@ bool ballCatchedInHole1 = false;
 int timeInHole2 = 0;
 bool ballCatchedInHole2 = false;
 
-//Gates Status
-//bool gate1Passed = false;
-//bool gate2Passed = false;
-//bool gate3Passed = false;
-
 //GESTION DES MODE
 byte activeMode = NO_MODE;
 unsigned long modeBeginTime = 0;
@@ -41,9 +34,6 @@ unsigned long time = 0;
 unsigned long timeSinceUpdateScreen = 0;
 byte nb_hits = 0;
 bool alreadyActivatedModes[9] = {false, false, false, false, false, false, false, false, false};
-
-//bool psitModeActive = false;
-//byte psitModeState = 0;
 
 //Bumpers
 byte bumpersState = 0;
@@ -56,9 +46,15 @@ int timeSinceLeftRedTargetHit = 100; int timeSinceRightRedTargetHit = 100;
 int timeSinceLeftGreenTargetHit = 100; int timeSinceRightGreenTargetHit = 100;
 int timeSinceYellowTargetHit = 100;
 
-//Comptage des coups
-//short nbBump = 0;
-//short nbTarget = 0;
+//Targets status, no multiplayer, lives for 1 ball
+byte leftRedTarget_Status = 0;
+byte rightRedTarget_Status = 0;
+byte leftGreenTarget_Status = 0;
+byte rightGreenTarget_Status = 0;
+byte yellowTarget_Status = 0;
+
+bool allTargetsHitFiveTimes = false;
+
 char name[11];
 
 //Timings
@@ -166,9 +162,7 @@ void ManageGame() {
           if (name[0] != 40) break;
           delay(30);
         }
-        Serial.print("OUT\n");
         if(name[0] != 39){
-          Serial.print("SAVES\n");
           addHighScore(score, name);
           WriteScoreMemory();
           delay(1000);
@@ -221,6 +215,7 @@ void ManageGame() {
     AmbiLight(ALL_OFF);
     AmbiLight(RED_ON);
     AnimLight(LAUNCHER_OFF);
+    AnimLight(OFF_TOP_LIGHTS);
     //score = 0;
     DisplayScore();
     PlayRandomMusic();
@@ -251,6 +246,7 @@ void ManageGame() {
   modeBeginTime = 0;
   bumpersState = 0;
   RestoreLight();
+  RestoreTargetStatus();
   EnableIncrementalScore();
   //Serial.print("nbBall =  "); Serial.print(nbBall); Serial.print("\n");
   
@@ -258,42 +254,14 @@ void ManageGame() {
   while (ballIsInPlay) {
     time = millis();
     delay(10);
+    
     //TARGETS HIT MANAGEMENT----------------------------------------------------------
-    if (timeSinceYellowTargetHit < 1000) {
-      timeSinceYellowTargetHit++;
-      if (timeSinceYellowTargetHit == 100) {
-        if (activeMode == MIDDLE_TARGET_MODE || activeMode == ALL_TARGET_MODE) AnimLight(SNAKE_YELLOW_TARGET);
-        else AnimLight(OFF_YELLOW_TARGET);
-      }
-    }
-    if (timeSinceLeftRedTargetHit < 100) {
-      timeSinceLeftRedTargetHit++;
-      if (timeSinceLeftRedTargetHit == 100) {
-        if (activeMode == RED_TARGET_MODE || activeMode == ALL_TARGET_MODE) AnimLight(SNAKE_LEFT_RED_TARGET);
-        else AnimLight(OFF_LEFT_RED_TARGET);
-      }
-    }
-    if (timeSinceRightRedTargetHit < 100) {
-      timeSinceRightRedTargetHit++;
-      if (timeSinceRightRedTargetHit == 100) {
-        if (activeMode == RED_TARGET_MODE || activeMode == ALL_TARGET_MODE) AnimLight(SNAKE_RIGHT_RED_TARGET);
-        else AnimLight(OFF_RIGHT_RED_TARGET);
-      }
-    }
-    if (timeSinceLeftGreenTargetHit < 100) {
-      timeSinceLeftGreenTargetHit++;
-      if (timeSinceLeftGreenTargetHit == 100) {
-        if (activeMode == GREEN_TARGET_MODE || activeMode == ALL_TARGET_MODE) AnimLight(SNAKE_LEFT_GREEN_TARGET);
-        else AnimLight(OFF_LEFT_GREEN_TARGET);
-      }
-    }
-    if (timeSinceRightGreenTargetHit < 100) {
-      timeSinceRightGreenTargetHit++;
-      if (timeSinceRightGreenTargetHit == 100) {
-        if (activeMode == GREEN_TARGET_MODE || activeMode == ALL_TARGET_MODE) AnimLight(SNAKE_RIGHT_GREEN_TARGET);
-        else AnimLight(OFF_RIGHT_GREEN_TARGET);
-      }
-    }
+    if (timeSinceYellowTargetHit < 1000) timeSinceYellowTargetHit++;
+    if (timeSinceLeftRedTargetHit < 100) timeSinceLeftRedTargetHit++;
+    if (timeSinceRightRedTargetHit < 100) timeSinceRightRedTargetHit++;
+    if (timeSinceLeftGreenTargetHit < 100) timeSinceLeftGreenTargetHit++;
+    if (timeSinceRightGreenTargetHit < 100) timeSinceRightGreenTargetHit++;
+     
     //BUMPER HITTEN MANAGEMENT----------------------------
     if (timeSinceBumper1Hit < BUMPER_BONUS_INTERVAL) {
       timeSinceBumper1Hit++;
@@ -332,6 +300,7 @@ void ManageGame() {
     if ((BSW1 || BSW2 || BSW3 || LKSW || RKSW || ROSW1 || ROSW2 || ROSW3 || CT || RT1 || RT2 || LT1 || LT2 || RLOSW || LLOSW || LOSW) && ballLaunched == false) {
       ballLaunched = true;
       AnimLight(LAUNCHER_OFF);
+      AnimLight(OFF_TOP_LIGHTS);
       
       if(ballCatchedInHole1 && ballCatchedInHole2){
         FireKickout1();
@@ -445,7 +414,7 @@ void ManageGame() {
 
     //TARGETS-----------------------------------------------------------------------
     //MIDDLE YELLOW
-    if (CT && timeSinceYellowTargetHit > 50) {
+    if (CT && timeSinceYellowTargetHit > 20) {
       nbTarget++;
       timeSinceYellowTargetHit = 0;
       byte randSound = random(3);
@@ -455,8 +424,26 @@ void ManageGame() {
       
       if (activeMode == NO_MODE) {
         score += 100;
-        AnimLightFor(BLINK_YELLOW_TARGET, 30);
         DisplayScreen(SCREEN_MIDDLE_SHOT, PRIORITY_HIGH);
+        
+        //If no mode only, count the targets status
+        if(yellowTarget_Status == 4) {
+          score += 500;
+          AnimLightFor(FLASH_TOP_LIGHTS, 10);
+        }
+        if(yellowTarget_Status < 5) yellowTarget_Status++;
+        AnimLightData(DATA_YELLOW_TARGET, NumberToData(yellowTarget_Status));
+        AnimLightFor(BLINK_YELLOW_TARGET, 30);
+        
+        //Super Psit Jackpot
+        if(allTargetsHitFiveTimes){
+          score += 10000;
+          RestoreTargetStatus();
+          DisplayScreen(SCREEN_SCORE, PRIORITY_LOW);
+          DisplayScreen(SCREEN_SUPER_PSIT_COMPLETE, PRIORITY_HIGH);
+          
+        }
+        CheckTarget();
 
       } else if (activeMode == MIDDLE_TARGET_MODE  || activeMode == ALL_TARGET_MODE) {
         score += 500;
@@ -464,6 +451,7 @@ void ManageGame() {
         nb_hits++;
         SendScreenData(NB_HITS, nb_hits);
         AnimLightFor(BLINK_YELLOW_TARGET, 30);
+        
       } else {
         score += 100;
       }
@@ -478,8 +466,19 @@ void ManageGame() {
 
       if (activeMode == NO_MODE) {
         score += 100;
-        AnimLightFor(BLINK_RIGHT_RED_TARGET, 30);
         DisplayScreen(SCREEN_RED_SHOT, PRIORITY_HIGH);
+        
+        //If no mode only, count the targets status
+        if(rightRedTarget_Status == 4) {
+          score += 500;
+          AnimLightFor(FLASH_TOP_LIGHTS, 10);
+        }
+        if(rightRedTarget_Status < 5) rightRedTarget_Status++;
+        AnimLightData(DATA_RIGHT_RED_TARGET, NumberToData(rightRedTarget_Status));
+        AnimLightFor(BLINK_RIGHT_RED_TARGET, 30);
+        
+        CheckTarget();
+        
       } else if (activeMode == RED_TARGET_MODE  || activeMode == ALL_TARGET_MODE) {
         score += 200;
         AnimLightFor(BLINK_RIGHT_RED_TARGET, 30);
@@ -490,7 +489,7 @@ void ManageGame() {
         score += 100;
       }
       //PSIT MODE
-      if (psitModeActive && ((psitModeState & 0b0010) >> 1 == 0)) {
+      if (activeMode == NO_MODE && psitModeActive && ((psitModeState & 0b0010) >> 1 == 0)) {
         psitModeState = psitModeState | 0b0010;
         SendScreenData(PSIT_STATE, psitModeState);
         DisplayScreen(SCREEN_PSIT_MODE_STATE, PRIORITY_HIGH);
@@ -508,8 +507,19 @@ void ManageGame() {
       else PlaySound(YOUHITTHATRIGHT);
       if (activeMode == NO_MODE) {
         score += 100;
-        AnimLightFor(BLINK_LEFT_RED_TARGET, 30);
         DisplayScreen(SCREEN_RED_SHOT, PRIORITY_HIGH);
+        
+        //If no mode only, count the targets status
+        if(leftRedTarget_Status == 4) {
+          score += 500;
+          AnimLightFor(FLASH_TOP_LIGHTS, 10);
+        }
+        if(leftRedTarget_Status < 5) leftRedTarget_Status++;
+        AnimLightData(DATA_LEFT_RED_TARGET, NumberToData(leftRedTarget_Status));
+        AnimLightFor(BLINK_LEFT_RED_TARGET, 30);
+        
+        CheckTarget();
+        
       } else if (activeMode == RED_TARGET_MODE  || activeMode == ALL_TARGET_MODE) {
         score += 200;
         AnimLightFor(BLINK_LEFT_RED_TARGET, 30);
@@ -520,7 +530,7 @@ void ManageGame() {
         score += 100;
       }
       //PSIT MODE
-      if (psitModeActive && ((psitModeState & 0b0100) >> 2 == 0)) {
+      if (activeMode == NO_MODE && psitModeActive && ((psitModeState & 0b0100) >> 2 == 0)) {
         psitModeState = psitModeState | 0b0100;
         SendScreenData(PSIT_STATE, psitModeState);
         DisplayScreen(SCREEN_PSIT_MODE_STATE, PRIORITY_HIGH);
@@ -539,9 +549,20 @@ void ManageGame() {
       if (activeMode == NO_MODE) {
         score += 50;
         DisplayScreen(SCREEN_GREEN_SHOT, PRIORITY_HIGH);
+        
+        //If no mode only, count the targets status
+        if(rightGreenTarget_Status == 4) {
+          score += 250;
+          AnimLightFor(FLASH_TOP_LIGHTS, 10);
+        }
+        if(rightGreenTarget_Status < 5) rightGreenTarget_Status++;
+        AnimLightData(DATA_RIGHT_GREEN_TARGET, NumberToData(rightGreenTarget_Status));
         AnimLightFor(BLINK_RIGHT_GREEN_TARGET, 30);
+        
+        CheckTarget();
+        
       } else if (activeMode == GREEN_TARGET_MODE  || activeMode == ALL_TARGET_MODE) {
-        score += 80;
+        score += 100;
         AnimLightFor(FLASH_TOP_LIGHTS, 20);
         AnimLightFor(BLINK_RIGHT_GREEN_TARGET, 30);
         nb_hits++;
@@ -550,7 +571,7 @@ void ManageGame() {
         score += 50;
       }
       //PSIT MODE
-      if (psitModeActive && ((psitModeState & 1) == 0)) {
+      if (activeMode == NO_MODE && psitModeActive && ((psitModeState & 1) == 0)) {
         psitModeState = psitModeState | 1;
         SendScreenData(PSIT_STATE, psitModeState);
         DisplayScreen(SCREEN_PSIT_MODE_STATE, PRIORITY_HIGH);
@@ -565,13 +586,23 @@ void ManageGame() {
       byte randSound = random(2);
       if (randSound == 0) PlaySound(TARGET_2);
       else PlaySound(OUCH);
-      PlaySound(TARGET_2);
       if (activeMode == NO_MODE) {
         score += 50;
         DisplayScreen(SCREEN_GREEN_SHOT, PRIORITY_HIGH);
+        
+        //If no mode only, count the targets status
+        if(leftGreenTarget_Status == 4) {
+          score += 250;
+          AnimLightFor(FLASH_TOP_LIGHTS, 10);
+        }
+        if(leftGreenTarget_Status < 5) leftGreenTarget_Status++;
+        AnimLightData(DATA_LEFT_GREEN_TARGET, NumberToData(leftGreenTarget_Status));
         AnimLightFor(BLINK_LEFT_GREEN_TARGET, 30);
+        
+        CheckTarget();
+        
       } else if (activeMode == GREEN_TARGET_MODE  || activeMode == ALL_TARGET_MODE) {
-        score += 80;
+        score += 100;
         AnimLightFor(FLASH_TOP_LIGHTS, 20);
         AnimLightFor(BLINK_LEFT_GREEN_TARGET, 30);
         nb_hits++;
@@ -581,7 +612,7 @@ void ManageGame() {
       }
 
       //PSIT MODE
-      if (psitModeActive && ((psitModeState & 0b1000) >> 3 == 0)) {
+      if (activeMode == NO_MODE && psitModeActive && ((psitModeState & 0b1000) >> 3 == 0)) {
         psitModeState = psitModeState | 0b1000;
         SendScreenData(PSIT_STATE, psitModeState);
         DisplayScreen(SCREEN_PSIT_MODE_STATE, PRIORITY_HIGH);
@@ -904,7 +935,19 @@ void ManageGame() {
               PlayMusic(STARWARSTHEME);
               delay(500);
               DisplayScreen(SCREEN_STARWARS_INTRO, PRIORITY_LOW);
-              delay(33000);
+              
+              //Possibilite de switch l introduction star Wars
+              unsigned long timeDepart = millis();
+              unsigned long timeTps = millis();
+              ReadSolenoidSwitches();
+              while (!RIGHT_FLIPPER || !LEFT_FLIPPER) {
+                ReadSolenoidSwitches();
+                if(timeTps - timeDepart > 33000 || timeTps - timeDepart < 0) break;
+                timeTps = millis();
+                delay(100);
+              }
+              //delay(33000);
+              
               AnimLight(MODE_EXTRA_BALL);
               DisplayScreen(SCREEN_STARWARS_GAME, PRIORITY_LOW);
               PlayStarWarsGame();
@@ -1012,6 +1055,7 @@ void ProvideANewBall() {
   RampABall();
   ballInPlay++;
   AnimLight(SNAKE_LAUNCHER);
+  AnimLight(SNAKE_TOP_LIGHTS);
   ballLaunched = false;
   timeSinceNewBall = millis();
 }
@@ -1028,6 +1072,11 @@ void RestoreLight() {
     AmbiLight(RED_ON);
     AmbiLight(YELLOW_ON);
   }
+  
+  if(allTargetsHitFiveTimes){
+    AmbiLight(ALL_OFF);
+    AmbiLight(YELLOW_ON);
+  } 
 
   //AnimLights
   AnimLight(ALL_BUMPERS_ON);
@@ -1036,11 +1085,12 @@ void RestoreLight() {
   AnimLight(SNAKE_KO1);
   AnimLight(SNAKE_KO2);
   AnimLight(SNAKE_MODES);
-  AnimLight(OFF_RIGHT_GREEN_TARGET);
-  AnimLight(OFF_LEFT_GREEN_TARGET);
-  AnimLight(OFF_RIGHT_RED_TARGET);
-  AnimLight(OFF_LEFT_RED_TARGET);
-  AnimLight(OFF_YELLOW_TARGET);
+
+  AnimLightData(DATA_YELLOW_TARGET, NumberToData(yellowTarget_Status));
+  AnimLightData(DATA_RIGHT_GREEN_TARGET, NumberToData(rightGreenTarget_Status));
+  AnimLightData(DATA_LEFT_GREEN_TARGET, NumberToData(leftGreenTarget_Status));
+  AnimLightData(DATA_RIGHT_RED_TARGET, NumberToData(rightRedTarget_Status));
+  AnimLightData(DATA_LEFT_RED_TARGET, NumberToData(leftRedTarget_Status));
 
   //Reallume les gate
   if (!gate1Passed) AnimLight(GATE_1_ON);
@@ -1085,6 +1135,18 @@ void CheckPsit() {
   }
 }
 
+void CheckTarget(){
+  if(leftRedTarget_Status == 5 && rightRedTarget_Status == 5 && leftGreenTarget_Status == 5 && rightGreenTarget_Status == 5 && yellowTarget_Status == 5 ){
+    DisplayScreen(SCREEN_SUPER_PSIT, PRIORITY_LOW);
+    
+    if(allTargetsHitFiveTimes == false){
+      AmbiLight(ALL_OFF);
+      AmbiLight(YELLOW_ON);
+    }    
+    allTargetsHitFiveTimes = true;
+  }
+}
+
 void RestoreModesRandom() {
 
   alreadyActivatedModes[0] = false;
@@ -1096,4 +1158,28 @@ void RestoreModesRandom() {
   alreadyActivatedModes[6] = false;
   alreadyActivatedModes[7] = false;
   alreadyActivatedModes[8] = false;
+}
+
+void RestoreTargetStatus(){
+  leftRedTarget_Status = 0;
+  rightRedTarget_Status = 0;
+  leftGreenTarget_Status = 0;
+  rightGreenTarget_Status = 0;
+  yellowTarget_Status = 0;
+  allTargetsHitFiveTimes = false;
+  AnimLightData(DATA_YELLOW_TARGET, NumberToData(yellowTarget_Status));
+  AnimLightData(DATA_RIGHT_GREEN_TARGET, NumberToData(rightGreenTarget_Status));
+  AnimLightData(DATA_LEFT_GREEN_TARGET, NumberToData(leftGreenTarget_Status));
+  AnimLightData(DATA_RIGHT_RED_TARGET, NumberToData(rightRedTarget_Status));
+  AnimLightData(DATA_LEFT_RED_TARGET, NumberToData(leftRedTarget_Status));
+}
+
+byte NumberToData(byte number){
+ if(number == 0) return 0;
+ else if(number == 1) return 0b1;
+ else if(number == 2) return 0b11;
+ else if(number == 3) return 0b111;
+ else if(number == 4) return 0b1111;
+ else if(number == 5) return 0b11111;
+ 
 }

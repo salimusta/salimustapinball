@@ -81,6 +81,28 @@ byte nbPlayer = 1;
 
 void loop(){
   
+  //SCREEN_SUPER_PSIT_COMPLETE
+  time = 0;
+  flag = true;
+  while(requestedScreen == SCREEN_SUPER_PSIT_COMPLETE){
+    time++;
+  
+    drawString(tmpBmp, "SUPER PSIT!", 1, 3, 50);
+    if(flag) drawInvertRect(tmpBmp, 0, 0, 64, 16);
+    if(time %3 == 0) flag = !flag;
+    centerString(tmpBmp, "+10 000", 19);
+    
+    DisplayMatrix(tmpBmp);
+    EmptyMatrix(tmpBmp);
+    if(time > 200) requestedScreen = lowPriorityScreen;
+  }
+  //SCREEN_SUPER_PSIT
+  while(requestedScreen == SCREEN_SUPER_PSIT){
+    copyFrames(SuperPsit, tmpBmp);
+    DisplayMatrix(tmpBmp);
+    EmptyMatrix(tmpBmp);
+  }
+  
   //SCREEN_PLAYER_SELECTION
   if(requestedScreen == SCREEN_PLAYER_SELECTION) nbPlayer = 1;
   while(requestedScreen == SCREEN_PLAYER_SELECTION){
@@ -800,6 +822,8 @@ void loop(){
       time++;
       if(time%3 == 0) flag = !flag;
     }else flag = false;
+    
+    if(countdown < 3 && time%3 == 0) flag = !flag;
     
     char buf[2];
     sprintf(buf, "TIME: %d", countdown);

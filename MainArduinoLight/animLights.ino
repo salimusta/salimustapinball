@@ -10,6 +10,13 @@ void AnimLightFor(byte light, byte duration){
   Wire.write(duration);
   Wire.endTransmission();
 }
+void AnimLightData(byte light, byte data){
+  Wire.beginTransmission(5);
+  Wire.write(light);
+  Wire.write(0);
+  Wire.write(data);
+  Wire.endTransmission();
+}
 void TestAnimLights(){
   printLine("Anim Lights Test", "On Going...");
   Serial.print("ALL OFF\n");

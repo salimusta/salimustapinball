@@ -67,6 +67,30 @@ void setup() {
 void loop() {
   SendHighScores();
   
+  /*TESTING LIGHTS 
+  
+  AmbiLight(ALL_OFF);
+  AnimLight(ALL_ANIM_OFF);
+  
+  delay(2000);
+  PlaySound(DESIREHEY);
+  
+  AnimLightData(DATA_YELLOW_TARGET, 0b1);
+  AnimLightFor(BLINK_YELLOW_TARGET, 30);
+  delay(2000);
+  AnimLightData(DATA_YELLOW_TARGET, 0b11);
+  AnimLightFor(BLINK_YELLOW_TARGET, 30);
+  delay(2000);
+  AnimLightData(DATA_YELLOW_TARGET, 0b111);
+  delay(2000);
+  AnimLightFor(BLINK_YELLOW_TARGET, 30);
+  delay(2000);
+  AnimLightData(DATA_YELLOW_TARGET, 0b1111);
+  delay(2000);
+  AnimLightData(DATA_YELLOW_TARGET, 0b11111);
+  delay(200000);
+  */
+  
 /*
   DisplayScreen(SCREEN_STARWARS_GAME, PRIORITY_LOW);
   while(1){
@@ -99,7 +123,7 @@ void loop() {
   delay(100);
   if(maintenanceMode){
     AmbiLight(ALL_OFF);
-    AnimLight(ALL_OFF);
+    AnimLight(ALL_ANIM_OFF);
     PlaySound(DESIREHEY);
     while(1) ManageMaintenanceMode(); 
   }else{

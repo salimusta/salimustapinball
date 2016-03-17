@@ -67,8 +67,8 @@ bool kickout2Requested = false;
 unsigned long timeRampABall = 0;
 
 
-const int POWER_TIME_LEFT_MS =  170;
-const int POWER_TIME_RIGHT_MS =  170;
+const int POWER_TIME_LEFT_MS =  190;
+const int POWER_TIME_RIGHT_MS =  190;
 const int HOLDON_PERIOD_MS =  16;
 const int HOLDON_DURATION_MS =  5;
 
@@ -313,7 +313,7 @@ void loop() {
   //Push the ball trough sequence, we shoot a need ball
   if(rampABallRequested){
     unsigned long timeSinceRequested = time - timeRampABall;
-    if(timeSinceRequested > 1429 && timeSinceRequested < 10000){
+    if(timeSinceRequested > 1427 && timeSinceRequested < 10000){
       SolenoidOff(3);
       SolenoidOff(2);
       rampABallRequested = false;

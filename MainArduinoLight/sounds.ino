@@ -127,6 +127,7 @@ int PlayRandomMusic(){
      timeRelease = 2000;
   }
   
+  return 2000;
   return timeRelease;
 
 }

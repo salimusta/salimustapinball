@@ -1,7 +1,7 @@
-#include <Wire.h>
+  #include <Wire.h>
 
 #define ANIM_ALL 1
-#define ALL_OFF 2
+#define ALL_ANIM_OFF 2
 #define VERT_SNAKE_ALL 81
 #define ALL_IDLE 82
 #define VERT_SNAKE_KEEP_ALL 83
@@ -11,26 +11,32 @@
 #define ALTERN_TOP_LIGHTS 5
 #define OFF_TOP_LIGHTS 6
 #define DUAL_SNAKE_TOP_LIGHTS 79
+#define SNAKE_TOP_LIGHTS 89
 
 #define SNAKE_RIGHT_GREEN_TARGET 7
 #define BLINK_RIGHT_GREEN_TARGET 8
 #define OFF_RIGHT_GREEN_TARGET 9
+#define DATA_RIGHT_GREEN_TARGET 84
 
 #define SNAKE_LEFT_GREEN_TARGET 10
 #define BLINK_LEFT_GREEN_TARGET 11
 #define OFF_LEFT_GREEN_TARGET 12
+#define DATA_LEFT_GREEN_TARGET 85
 
 #define SNAKE_RIGHT_RED_TARGET 13
 #define BLINK_RIGHT_RED_TARGET 14
 #define OFF_RIGHT_RED_TARGET 15
+#define DATA_RIGHT_RED_TARGET 86
 
 #define SNAKE_LEFT_RED_TARGET 16
 #define BLINK_LEFT_RED_TARGET 17
 #define OFF_LEFT_RED_TARGET 18
+#define DATA_LEFT_RED_TARGET 87
 
 #define SNAKE_YELLOW_TARGET 19
 #define BLINK_YELLOW_TARGET 20
 #define OFF_YELLOW_TARGET 21
+#define DATA_YELLOW_TARGET 88
 
 #define ALL_MODE_OFF 22
 #define ALL_MODE_ON 77
@@ -119,30 +125,35 @@ byte LeftRedAnim = 0;
 byte LeftRedTargetAnimMode = OFF_LEFT_RED_TARGET;
 byte LeftRedTargetAnimMode_Old = OFF_LEFT_RED_TARGET;
 int LeftRedTargetAnimTime = 0;
+byte LeftRedData = 0;
 
 //RIGHT RED TARGET
 byte RightRedAnim = 0;
 byte RightRedTargetAnimMode = OFF_RIGHT_RED_TARGET;
 byte RightRedTargetAnimMode_Old = OFF_RIGHT_RED_TARGET;
 int RightRedTargetAnimTime = 0;
+byte RightRedData = 0;
 
 //LEFT GREEN TARGET
 byte LeftGreenAnim = 0;
 byte LeftGreenTargetAnimMode = OFF_LEFT_GREEN_TARGET;
 byte LeftGreenTargetAnimMode_Old = OFF_LEFT_GREEN_TARGET;
 int LeftGreenTargetAnimTime = 0;
+byte LeftGreenData = 0;
 
 //RIGHT GREEN TARGET
 byte RightGreenAnim = 0;
 byte RightGreenTargetAnimMode = OFF_RIGHT_GREEN_TARGET;
 byte RightGreenTargetAnimMode_Old = OFF_RIGHT_GREEN_TARGET;
 int RightGreenTargetAnimTime = 0;
+byte RightGreenData = 0;
 
 //MIDDLE YELLOW TARGET
 byte MiddleYellowAnim = 0;
 byte YellowTargetAnimMode = OFF_YELLOW_TARGET;
 byte YellowTargetAnimMode_Old = OFF_YELLOW_TARGET;
 byte YellowTargetAnimTime = 0;
+byte MiddleYellowData = 0;
 
 //MODES ANIM
 byte ModesAnim = 0;
@@ -255,6 +266,11 @@ void setup() {
   //Starting value
 //allAnimModeState = 1;
 //allAnimMode = VERT_SNAKE_ALL;
+
+  /*allAnim = true;
+      allAnimModeFrame = 1;
+      allAnimMode = ALL_IDLE;
+      SetAllAnim();*/
 }
 
 
@@ -281,8 +297,8 @@ void SetAllAnim(){
   LauncherAnimMode = SNAKE_LAUNCHER;
   LooseAnim = 0;
   
-  FlashAnim = 0b01010101;
-  FlashAnimMode = ALTERN_TOP_LIGHTS;
+  FlashAnim = 1;
+  FlashAnimMode = DUAL_SNAKE_TOP_LIGHTS;
   
   LettersAnimMode = SNAKE_LETTERS;
   Pletter = 1;
@@ -301,78 +317,87 @@ void SetAllAnim(){
   Gate1Light = Gate2Light = Gate3Light = 1; 
 }
 
+void SetAllOff(){
+  LeftRedAnim = 0;
+  LeftRedTargetAnimMode = OFF_LEFT_RED_TARGET;
+  LeftRedTargetAnimMode_Old = LeftRedTargetAnimMode;
+  
+  RightRedAnim = 0;
+  RightRedTargetAnimMode = OFF_RIGHT_RED_TARGET;
+  RightRedTargetAnimMode_Old = RightRedTargetAnimMode;
+  
+  LeftGreenAnim = 0;
+  LeftGreenTargetAnimMode = OFF_LEFT_GREEN_TARGET;
+  LeftGreenTargetAnimMode_Old = LeftGreenTargetAnimMode;
+  
+  RightGreenAnim = 0;
+  RightGreenTargetAnimMode = OFF_RIGHT_GREEN_TARGET;
+  RightGreenTargetAnimMode_Old = RightGreenTargetAnimMode;
+  
+  MiddleYellowAnim = 0;
+  YellowTargetAnimMode = OFF_YELLOW_TARGET;
+  YellowTargetAnimMode_Old = YellowTargetAnimMode;
+  
+  ModesAnim = 0;
+  ModesAnimMode = ALL_MODE_OFF;
+  ModesAnimMode_Old = ModesAnimMode;
+  
+  LauncherAnim = 0;
+  LauncherAnimMode = LAUNCHER_OFF;
+  LauncherAnimMode_Old = LauncherAnimMode;
+  
+  LooseAnim = 0;
+  LooseAnimMode = LOOSE_OFF;
+  LooseAnimMode_Old = LooseAnimMode;
+  
+  FlashAnim = 0;
+  FlashAnimMode = OFF_TOP_LIGHTS;
+  FlashAnimMode_Old = FlashAnimMode;
+  
+  LettersAnimMode = ALL_LETTERS_OFF;
+  Pletter = Sletter = Iletter = Tletter = 0;
+  LettersAnimMode_Old = LettersAnimMode;
+  PletterAnimMode = 0; PletterAnimMode_Old = 0;
+  SletterAnimMode = 0; SletterAnimMode_Old = 0;
+  IletterAnimMode = 0; IletterAnimMode_Old = 0;
+  TletterAnimMode = 0; TletterAnimMode_Old = 0;
+  
+  KO1Anim = 0;
+  KO1AnimMode = KO1_OFF;
+  KO1AnimMode_Old = KO1AnimMode;
+  
+  KO2Anim = 0;
+  KO2AnimMode = KO2_OFF;
+  KO2AnimMode_Old = KO2AnimMode;
+  
+  Bumper1Light = Bumper2Light = Bumper3Light = 0;
+  Bumper1Mode = BUMPER_1_OFF;
+  Bumper2Mode = BUMPER_2_OFF;
+  Bumper3Mode = BUMPER_3_OFF;
+  
+  Bumper1Mode_Old = Bumper1Mode;
+  Bumper2Mode_Old = Bumper2Mode;
+  Bumper3Mode_Old = Bumper3Mode;
+  
+  Gate1Light = Gate2Light = Gate3Light = 0;
+}
+
 
 void receiveEvent(int howMany) {
   byte duration = 0;
+  byte data = 0;
   allAnim = false;
-  if(howMany == 1 || howMany == 2){
+  //If 3 byte received, the third byte is the exact data to set.
+  if(howMany == 1 || howMany == 2 || howMany == 3){
     byte byte0 = Wire.read();
     //TOP LIGHT--------------------------------------------------------------
-    if(howMany == 2) duration = Wire.read();
+    if(howMany > 1) duration = Wire.read();
+    if(howMany > 2) data = Wire.read();
     
-    if(byte0 == ALL_OFF || byte0 == VERT_SNAKE_ALL || byte0 == VERT_SNAKE_KEEP_ALL){
-      LeftRedAnim = 0;
-      LeftRedTargetAnimMode = OFF_LEFT_RED_TARGET;
-      LeftRedTargetAnimMode_Old = LeftRedTargetAnimMode;
-      
-      RightRedAnim = 0;
-      RightRedTargetAnimMode = OFF_RIGHT_RED_TARGET;
-      RightRedTargetAnimMode_Old = RightRedTargetAnimMode;
-      
-      LeftGreenAnim = 0;
-      LeftGreenTargetAnimMode = OFF_LEFT_GREEN_TARGET;
-      LeftGreenTargetAnimMode_Old = LeftGreenTargetAnimMode;
-      
-      RightGreenAnim = 0;
-      RightGreenTargetAnimMode = OFF_RIGHT_GREEN_TARGET;
-      RightGreenTargetAnimMode_Old = RightGreenTargetAnimMode;
-      
-      MiddleYellowAnim = 0;
-      YellowTargetAnimMode = OFF_YELLOW_TARGET;
-      YellowTargetAnimMode_Old = YellowTargetAnimMode;
-      
-      ModesAnim = 0;
-      ModesAnimMode = ALL_MODE_OFF;
-      ModesAnimMode_Old = ModesAnimMode;
-      
-      LauncherAnim = 0;
-      LauncherAnimMode = LAUNCHER_OFF;
-      LauncherAnimMode_Old = LauncherAnimMode;
-      
-      LooseAnim = 0;
-      LooseAnimMode = LOOSE_OFF;
-      LooseAnimMode_Old = LooseAnimMode;
-      
-      FlashAnim = 0;
-      FlashAnimMode = OFF_TOP_LIGHTS;
-      FlashAnimMode_Old = FlashAnimMode;
-      
-      LettersAnimMode = ALL_LETTERS_OFF;
-      Pletter = Sletter = Iletter = Tletter = 0;
-      LettersAnimMode_Old = LettersAnimMode;
-      PletterAnimMode = 0; PletterAnimMode_Old = 0;
-      SletterAnimMode = 0; SletterAnimMode_Old = 0;
-      IletterAnimMode = 0; IletterAnimMode_Old = 0;
-      TletterAnimMode = 0; TletterAnimMode_Old = 0;
-      
-      KO1Anim = 0;
-      KO1AnimMode = KO1_OFF;
-      KO1AnimMode_Old = KO1AnimMode;
-      
-      KO2Anim = 0;
-      KO2AnimMode = KO2_OFF;
-      KO2AnimMode_Old = KO2AnimMode;
-      
-      Bumper1Light = Bumper2Light = Bumper3Light = 0;
-      Bumper1Mode = BUMPER_1_OFF;
-      Bumper2Mode = BUMPER_2_OFF;
-      Bumper3Mode = BUMPER_3_OFF;
-      
-      Bumper1Mode_Old = Bumper1Mode;
-      Bumper2Mode_Old = Bumper2Mode;
-      Bumper3Mode_Old = Bumper3Mode;
-      
-      Gate1Light = Gate2Light = Gate3Light = 0;
+    allAnimMode = ALL_IDLE;
+    
+    if(byte0 == ALL_ANIM_OFF || byte0 == VERT_SNAKE_ALL || byte0 == VERT_SNAKE_KEEP_ALL){
+      SetAllOff();
       
       if(byte0 == VERT_SNAKE_ALL){
         allAnimModeState = 1;
@@ -384,7 +409,7 @@ void receiveEvent(int howMany) {
     }else if(byte0 == ANIM_ALL){
       allAnim = true;
       allAnimModeFrame = 1;
-      allAnimMode = ANIM_ALL;
+      allAnimMode = ALL_IDLE;
       SetAllAnim();
 
       
@@ -431,6 +456,15 @@ void receiveEvent(int howMany) {
       FlashAnim = 1;
       FlashAnimMode = DUAL_SNAKE_TOP_LIGHTS;
       
+    }else if(byte0 == SNAKE_TOP_LIGHTS){
+      if(duration > 0){ 
+        if(FlashAnimTime == 0) FlashAnimMode_Old = FlashAnimMode;
+        FlashAnimTime = duration;
+       }
+      else FlashAnimTime = 0;
+      FlashAnim = 1;
+      FlashAnimMode = SNAKE_TOP_LIGHTS;
+      
       //LEFT GREEN TARGET--------------------------------------------------------
     }else if(byte0 == SNAKE_LEFT_GREEN_TARGET){
       if(duration > 0){LeftGreenTargetAnimMode_Old = LeftGreenTargetAnimMode;LeftGreenTargetAnimTime = duration;}
@@ -447,6 +481,11 @@ void receiveEvent(int howMany) {
       else LeftGreenTargetAnimTime = 0;
       LeftGreenAnim = 0;
       LeftGreenTargetAnimMode = OFF_LEFT_GREEN_TARGET;
+    }else if(byte0 == DATA_LEFT_GREEN_TARGET){
+      if(duration > 0){LeftGreenTargetAnimMode_Old = LeftGreenTargetAnimMode;LeftGreenTargetAnimTime = duration;}
+      else LeftGreenTargetAnimTime = 0;
+      LeftGreenData = LeftGreenAnim = data;
+      LeftGreenTargetAnimMode = DATA_LEFT_GREEN_TARGET;
       
     //RIGHT GREEN TARGET--------------------------------------------------------
     }else if(byte0 == SNAKE_RIGHT_GREEN_TARGET){
@@ -464,6 +503,11 @@ void receiveEvent(int howMany) {
       else RightGreenTargetAnimTime = 0;
       RightGreenAnim = 0;
       RightGreenTargetAnimMode = OFF_RIGHT_GREEN_TARGET;
+    }else if(byte0 == DATA_RIGHT_GREEN_TARGET){
+      if(duration > 0){RightGreenTargetAnimMode_Old = RightGreenTargetAnimMode;RightGreenTargetAnimTime = duration;}
+      else RightGreenTargetAnimTime = 0;
+      RightGreenAnim = RightGreenData = data;
+      RightGreenTargetAnimMode = DATA_RIGHT_GREEN_TARGET;
       
       //LEFT RED TARGETS--------------------------------------------------------------------
     }else if(byte0 == SNAKE_LEFT_RED_TARGET){
@@ -481,6 +525,11 @@ void receiveEvent(int howMany) {
       else LeftRedTargetAnimTime = 0;
       LeftRedAnim = 0;
       LeftRedTargetAnimMode = OFF_LEFT_RED_TARGET;
+    }else if(byte0 == DATA_LEFT_RED_TARGET){
+      if(duration > 0){LeftRedTargetAnimMode_Old = LeftRedTargetAnimMode; LeftRedTargetAnimTime = duration;}
+      else LeftRedTargetAnimTime = 0;
+      LeftRedAnim = LeftRedData = data;
+      LeftRedTargetAnimMode = DATA_LEFT_RED_TARGET;
       
       //RIGHT RED TARGETS--------------------------------------------------------------------
     }else if(byte0 == SNAKE_RIGHT_RED_TARGET){
@@ -498,6 +547,11 @@ void receiveEvent(int howMany) {
       else RightRedTargetAnimTime = 0;
       RightRedAnim = 0;
       RightRedTargetAnimMode = OFF_RIGHT_RED_TARGET;
+    }else if(byte0 == DATA_RIGHT_RED_TARGET){
+      if(duration > 0){RightRedTargetAnimMode_Old = RightRedTargetAnimMode; RightRedTargetAnimTime = duration;}
+      else RightRedTargetAnimTime = 0;
+      RightRedAnim = RightRedData = data;
+      RightRedTargetAnimMode = DATA_RIGHT_RED_TARGET;
       
       //YELLOW TARGETS-------------------------------------------------------------------
     }else if(byte0 == SNAKE_YELLOW_TARGET){
@@ -515,7 +569,12 @@ void receiveEvent(int howMany) {
       else YellowTargetAnimTime = 0;
       MiddleYellowAnim = 0;
       YellowTargetAnimMode = OFF_YELLOW_TARGET;
-    
+    }else if(byte0 == DATA_YELLOW_TARGET){
+      if(duration > 0){YellowTargetAnimMode_Old = YellowTargetAnimMode; YellowTargetAnimTime = duration;}
+      else YellowTargetAnimTime = 0;
+      MiddleYellowAnim = MiddleYellowData = data;
+      YellowTargetAnimMode = DATA_YELLOW_TARGET;
+      
       //MODES-----------------------------------------------------------------------------------
     }else if(byte0 == ALL_MODE_OFF){
       if(duration > 0){ModesAnimMode_Old = ModesAnimMode; ModesAnimTime = duration;}
@@ -881,19 +940,21 @@ void loop() {
     
     //Managing the anim mode frames
     if(allAnim){
-      if(time%50 == 0){
+      if(time%80 == 0){
         allAnimModeFrame++;
         allAnimModeState = 1;
         if(allAnimModeFrame == 4) allAnimModeFrame = 1;
         
-        if(allAnimModeFrame == 1) SetAllAnim();
-        else if(allAnimModeFrame == 2) allAnimMode = VERT_SNAKE_ALL;
+        if(allAnimModeFrame == 1) {
+          allAnimMode = ALL_IDLE;
+          SetAllAnim();
+        }else if(allAnimModeFrame == 2) allAnimMode = VERT_SNAKE_ALL;
         else if(allAnimModeFrame == 3) allAnimMode = VERT_SNAKE_KEEP_ALL;
 
       }
     }
     
-    
+
     //ALL
     if(allAnimMode == VERT_SNAKE_ALL){
       if(allAnimModeState == 1){
@@ -952,6 +1013,7 @@ void loop() {
       }
     }else if(allAnimMode == VERT_SNAKE_KEEP_ALL){
       if(allAnimModeState == 1){
+        SetAllOff();
         LooseAnim = 0b111;
       }else if(allAnimModeState == 3){
         ModesAnim = 14;
@@ -990,7 +1052,7 @@ void loop() {
         if(allAnimModeState == 13) allAnimModeState = 1; 
       }
     }else if(allAnimMode == ALL_IDLE){
-        
+
       //LAUNCHER---------------------------------------
       if(LauncherAnimMode == SNAKE_LAUNCHER){
           LauncherAnim = LauncherAnim << 1;
@@ -1067,7 +1129,7 @@ void loop() {
       }
       
       //Bumper Snake management
-      if(time%2 == 0){
+      if(time%3 == 0){
         BumperModeState++;
         if(BumperModeState == 4) BumperModeState = 1; 
       }
@@ -1114,12 +1176,13 @@ void loop() {
         MiddleYellowAnim = MiddleYellowAnim << 1;
         if(MiddleYellowAnim == 0) MiddleYellowAnim = 1;
       }else if(YellowTargetAnimMode == BLINK_YELLOW_TARGET){
-        if(time%2 == 0 ) MiddleYellowAnim = ~MiddleYellowAnim;
+        if(time%1 == 0 ) MiddleYellowAnim = ~MiddleYellowAnim;
       }
       if(YellowTargetAnimTime > 0){
          YellowTargetAnimTime--;
          if(YellowTargetAnimTime == 0){
            YellowTargetAnimMode = YellowTargetAnimMode_Old;
+           if(YellowTargetAnimMode == DATA_YELLOW_TARGET) MiddleYellowAnim = MiddleYellowData;
          } 
       }
       
@@ -1130,7 +1193,7 @@ void loop() {
         LeftGreenAnim = LeftGreenAnim << 1;
         if(LeftGreenAnim == 0) LeftGreenAnim = 1;
       }else if(LeftGreenTargetAnimMode == BLINK_LEFT_GREEN_TARGET){
-        if(time%2 == 0 ){
+        if(time%1 == 0 ){
           LeftGreenAnim = ~LeftGreenAnim;
         }  
       }
@@ -1138,6 +1201,7 @@ void loop() {
          LeftGreenTargetAnimTime--;
          if(LeftGreenTargetAnimTime == 0){
            LeftGreenTargetAnimMode = LeftGreenTargetAnimMode_Old;
+           if(LeftGreenTargetAnimMode == DATA_LEFT_GREEN_TARGET) LeftGreenAnim = LeftGreenData;
          } 
       }
       
@@ -1148,7 +1212,7 @@ void loop() {
         RightGreenAnim = RightGreenAnim << 1;
         if(RightGreenAnim == 0) RightGreenAnim = 1;
       }else if(RightGreenTargetAnimMode == BLINK_RIGHT_GREEN_TARGET){
-        if(time%2 == 0 ){
+        if(time%1 == 0 ){
           RightGreenAnim = ~RightGreenAnim;
         }  
       }
@@ -1156,6 +1220,7 @@ void loop() {
          RightGreenTargetAnimTime--;
          if(RightGreenTargetAnimTime == 0){
            RightGreenTargetAnimMode = RightGreenTargetAnimMode_Old;
+           if(RightGreenTargetAnimMode == DATA_RIGHT_GREEN_TARGET) RightGreenAnim = RightGreenData;
          } 
       }
       
@@ -1166,7 +1231,7 @@ void loop() {
         LeftRedAnim = LeftRedAnim << 1;
         if(LeftRedAnim == 0) LeftRedAnim = 1;
       }else if(LeftRedTargetAnimMode == BLINK_LEFT_RED_TARGET){
-        if(time%2 == 0 ){
+        if(time%1 == 0 ){
           LeftRedAnim = ~LeftRedAnim;
         }  
       }
@@ -1174,6 +1239,7 @@ void loop() {
          LeftRedTargetAnimTime--;
          if(LeftRedTargetAnimTime == 0){
            LeftRedTargetAnimMode = LeftRedTargetAnimMode_Old;
+           if(LeftRedTargetAnimMode == DATA_LEFT_RED_TARGET) LeftRedAnim = LeftRedData;
          } 
       }
       
@@ -1184,7 +1250,7 @@ void loop() {
         RightRedAnim = RightRedAnim << 1;
         if(RightRedAnim == 0) RightRedAnim = 1;
       }else if(RightRedTargetAnimMode == BLINK_RIGHT_RED_TARGET){
-        if(time%2 == 0 ){
+        if(time%1 == 0 ){
           RightRedAnim = ~RightRedAnim;
         }  
       }
@@ -1192,6 +1258,7 @@ void loop() {
          RightRedTargetAnimTime--;
          if(RightRedTargetAnimTime == 0){
            RightRedTargetAnimMode = RightRedTargetAnimMode_Old;
+           if(RightRedTargetAnimMode == DATA_RIGHT_RED_TARGET) RightRedAnim = RightRedData;
          } 
       }
   
@@ -1208,6 +1275,9 @@ void loop() {
         if(FlashAnimSide) FlashAnim = FlashAnim << 1;
         else FlashAnim = FlashAnim >> 1;
         if(FlashAnim == 0b10000000 || FlashAnim == 1) FlashAnimSide = !FlashAnimSide;
+      }else if(FlashAnimMode == SNAKE_TOP_LIGHTS){
+        FlashAnim = FlashAnim << 1;
+        if(FlashAnim == 0 && time%20 == 0) FlashAnim = 1;
       }else if(FlashAnimMode == OFF_TOP_LIGHTS){
         FlashAnim = 0;
       }
@@ -1252,7 +1322,7 @@ void loop() {
       
       //LETTERS---------------------------------------------------------------------
       if(LettersAnimMode == SNAKE_LETTERS){
-        if(time%10 == 0){
+        if(time%5 == 0){
           if(Pletter == 1){ Pletter = 0; Sletter = 1;}
           else if(Sletter == 1){ Sletter = 0; Iletter = 1;}
           else if(Iletter == 1){ Iletter = 0; Tletter = 1;}

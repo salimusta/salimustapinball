@@ -30,7 +30,6 @@ void PlayBallGame(){
       
       
       DisplayScreen(SCREEN_MULTIBALL, PRIORITY_HIGH);
-      delay(2000);
       ProvideANewBall();
     }
     DisplayScore();
@@ -59,11 +58,10 @@ void PlayWordGame(){
       PlaySound(CAFARTE);
       DisplayScreen(SCREEN_3BUMPERS_MODE_SUCCESS, PRIORITY_LOW);
       score += 1000;
-      delay(2000);
+      delay(1000);
       EnableFlippers();
       
       DisplayScreen(SCREEN_MULTIBALL, PRIORITY_HIGH);
-      delay(2000);
       ProvideANewBall();
     }
     DisplayScore();
@@ -101,11 +99,10 @@ void PlayStarWarsGame(){
       delay(3000);
       DisplayScreen(SCREEN_STARWARS_WIN, PRIORITY_LOW);
       score += 3000;
-      delay(2000);
+      delay(1000);
       EnableFlippers();
       
       DisplayScreen(SCREEN_MULTIBALL, PRIORITY_HIGH);
-      delay(2000);
       ProvideANewBall();
     }
     DisplayScore();
