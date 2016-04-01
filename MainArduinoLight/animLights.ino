@@ -17,6 +17,26 @@ void AnimLightData(byte light, byte data){
   Wire.write(data);
   Wire.endTransmission();
 }
+
+void AnimLight2(byte light){
+  Wire.beginTransmission(7);
+  Wire.write(light);
+  Wire.endTransmission();
+}
+void AnimLightFor2(byte light, byte duration){
+  Wire.beginTransmission(7);
+  Wire.write(light);
+  Wire.write(duration);
+  Wire.endTransmission();
+}
+void AnimLightData2(byte light, byte data){
+  Wire.beginTransmission(7);
+  Wire.write(light);
+  Wire.write(0);
+  Wire.write(data);
+  Wire.endTransmission();
+}
+
 void TestAnimLights(){
   printLine("Anim Lights Test", "On Going...");
   Serial.print("ALL OFF\n");

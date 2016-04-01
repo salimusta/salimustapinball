@@ -295,9 +295,12 @@ void SetAllAnim(){
   
   LauncherAnim = 1;
   LauncherAnimMode = SNAKE_LAUNCHER;
+  
   LooseAnim = 0;
+  LooseAnimMode = BLINK_LOOSE;
   
   FlashAnim = 1;
+  FlashAnimSide = true;
   FlashAnimMode = DUAL_SNAKE_TOP_LIGHTS;
   
   LettersAnimMode = SNAKE_LETTERS;
@@ -453,6 +456,7 @@ void receiveEvent(int howMany) {
         FlashAnimTime = duration;
        }
       else FlashAnimTime = 0;
+      FlashAnimSide = true;
       FlashAnim = 1;
       FlashAnimMode = DUAL_SNAKE_TOP_LIGHTS;
       

@@ -166,6 +166,24 @@
 #define BLINK_KO2 75
 #define SNAKE_KO2 76
 
+//Light 2 Management
+#define RAMPGATE_OFF 10
+#define RAMPGATE_SNAKE 11
+#define RAMPGATE_BLINK 12
+#define RAMPGATE_ON 13
+#define RAMPGATE_DUAL_SNAKE 14
+#define RAMPGATE_ALTERNATE 15
+
+#define RAMP_OFF 20
+#define RAMP_ON 21
+#define RAMP_BLUE 22
+#define RAMP_YELLOW 23
+#define RAMP_SNAKE_BLUE 24
+#define RAMP_SNAKE_YELLOW 25
+#define RAMP_SNAKE 26
+#define RAMP_BLINK 27
+#define RAMP_ALTERNATE 28
+
 //AMBI LIGHTS
 #define RED_ON 1
 #define RED_OFF 2

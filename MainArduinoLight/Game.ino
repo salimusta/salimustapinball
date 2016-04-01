@@ -55,6 +55,10 @@ byte yellowTarget_Status = 0;
 
 bool allTargetsHitFiveTimes = false;
 
+//Ramp status
+bool ramp1Passed = false;
+
+
 char name[11];
 
 //Timings
@@ -64,6 +68,7 @@ void ManageGame() {
 
   AmbiLight(ALL_OFF);
   AnimLight(ALL_ANIM_OFF);
+  AnimLight2(ALL_ANIM_OFF);
 
   if (gameIsOn){
     SendLedMatrixScore(selectedPlayer);
@@ -93,6 +98,7 @@ void ManageGame() {
     DisableFlippers();
     AmbiLight(ANIME_ALL);
     AnimLight(ANIM_ALL);
+    AnimLight2(ANIM_ALL);
     delay(2000);
     
     
@@ -158,7 +164,6 @@ void ManageGame() {
   
           delay(50);
           ReadPlayerName(name);
-          Serial.print(name[0]);
           if (name[0] != 40) break;
           delay(30);
         }
@@ -240,6 +245,7 @@ void ManageGame() {
   AnimLight(OFF_TOP_LIGHTS);
 
   ballIsInPlay = true;
+  ramp1Passed = false;
   DisplayScreen(SCREEN_SCORE, PRIORITY_LOW);
   activeMode = NO_MODE;
 
@@ -291,13 +297,9 @@ void ManageGame() {
     ReadSwitches();
     ReadSolenoidSwitches();
 
-    //If the RAMP fails, we send a command to the solenoid to power again
-    /*if (RAMP) {
-      SendSolenoidRampInfo();
-    }*/
     
     //If any switch is activated, the ball is now in play
-    if ((BSW1 || BSW2 || BSW3 || LKSW || RKSW || ROSW1 || ROSW2 || ROSW3 || CT || RT1 || RT2 || LT1 || LT2 || RLOSW || LLOSW || LOSW) && ballLaunched == false) {
+    if ((BSW1 || BSW2 || BSW3 || LKSW || RKSW || ROSW1 || ROSW2 || ROSW3 || CT || RT1 || RT2 || LT1 || LT2 || RLOSW || LLOSW || LOSW || RAMP1 || RAMP2) && ballLaunched == false) {
       ballLaunched = true;
       AnimLight(LAUNCHER_OFF);
       AnimLight(OFF_TOP_LIGHTS);
@@ -320,6 +322,23 @@ void ManageGame() {
     if(time - timeSinceNewBall > 10000 && !ballLaunched){
       timeSinceNewBall = millis();
       PlaySound(STILLWAITING);
+    }
+    
+    //RAMPS-----------------------------------------------------
+    if(RAMP1){
+      if(!ramp1Passed){
+        score += 100;
+        AnimLightFor2(RAMPGATE_BLINK, 30);
+        AnimLightFor2(RAMP_BLINK, 30);
+        ramp1Passed = true;
+      }else{
+        ramp1Passed = false;
+      }
+    }
+    
+    if(RAMP2){
+      score += 500;
+      ramp1Passed = false;
     }
     //BUMPERS-------------------------------------------------------------------------
     if (BSW1) {
@@ -774,6 +793,7 @@ void ManageGame() {
               //ALL LIGHTS OFF
               AmbiLight(ALL_OFF);
               AnimLight(ALL_ANIM_OFF);
+              AnimLight2(ALL_ANIM_OFF);
               AnimLight(BLINK_MODES);
               timeInHole2 = 300;
 
@@ -795,6 +815,7 @@ void ManageGame() {
               //ALL LIGHTS OFF
               AmbiLight(ALL_OFF);
               AnimLight(ALL_ANIM_OFF);
+              AnimLight2(ALL_ANIM_OFF);
               AnimLight(BLINK_MODES);
               timeInHole2 = 300;
 
@@ -814,6 +835,7 @@ void ManageGame() {
               //ALL LIGHTS OFF
               AmbiLight(ALL_OFF);
               AnimLight(ALL_ANIM_OFF);
+              AnimLight2(ALL_ANIM_OFF);
               AnimLight(BLINK_MODES);
               timeInHole2 = 200;
 
@@ -834,6 +856,7 @@ void ManageGame() {
               //ALL LIGHTS OFF
               AmbiLight(ALL_OFF);
               AnimLight(ALL_ANIM_OFF);
+              AnimLight2(ALL_ANIM_OFF);
               AnimLight(BLINK_MODES);
               timeInHole2 = 300;
 
@@ -856,6 +879,7 @@ void ManageGame() {
               //ALL LIGHTS OFF
               AmbiLight(ALL_OFF);
               AnimLight(ALL_ANIM_OFF);
+              AnimLight2(ALL_ANIM_OFF);
               AnimLight(BLINK_MODES);
               timeInHole2 = 300;
 
@@ -876,6 +900,7 @@ void ManageGame() {
               //ALL LIGHTS OFF
               AmbiLight(ALL_OFF);
               AnimLight(ALL_ANIM_OFF);
+              AnimLight2(ALL_ANIM_OFF);
               AnimLight(BLINK_MODES);
               DisableFlippers();
               DisplayScreen(SCREEN_BALL_GAME_INTRO, PRIORITY_LOW);
@@ -891,6 +916,7 @@ void ManageGame() {
               alreadyActivatedModes[6] = true;
               AmbiLight(ALL_OFF);
               AnimLight(ALL_ANIM_OFF);
+              AnimLight2(ALL_ANIM_OFF);
               AnimLight(BLINK_MODES);
               DisplayScreen(SCREEN_PSIT_MODE_ACTIVE, PRIORITY_LOW);
               StopMusic();
@@ -910,6 +936,7 @@ void ManageGame() {
               //ALL LIGHTS OFF
               AmbiLight(ALL_OFF);
               AnimLight(ALL_ANIM_OFF);
+              AnimLight2(ALL_ANIM_OFF);
               AnimLight(BLINK_MODES);
               DisableFlippers();
               DisplayScreen(SCREEN_BALL_GAME_INTRO, PRIORITY_LOW);
@@ -927,6 +954,7 @@ void ManageGame() {
               //ALL LIGHTS OFF
               AmbiLight(ALL_OFF);
               AnimLight(ALL_ANIM_OFF);
+              AnimLight2(ALL_ANIM_OFF);
               AnimLight(ALL_MODE_OFF);
               DisableFlippers();
               StopMusic();

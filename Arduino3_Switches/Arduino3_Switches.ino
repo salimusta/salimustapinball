@@ -5,6 +5,7 @@ const int I3 = 3;
 const int I4 = 4;
 const int I5 = 5;
 const int I6 = 6;
+const int I7 = 7;
 
 const int D8 = 8;
 const int D9 = 9;
@@ -26,6 +27,7 @@ void setup() {
   pinMode(I4, INPUT);
   pinMode(I5, INPUT);  
   pinMode(I6, INPUT);
+  pinMode(I7, INPUT);
   
   Wire.begin(3);
   Wire.onRequest(requestEvent);
@@ -52,6 +54,8 @@ bool LT2 = false;
 bool LT2P = false;
 bool KO1 = false;
 bool RAMP = false;
+bool RAMPA1 = false;
+bool RAMPA2 = false;
 
 
 int ROSW1_State = 0;
@@ -74,6 +78,8 @@ int LT2_State = 0;
 int LT2P_State = 0;
 int KO1_State = 0;
 int RAMP_State = 0;
+int RAMPA1_State = 0;
+int RAMPA2_State = 0;
 
 int ROSW1_Old = 0;
 int ROSW2_Old = 0;
@@ -95,6 +101,8 @@ int LT2_Old = 0;
 int LT2P_Old = 0;
 int KO1_Old = 0;
 int RAMP_Old = 0;
+int RAMPA1_Old = 0;
+int RAMPA2_Old = 0;
 
 short delayMs = 400;
 
@@ -111,6 +119,7 @@ void loop(){
   ROSW3_State = digitalRead(I4);
   LT2P_State = digitalRead(I5);
   LT2_State = digitalRead(I6);
+  RAMPA2_State = digitalRead(I7);
   
   //DRIVE LINE 9
   digitalWrite(D8, LOW);
@@ -124,6 +133,7 @@ void loop(){
   RT2_State = digitalRead(I4);
   LT1_State = digitalRead(I5);
   KO1_State = digitalRead(I6);
+  RAMPA1_State = digitalRead(I7);
   
   //DRIVE LINE 10
   digitalWrite(D8, LOW);
@@ -252,6 +262,18 @@ void loop(){
     KO1 = (KO1_State == HIGH);
   }
   
+  if(RAMPA1_State != RAMPA1_Old){
+    if (RAMPA1_State == HIGH) Serial.print("RAMPA1 ON\n");
+    else Serial.print("RAMPA1 OFF\n"); 
+    RAMPA1 = (RAMPA1_State == HIGH);
+  }
+  
+  if(RAMPA2_State != RAMPA2_Old){
+    if (RAMPA2_State == HIGH) Serial.print("RAMPA2 ON\n");
+    else Serial.print("RAMPA2 OFF\n"); 
+    RAMPA2 = (RAMPA2_State == HIGH);
+  }
+  
   ROSW1_Old = ROSW1_State;
   ROSW2_Old = ROSW2_State;
   ROSW3_Old = ROSW3_State;
@@ -272,6 +294,8 @@ void loop(){
   LT2_Old = LT2_State;
   LT2P_Old = LT2P_State;
   KO1_Old = KO1_State;
+  RAMPA1_Old = RAMPA1_State;
+  RAMPA2_Old = RAMPA2_State;
 }
 
 void requestEvent()
@@ -297,8 +321,9 @@ void requestEvent()
   response2 = (response2 << 1) | RLOSW;
   response2 = (response2 << 1) | LOSW;
   
-  //order starting from bit 0: LT1, LT2, LT2P, KO1, RAMP
-  byte response3 = RAMP;
+  //order starting from bit 0: LT1, LT2, LT2P, KO1, RAMP1, RAMP2
+  byte response3 = RAMPA2;
+  response3 = (response3 << 1) | RAMPA1;
   response3 = (response3 << 1) | KO1;
   response3 = (response3 << 1) | LT2P;
   response3 = (response3 << 1) | LT2;
