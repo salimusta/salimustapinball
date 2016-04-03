@@ -18,7 +18,6 @@ typedef struct {
 Player players[4];
 
 void initPlayers(byte nb){
-  Serial.print("initPlayers =  "); Serial.print(nb); Serial.print("\n");
   score = 0;
   nbBall = 3;
   gate1Passed = gate2Passed = gate3Passed = false;
@@ -40,9 +39,6 @@ void initPlayers(byte nb){
 
 void SelectPlayer(byte index){
   //Save the current player status
-  Serial.print("Sel Player "); Serial.print(index); Serial.print("\n");
-  Serial.print("old "); Serial.print(currentPlayer); Serial.print("\n");
-  
   players[currentPlayer].score = score;
   players[currentPlayer].nbBall = nbBall;
   players[currentPlayer].gate1Passed = gate1Passed;

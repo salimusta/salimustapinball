@@ -56,6 +56,7 @@
 #define SCREEN_PLAYER_WIN 49
 #define SCREEN_SUPER_PSIT 50
 #define SCREEN_SUPER_PSIT_COMPLETE 51
+#define SCREEN_KO1_MULTIBALL 52
 
 #define PRIORITY_LOW 0
 #define PRIORITY_HIGH 1
@@ -161,6 +162,7 @@
 #define KO1_OFF 71
 #define BLINK_KO1 72
 #define SNAKE_KO1 73
+#define DATA_KO1 90
 
 #define KO2_OFF 74
 #define BLINK_KO2 75

@@ -31,6 +31,7 @@ void PlayBallGame(){
       
       DisplayScreen(SCREEN_MULTIBALL, PRIORITY_HIGH);
       ProvideANewBall();
+      PlayRandomMultiballMusic();
     }
     DisplayScore(score);
     delay(50);
@@ -50,7 +51,23 @@ void PlayWordGame(){
     flippers_state = (flippers_state << 1) | LEFT_FLIPPER;
     SendScreenData(FLIPPERS_STATE, flippers_state);
     
-    gameStatus = ReadBallGameStatus();
+    //Send TimeOut
+    if ( millis() - timeSinceUpdateScreen > 1000) {
+      unsigned long countdown = (25000 - (millis() - modeBeginTime)) / 1000;
+      byte countdownByted = countdown;
+      if (countdownByted <= 0 ) countdownByted = 0;
+      timeSinceUpdateScreen = millis();
+
+      SendScreenData(COUNTDOWN, countdownByted);
+    }
+    
+    
+    
+    //End of time out 
+    if (millis() - modeBeginTime >= 25000){
+      gameStatus = GAME_LOST;
+    }else gameStatus = ReadBallGameStatus();
+    
     if(gameStatus == GAME_LOST){
       PlaySound(LOOSE_POINT_POINT);
       
@@ -60,9 +77,6 @@ void PlayWordGame(){
       score += 1000;
       delay(1000);
       EnableFlippers();
-      
-      DisplayScreen(SCREEN_MULTIBALL, PRIORITY_HIGH);
-      ProvideANewBall();
     }
     DisplayScore(score);
     delay(50);
@@ -106,6 +120,7 @@ void PlayStarWarsGame(){
       
       DisplayScreen(SCREEN_MULTIBALL, PRIORITY_HIGH);
       ProvideANewBall();
+      PlayRandomMultiballMusic();
     }
     DisplayScore(gameScore);
     delay(50);

@@ -650,6 +650,16 @@ void ManageGame() {
       PlayRandomLoose();
     }
     //KO1-----------------------------------------------------------
+    //If the ball is in Hole1, Waiting for K02, animating Ligths
+    if(ballCatchedInHole1 && timeInHole1 > 0){
+      if(timeInHole1 == 500) AnimLightData(DATA_KO1, 0b00011);
+      else if(timeInHole1 == 1000) AnimLightData(DATA_KO1, 0b00111);
+      else if(timeInHole1 == 1500) AnimLightData(DATA_KO1, 0b01111);
+      else if(timeInHole1 == 2000) AnimLightData(DATA_KO1, 0b11111);
+      else if(timeInHole1 == 2500) AnimLight(BLINK_KO1);
+    }
+    
+    
     if (KO1_Old || ballCatchedInHole1) {
       timeInHole1++;
       //KICK THE BALL OUT
@@ -670,6 +680,7 @@ void ManageGame() {
         timeInHole1 = 0;
         score += 100;
 
+      //Ball actually caught in Hole 1
       } else if (timeInHole1 == 20 && ballCatchedInHole1 == false) {
         AnimLight(BLINK_KO1);
         byte randSound = random(2);
@@ -687,7 +698,18 @@ void ManageGame() {
           timeInHole1 = 0;
           score += 100;
         }else{
+          AmbiLight(ALL_OFF);
+          AnimLight(ALL_ANIM_OFF);
+          AnimLight2(ALL_ANIM_OFF);
+          
+          DisplayScreen(SCREEN_KO1_MULTIBALL, PRIORITY_HIGH);
+          
+          delay(2000);
+          RestoreLight();
           ProvideANewBall();
+          PlayRandomMultiballMusic();
+          
+          AnimLightData(DATA_KO1, 0b00001);
         }
         
       }
@@ -776,6 +798,10 @@ void ManageGame() {
           //Si on est en multiball ou en cours de mode, on relache direct
           if (ballInPlay > 1 || activeMode != NO_MODE || ballCatchedInHole1) timeInHole2 = 280;
           else {
+            //STARTING A MODE
+            //IF THE SUPER PSIT WAS A BOUT TO BE COMPLETED= TOO LATE BRO!!!
+            if(allTargetsHitFiveTimes) RestoreTargetStatus();
+            
             byte hasardMode = random(9);
             while (psitModeActive && hasardMode == 6) hasardMode = random(9);
 
@@ -784,7 +810,7 @@ void ManageGame() {
               RestoreModesRandom();
             }
             while (alreadyActivatedModes[hasardMode]) hasardMode = random(9);
-            hasardMode = 8;
+            //hasardMode = 8;
             modeStarted = false;
             DisableKickers();
             if (hasardMode == 0) {
@@ -829,6 +855,7 @@ void ManageGame() {
               PlaySound(GREEN_TARGETS_ROUND);
               delay(1000);
               delay(PlayRandomMusic());
+              
             } else if (hasardMode == 2) {
               alreadyActivatedModes[2] = true;
               activeMode = RED_TARGET_MODE;
@@ -1041,6 +1068,7 @@ void ManageGame() {
     if ( nbBall == 1 && (ROSW2 || ROSW1 || ROSW3) && ballInPlay == 1) {
       DisplayScreen(SCREEN_MULTIBALL, PRIORITY_HIGH);
       ProvideANewBall();
+      PlayRandomMultiballMusic();
     }
 
     DisplayScore(score);
@@ -1048,6 +1076,11 @@ void ManageGame() {
     //Balle perdu
     if (LOSW) {
       ballInPlay = ballInPlay - 1;
+      
+      //If multiball mode is done, play normal tune
+      if(ballInPlay == 1){
+        PlayRandomMusic();
+      }
       //Si on perd une balle mais il y en a d autres en jeu
       if (ballInPlay > 0) {
         PlaySound(LOOSE_BADLY);
@@ -1070,7 +1103,7 @@ void ManageGame() {
       delay(3000);
       AnimLight(LOOSE_OFF);
       nbBall = nbBall - 1;
-      Serial.print("nbBall =  "); Serial.print(nbBall); Serial.print("\n");
+
       DisplayScreen(SCREEN_BALLLEFT, PRIORITY_LOW);
       delay(2000);
       ballIsInPlay = false;

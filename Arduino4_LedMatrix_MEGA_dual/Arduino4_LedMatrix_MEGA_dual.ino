@@ -81,6 +81,18 @@ byte nbPlayer = 1;
 
 void loop(){
   
+  //SCREEN_KO1_MULTIBALL
+  time = 0;
+  while(requestedScreen == SCREEN_KO1_MULTIBALL){
+    time++;
+    centerString(tmpBmp, "START MODE FOR", 3);
+    centerString(tmpBmp, "MULTIBALL!", 19);
+    
+    DisplayMatrix(tmpBmp);
+    EmptyMatrix(tmpBmp);
+    if(time > 200) requestedScreen = lowPriorityScreen;
+  }
+  
   //SCREEN_SUPER_PSIT_COMPLETE
   time = 0;
   flag = true;
@@ -1381,7 +1393,7 @@ void loop(){
         drawSmallString(tmpBmp, "SUPERHERO", 1, 0, 50);
         drawSmallString(tmpBmp, "CHARACTER", 1, 8, 50);
       }else if(hasard == 1){
-        drawSmallString(tmpBmp, "IT  IS  A", 1, 0, 50);
+        drawSmallString(tmpBmp, "IT S  A", 1, 0, 50);
         drawSmallString(tmpBmp, "POKEMON", 1, 8, 50);
       }else if(hasard == 2){
         drawSmallString(tmpBmp, "VERY", 1, 0, 50);
@@ -1390,6 +1402,12 @@ void loop(){
         drawSmallString(tmpBmp, "SUPERHERO", 1, 0, 50);
         drawSmallString(tmpBmp, "CHARACTER", 1, 8, 50);
       }
+      
+      //Display Timer
+      char buf[2];
+      sprintf(buf, "%d", countdown);
+      drawSmallString(tmpBmp, buf, 57, 0, 50);
+    
     }else{
       if(correct){
         centerString(tmpBmp, "CORRECT!", 11);

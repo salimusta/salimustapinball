@@ -64,7 +64,7 @@ int PlayRandomMusic(){
   
   long hasardSound;
   randomSeed(analogRead(0));
-  hasardSound = random(17);
+  hasardSound = random(15);
   
   wTrig.masterGain(0);
   byte i;
@@ -84,8 +84,8 @@ int PlayRandomMusic(){
      PlaySound(SURFIN_USA);
      timeRelease = 3500;
   }else  if(hasardSound == 3){
-     PlaySound(MISIRLOU);
-     timeRelease = 6000;
+     PlaySound(RELAX);
+     timeRelease = 2000;
   }else  if(hasardSound == 4){
      PlaySound(ELVIS);
      timeRelease = 8000;
@@ -96,8 +96,8 @@ int PlayRandomMusic(){
      PlaySound(ROCKNROLLPARTY);
      timeRelease = 1000;
   }else  if(hasardSound == 7){
-     PlaySound(CANCANYOU);
-     timeRelease = 3000;
+     PlaySound(HEY);
+     timeRelease = 5500;
   }else  if(hasardSound == 8){
      PlaySound(NOBLESURFER);
      timeRelease = 7000;
@@ -119,16 +119,34 @@ int PlayRandomMusic(){
   }else  if(hasardSound == 14){
      PlaySound(HIDEHO);
      timeRelease = 6800;
-  }else  if(hasardSound == 15){
-     PlaySound(HEY);
-     timeRelease = 5500;
-  }else  if(hasardSound == 16){
-     PlaySound(RELAX);
-     timeRelease = 2000;
   }
   
   return 2000;
   return timeRelease;
+
+}
+
+void PlayRandomMultiballMusic(){
+  StopMusic();
+  
+  long hasardSound;
+  randomSeed(analogRead(0));
+  hasardSound = random(2);
+  
+  wTrig.masterGain(0);
+  byte i;
+  int timeRelease = 0;
+  for(i = 100; i< 118; i++){
+    wTrig.trackLoop(i, true);
+    wTrig.trackGain(i, -10);
+  }
+  
+  if(hasardSound == 0){
+    PlaySound(MISIRLOU);
+  }else{
+    PlaySound(CANCANYOU);
+  }
+  
 
 }
 

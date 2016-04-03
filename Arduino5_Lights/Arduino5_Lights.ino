@@ -100,6 +100,7 @@
 #define KO1_OFF 71
 #define BLINK_KO1 72
 #define SNAKE_KO1 73
+#define DATA_KO1 90
 
 #define KO2_OFF 74
 #define BLINK_KO2 75
@@ -214,6 +215,7 @@ byte KO1Anim = 0;
 byte KO1AnimMode = KO1_OFF;
 byte KO1AnimMode_Old = KO1_OFF;
 byte KO1AnimTime = 0;
+byte KO1AnimData = 0;
 
 //KO2
 byte KO2Anim = 0;
@@ -868,6 +870,11 @@ void receiveEvent(int howMany) {
       else KO1AnimTime = 0;
       KO1Anim = 1;
       KO1AnimMode = SNAKE_KO1;
+    }else if(byte0 == DATA_KO1){
+      if(duration > 0){KO1AnimMode_Old = KO1AnimMode;KO1AnimTime = duration;}
+      else KO1AnimTime = 0;
+      KO1AnimData = KO1Anim = data;
+      KO1AnimMode = DATA_KO1;
       
     //KO2--------------------------------------------------
     }else if(byte0 == KO2_OFF){
@@ -1305,6 +1312,7 @@ void loop() {
          KO1AnimTime--;
          if(KO1AnimTime == 0){
            KO1AnimMode = KO1AnimMode_Old;
+           if(KO1AnimMode == DATA_KO1) KO1Anim = KO1AnimData;
          } 
       }
       
