@@ -7,6 +7,7 @@
 #define pinMOSI 11
 #define DEBUG false
 
+//PIN Connections
 const int buttonLeftPin = 2;
 const int buttonRightPin = 3;
 const int BASW1Pin = 4;
@@ -15,12 +16,14 @@ const int BASW3Pin = 6;
 const int RKickerPin = 8;
 const int LKickerPin = 7;
 
+//Data buffers
 unsigned char dataSolenoid = 0;
 unsigned char dataSolenoidOld = 99;
 unsigned char dataSolenoidBankB = 0;
 unsigned char dataSolenoidBankBOld = 99;
 byte board = 0;
 
+//Switches State
 int buttonLeftState = 0;
 int buttonRightState = 0;
 int buttonLeftOldState = 0;
@@ -54,6 +57,8 @@ int LeftKicker_Duration = 9999;
 int Kickout1_Duration = 9999;
 int Kickout2_Duration = 9999;
 
+int Shooter_Duration = 9999;
+
 bool KICKER_LEFT = 0;
 bool KICKER_RIGHT = 0;
 
@@ -63,6 +68,7 @@ bool flippersEnabled = false;
 bool kickersEnabled = true;
 bool kickout1Requested = false;
 bool kickout2Requested = false;
+bool shooterRequested = false;
 
 unsigned long timeRampABall = 0;
 
@@ -79,6 +85,7 @@ const int BUMPER3_FIRE_DURATION = 150;
 const int KICKER_FIRE_DURATION = 150;
 int KICKOUT1_FIRE_DURATION = 100;
 int KICKOUT2_FIRE_DURATION = 100;
+int SHOOTER_FIRE_DURATION = 450;
 
 short decalage = 130;
 short decalage2 = 110;
@@ -106,7 +113,7 @@ void setup() {
  Wire.onRequest(requestEvent);
 
  SolenoidStatesBankA(0, 0, 0, 0, 0);
- SolenoidStatesBankB(0, 0, 0, 0);
+ SolenoidStatesBankB(0, 0, 0, 0, 0);
  SolenoidOff(2);
  SolenoidOff(3);
 
@@ -116,6 +123,12 @@ void setup() {
 void receiveEvent(int howMany) {
   //10 for RampABall function
   //20 for test solenoids
+  //30 to disable flippers
+  //40 to enable flippers
+  //50 To fire Kickout 1
+  //60 to Fire Kickout 2
+  //80 to disable side kickers
+  //90 to Shoot a Ball
   for(int x=0; x<howMany;x++){
     byte data = Wire.read();
     
@@ -144,16 +157,14 @@ void receiveEvent(int howMany) {
       Kickout2_Duration = 0;
       randomTime = random(110);
       KICKOUT2_FIRE_DURATION = 120 + randomTime;
-    }else if(data == 70){
-      //RAMP ON
-      
-      if(rampABallRequested == false){
-        //Serial.print("RAMP");
-        rampABallRequested = true;
-        timeRampABall = millis() + 400;
-      }
     }else if(data == 80){
       kickersEnabled = false;
+      
+    }else if(data == 90){
+      rampABallRequested = true;
+      timeRampABall = millis();
+      shooterRequested = true;
+      Shooter_Duration = 0;
     }
   }
 }
@@ -206,9 +217,21 @@ void loop() {
   int LeftKicker_State = 0;
   int Kickout1_State = 0;
   int Kickout2_State = 0;
+  int Shooter_State = 0;
   
   bool Ramping = false;
 
+  if(shooterRequested && !rampABallRequested){
+    
+    Shooter_Duration++;
+    Shooter_State = 1;
+    
+    if(Shooter_Duration > SHOOTER_FIRE_DURATION ){
+      Shooter_Duration = 9999;
+      shooterRequested = false;
+    }
+  }
+  
   if(kickout1Requested){
     Kickout1_State = 1;
     Kickout1_Duration++;
@@ -230,7 +253,7 @@ void loop() {
   if(testRequested){
     //Serial.print("SEQUENCE DE TEST RECU\n");
     SolenoidStatesBankA(0, 0, 0, 0, 0);
-    SolenoidStatesBankB(0, 0, 0, 0);
+    SolenoidStatesBankB(0, 0, 0, 0, 0);
     delay(2000);
     //Serial.print("LEFT FLIPPER\n");
     //LEFT FLIPPER
@@ -280,30 +303,36 @@ void loop() {
     
     //Serial.print("Kicker Left\n");
     //Kicker Left
-    SolenoidStatesBankB(0, 1, 0, 0);
+    SolenoidStatesBankB(0, 1, 0, 0, 0);
     delay(200);
-    SolenoidStatesBankB(0, 0, 0, 0);
+    SolenoidStatesBankB(0, 0, 0, 0, 0);
     delay(2000);
     
     //Serial.print("Kicker Right\n");
     //Kicker Right
-    SolenoidStatesBankB(1, 0, 0, 0);
+    SolenoidStatesBankB(1, 0, 0, 0, 0);
     delay(200);
-    SolenoidStatesBankB(0, 0, 0, 0);
+    SolenoidStatesBankB(0, 0, 0, 0, 0);
     delay(2000);
     
     //Serial.print("Kickout 1\n");
     //Kickout 1
-    SolenoidStatesBankB(0, 0, 1, 0);
+    SolenoidStatesBankB(0, 0, 1, 0, 0);
     delay(50);
-    SolenoidStatesBankB(0, 0, 0, 0);
+    SolenoidStatesBankB(0, 0, 0, 0, 0);
     delay(1000);
     
     //Serial.print("Kickout 1\n");
     //Kickout 1
-    SolenoidStatesBankB(0, 0, 0, 1);
+    SolenoidStatesBankB(0, 0, 0, 1, 0);
     delay(50);
-    SolenoidStatesBankB(0, 0, 0, 0);
+    SolenoidStatesBankB(0, 0, 0, 0, 0);
+    delay(1000);
+    
+    //Shooter
+    SolenoidStatesBankB(0, 0, 0, 0, 1);
+    delay(50);
+    SolenoidStatesBankB(0, 0, 0, 0, 0);
     delay(1000);
     
     //Serial.print("FIN DE SEQUENCE\n");
@@ -313,10 +342,13 @@ void loop() {
   //Push the ball trough sequence, we shoot a need ball
   if(rampABallRequested){
     unsigned long timeSinceRequested = time - timeRampABall;
-    if(timeSinceRequested > 1427 && timeSinceRequested < 10000){
+    
+    if(timeSinceRequested > 3200 && timeSinceRequested < 10000){
+      rampABallRequested = false;
+    }else if(timeSinceRequested > 1427){
       SolenoidOff(3);
       SolenoidOff(2);
-      rampABallRequested = false;
+      
       
     }else if(timeSinceRequested > 1405){
       SolenoidOn(3);
@@ -475,10 +507,10 @@ void loop() {
   
   if(flippersEnabled && Ramping == false){
     SolenoidStatesBankA(leftSolenoidState, rightSolenoidState, Bumper1_State, Bumper2_State, Bumper3_State);
-    SolenoidStatesBankB(RightKicker_State, LeftKicker_State, Kickout1_State, Kickout2_State);
+    SolenoidStatesBankB(RightKicker_State, LeftKicker_State, Kickout1_State, Kickout2_State, Shooter_State);
   }else {
     SolenoidStatesBankA(0, 0, 0, 0, 0);
-    SolenoidStatesBankB(0, 0, 0, 0);
+    SolenoidStatesBankB(0, 0, 0, 0, Shooter_State);
   }
   
   buttonLeftOldState = buttonLeftState;
@@ -517,7 +549,7 @@ void SolenoidStatesBankA(byte solenoid0, byte solenoid1, byte Bumper1_Solenoid, 
   dataSolenoidOld = dataSolenoid;
 }
 
-void SolenoidStatesBankB(byte RightKicker, byte LeftKicker, byte Kickout1, byte Kickout2){
+void SolenoidStatesBankB(byte RightKicker, byte LeftKicker, byte Kickout1, byte Kickout2, byte Shooter){
   
   if(LeftKicker == 1) dataSolenoidBankB |= 1;
   else dataSolenoidBankB &= ~1;
@@ -530,6 +562,9 @@ void SolenoidStatesBankB(byte RightKicker, byte LeftKicker, byte Kickout1, byte 
   
   if(Kickout2 == 1) dataSolenoidBankB |= 1 << 3;
   else dataSolenoidBankB &= ~(1 << 3);
+  
+  if(Shooter == 1) dataSolenoidBankB |= 1 << 4;
+  else dataSolenoidBankB &= ~(1 << 4);
   
   if(dataSolenoidBankB != dataSolenoidBankBOld){
     sendPDBCommand(board, PDB_COMMAND_WRITE, BANK_ONE, dataSolenoidBankB);

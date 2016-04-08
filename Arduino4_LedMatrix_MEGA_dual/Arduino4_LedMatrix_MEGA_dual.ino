@@ -26,6 +26,7 @@ byte psit_state = 0;
 byte nb_hits = 0;
 byte nb_hits_Old = 0;
 byte flippers_state = 0;
+byte start_state = 0;
 byte currentPlayer = 0;
 unsigned long score = 0;
 unsigned long playersScore[4];
@@ -1136,8 +1137,9 @@ void loop(){
   //SCREEN_HIGHSCORES-----------------------------------------------------------------
   time = 0; time2 = 0;
   y = 33; y2 = 33; x = 0;
-  byte x2 = 0; short i = 0; flag = true;
+  byte x2 = 0; short i = 0; flag = true; bool flag2 = false;
   scoreDisplayed = 0;
+  bool displayHighScore = true;
   //using scoresTab
   while(requestedScreen == SCREEN_HIGHSCORES){
     time++;
@@ -1149,42 +1151,57 @@ void loop(){
         y = 33;
         scoreDisplayed = 0;
       }
-      if(i == 6) i = 0;
+      if(i == 6){
+        //i = 0;
+        displayHighScore = false;
+      }
       flag = !flag; 
     }
     
-    if(i == 0){
-      if( y > 11 && flag) y--;
-      else if( y > -20 && !flag && time > 50 && time%5==0) y--;
-      centerString(tmpBmp, "HIGHSCORES", y);
+    if(!displayHighScore){
+      if(flag2){
+        centerString(tmpBmp, "PRESS", 1);
+        centerString(tmpBmp, "START", 17);
+      }
+      if(time%5 == 0) flag2 = !flag2;
+      if(time > 200){
+        displayHighScore = true;
+        i = 0;
+      }
     }else{
-      
-      //Display Score Rank
-      char buf[1];
-      sprintf(buf, "%d", i);
-      if( y > 3 && flag) y--;
-      else if(!flag && y > -20 && time > 130) y--;
-      if(!flag && time > 130) y2++;
-      else y2 = 19;
-      drawString(tmpBmp, buf, 0, y, 50);
-      
-      //Display Name
-      
-      if(i == 1) drawString(tmpBmp, highscoreName1, 10, y, 50);
-      else if(i == 2) drawString(tmpBmp, highscoreName2, 10, y, 50);
-      else if(i == 3) drawString(tmpBmp, highscoreName3, 10, y, 50);
-      else if(i == 4) drawString(tmpBmp, highscoreName4, 10, y, 50);
-      else if(i == 5) drawString(tmpBmp, highscoreName5, 10, y, 50);
+      if(i == 0){
+        if( y > 11 && flag) y--;
+        else if( y > -20 && !flag && time > 50 && time%5==0) y--;
+        centerString(tmpBmp, "HIGHSCORES", y);
+      }else{
         
-      //Display Score
-      if(!flag){
-        char bufScore[5];
-        int scoreInc = scoresTab[i-1] / 20;
-        if(scoreDisplayed < scoresTab[i-1] ) scoreDisplayed += scoreInc;
-        else scoreDisplayed = scoresTab[i-1];
-        sprintf(bufScore, "%lu", scoreDisplayed);
+        //Display Score Rank
+        char buf[1];
+        sprintf(buf, "%d", i);
+        if( y > 3 && flag) y--;
+        else if(!flag && y > -20 && time > 130) y--;
+        if(!flag && time > 130) y2++;
+        else y2 = 19;
+        drawString(tmpBmp, buf, 0, y, 50);
         
-        centerString(tmpBmp, bufScore, y2);
+        //Display Name
+        
+        if(i == 1) drawString(tmpBmp, highscoreName1, 10, y, 50);
+        else if(i == 2) drawString(tmpBmp, highscoreName2, 10, y, 50);
+        else if(i == 3) drawString(tmpBmp, highscoreName3, 10, y, 50);
+        else if(i == 4) drawString(tmpBmp, highscoreName4, 10, y, 50);
+        else if(i == 5) drawString(tmpBmp, highscoreName5, 10, y, 50);
+          
+        //Display Score
+        if(!flag){
+          char bufScore[5];
+          int scoreInc = scoresTab[i-1] / 20;
+          if(scoreDisplayed < scoresTab[i-1] ) scoreDisplayed += scoreInc;
+          else scoreDisplayed = scoresTab[i-1];
+          sprintf(bufScore, "%lu", scoreDisplayed);
+          
+          centerString(tmpBmp, bufScore, y2);
+        }
       }
     }
     DisplayMatrix(tmpBmp);
@@ -1235,7 +1252,7 @@ void loop(){
         currentChar = ' ';
       } 
     }
-    if(rightFlipper == 1 && leftFlipper == 1){
+    if(start_state == 1){
       if(index == 0 && currentChar == 'A') nameEnterCanceled = true;
       else nameEntered = true;
       //if(index > 1 ) nameEntered = true;

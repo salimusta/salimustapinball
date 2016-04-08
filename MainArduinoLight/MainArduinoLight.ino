@@ -17,13 +17,13 @@ bool BSW1 = false; bool BSW2 = false; bool BSW3 = false; bool ROSW1 = false; boo
 bool RKSW = false; bool LKSW = false; bool LOSW = false; bool RLOSW = false; bool LLOSW = false; bool CT = false; bool CTP = false;
 bool RT1 = false; bool RT1P = false; bool RT2 = false; bool LT1 = false; bool LT2 = false; bool LT2P = false; bool KO1 = false;
 bool RAMP1 = false; bool RAMP2 = false;
-bool LEFT_FLIPPER = false; bool RIGHT_FLIPPER = false;
+bool LEFT_FLIPPER = false; bool RIGHT_FLIPPER = false; bool START = false;
 
 bool BSW1_Old = false; bool BSW2_Old = false; bool BSW3_Old = false; bool ROSW1_Old = false; bool ROSW2_Old = false; bool ROSW3_Old = false; bool KO1_Old = false;
 bool TRIEUR_Old = false; bool KO2_Old = false; bool RKSW_Old = false; bool LKSW_Old = false; bool LOSW_Old = false; bool RLOSW_Old = false; bool LLOSW_Old = false;
 bool CT_Old = false; bool CTP_Old = false; bool RT1_Old = false; bool RT1P_Old = false; bool RT2_Old = false; bool LT1_Old = false; bool LT2_Old = false; bool LT2P_Old = false;
 bool RAMP1_Old = false; bool RAMP2_Old = false;
-bool LEFT_FLIPPER_Old = false; bool RIGHT_FLIPPER_Old = false;
+bool LEFT_FLIPPER_Old = false; bool RIGHT_FLIPPER_Old = false; bool START_Old = false;
 
 long scoreTab[5];
 char highscoreName1[11]; 
@@ -68,6 +68,24 @@ void setup() {
 
 void loop() {
   SendHighScores();
+  
+
+  //Boucle
+  int nbIteration = 0;
+  while(1){
+    Serial.print("Lancement d'une balle...\n");
+    ShootABall();
+    delay(5000);
+    
+    ReadSwitches();
+    while( !LOSW ){
+      ReadSwitches();
+      delay(10);
+    }
+    nbIteration++;
+    Serial.print("Succes = "); Serial.print(nbIteration); Serial.print("\n");
+  }
+  
   /*
   AmbiLight(ALL_OFF);
     AnimLight(ALL_ANIM_OFF);

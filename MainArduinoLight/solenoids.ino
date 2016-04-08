@@ -9,6 +9,13 @@ void RampABall(){
   Wire.endTransmission();
 }
 
+void ShootABall(){
+  //send a Shoot command to the Solenoid arduino
+  Wire.beginTransmission(2);
+  Wire.write(90);
+  Wire.endTransmission();
+}
+
 void EnableFlippers(){
   //send a Launch command to the Solenoid arduino
   Wire.beginTransmission(2);
@@ -56,8 +63,4 @@ void EmptyAllBalls(){
   delay(3000);
 }
 
-void SendSolenoidRampInfo(){
-  Wire.beginTransmission(2);
-  Wire.write(70);
-  Wire.endTransmission();
-}
+

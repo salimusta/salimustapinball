@@ -5,10 +5,11 @@ void PlayBallGame(){
   gameStatus = GAME_IDLE;
   while(gameStatus != GAME_WIN && gameStatus != GAME_LOST){
     ReadSolenoidSwitches();
-    
+    ReadSwitches();
     //Order starting at 0: LEFT 0 then RIGHT 1
     byte flippers_state = RIGHT_FLIPPER;
     flippers_state = (flippers_state << 1) | LEFT_FLIPPER;
+    flippers_state = (flippers_state << 1) | START;
     SendScreenData(FLIPPERS_STATE, flippers_state);
     
     gameStatus = ReadBallGameStatus();
@@ -30,7 +31,7 @@ void PlayBallGame(){
       
       
       DisplayScreen(SCREEN_MULTIBALL, PRIORITY_HIGH);
-      ProvideANewBall();
+      FireANewBall();
       PlayRandomMultiballMusic();
     }
     DisplayScore(score);
@@ -45,10 +46,11 @@ void PlayWordGame(){
   gameStatus = GAME_IDLE;
   while(gameStatus != GAME_WIN && gameStatus != GAME_LOST){
     ReadSolenoidSwitches();
-    
+    ReadSwitches();
     //Order starting at 0: LEFT 0 then RIGHT 1
     byte flippers_state = RIGHT_FLIPPER;
     flippers_state = (flippers_state << 1) | LEFT_FLIPPER;
+    flippers_state = (flippers_state << 1) | START;
     SendScreenData(FLIPPERS_STATE, flippers_state);
     
     //Send TimeOut
@@ -91,10 +93,11 @@ void PlayStarWarsGame(){
   gameStatus = GAME_IDLE;
   while(gameStatus != GAME_WIN && gameStatus != GAME_LOST){
     ReadSolenoidSwitches();
-    
+    ReadSwitches();
     //Order starting at 0: LEFT 0 then RIGHT 1
     byte flippers_state = RIGHT_FLIPPER;
     flippers_state = (flippers_state << 1) | LEFT_FLIPPER;
+    flippers_state = (flippers_state << 1) | START;
     SendScreenData(FLIPPERS_STATE, flippers_state);
     
     gameStatus = ReadBallGameStatus();
@@ -119,7 +122,7 @@ void PlayStarWarsGame(){
       EnableFlippers();
       
       DisplayScreen(SCREEN_MULTIBALL, PRIORITY_HIGH);
-      ProvideANewBall();
+      FireANewBall();
       PlayRandomMultiballMusic();
     }
     DisplayScore(gameScore);

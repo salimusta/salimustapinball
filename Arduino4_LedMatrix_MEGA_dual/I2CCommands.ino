@@ -63,7 +63,9 @@ void receiveEvent(int howMany)
       nb_hits = Wire.read();
       
     }else if(type == FLIPPERS_STATE){
-      flippers_state = Wire.read();
+      byte data = Wire.read();
+      start_state = data & 1;
+      flippers_state = data >> 1;
       //Serial.print("STATE = " ); Serial.print(flippers_state) ; Serial.print("\n");
       
     }else if(type == PSIT_STATE){

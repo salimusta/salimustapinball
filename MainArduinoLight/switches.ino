@@ -5,13 +5,13 @@ void TestSwitches() {
     ReadSwitches();
     ReadSolenoidSwitches();
     lcd.setCursor(0, 1);
-    if (BSW1) lcd.print("BSW1"); if (BSW2) lcd.print("BSW2"); if (BSW3) lcd.print("BSW3");
+    /*if (BSW1) lcd.print("BSW1"); if (BSW2) lcd.print("BSW2"); if (BSW3) lcd.print("BSW3");
     if (ROSW1) lcd.print("ROSW1"); if (ROSW2) lcd.print("ROSW2-"); if (ROSW3) lcd.print("ROSW3");
     if (TRIEUR) lcd.print("TRIEUR"); if (KO2) lcd.print("KO2"); if (RKSW) lcd.print("Right Kick"); if (LKSW) lcd.print("Left Kick");
     if (LOSW) lcd.print("LOSW"); if (RLOSW) lcd.print("RLOSW"); if (LLOSW) lcd.print("LLOSW");
     if (CT) lcd.print("CT"); if (CTP) lcd.print("CTP"); if (RT1) lcd.print("RT1"); if (RT1P) lcd.print("RT1P"); if (RT2) lcd.print("RT2");
     if (LT1) lcd.print("LT1"); if (LT2) lcd.print("LT2"); if (LT2P) lcd.print("LT2P"); if (KO1) lcd.print("KO1"); if (RAMP1) lcd.print("RAMP1");
-    if (RAMP2) lcd.print("RAMP2");
+    if (RAMP2) lcd.print("RAMP2");*/
     if (digitalRead(BackBoutonPin) == HIGH) break;
   }
 }
@@ -22,7 +22,7 @@ void ReadSwitches() {
   //Just 1 Byte, containing the switch status 0010 0110
   //Serial.print("Requesting 1 byte...\n");
   bool newBSW1, newBSW2, newBSW3, newROSW1, newROSW2, newROSW3, newTRIEUR, newKO2;
-  bool newLOSW, newRLOSW, newLLOSW, newCT, newCTP, newRT1, newRT1P, newRT2, newLT1, newLT2, newLT2P, newKO1, newRAMP1, newRAMP2;
+  bool newLOSW, newRLOSW, newLLOSW, newCT, newCTP, newRT1, newRT1P, newRT2, newLT1, newLT2, newLT2P, newKO1, newRAMP1, newRAMP2, newSTART;
   Wire.requestFrom(3, 3);
   while (Wire.available())   // slave may send less than requested
   {
@@ -37,9 +37,9 @@ void ReadSwitches() {
     newLOSW = (c2 & 1); newRLOSW = (c2 & 2) >> 1; newLLOSW = (c2 & 4) >> 2; newCT = (c2 & 8) >> 3;
     newCTP = (c2 & 16) >> 4; newRT1 = (c2 & 32) >> 5; newRT1P = (c2 & 64) >> 6; newRT2 = (c2 & 128) >> 7;
 
-    //order starting from bit 0: LT1, LT2, LT2P, KO1, RAMP1, RAMP2
+    //order starting from bit 0: LT1, LT2, LT2P, KO1, RAMP1, RAMP2, START
     newLT1 = (c3 & 1); newLT2 = (c3 & 2) >> 1; newLT2P = (c3 & 4) >> 2; newKO1 = (c3 & 8) >> 3;
-    newRAMP1 = (c3 & 16) >> 4; newRAMP2 = (c3 & 32) >> 5;
+    newRAMP1 = (c3 & 16) >> 4; newRAMP2 = (c3 & 32) >> 5; newSTART = (c3 & 64) >> 6;
 
     BSW1 = (newBSW1 && BSW1_Old != newBSW1); BSW2 = (newBSW2 && BSW2_Old != newBSW2); BSW3 = (newBSW3 && BSW3_Old != newBSW3);
     ROSW1 = (newROSW1 && ROSW1_Old != newROSW1); ROSW2 = (newROSW2 && ROSW2_Old != newROSW2); ROSW3 = (newROSW3 && ROSW3_Old != newROSW3);
@@ -53,7 +53,7 @@ void ReadSwitches() {
   }
   BSW1_Old = newBSW1; BSW2_Old = newBSW2; BSW3_Old = newBSW3; ROSW1_Old = newROSW1; ROSW2_Old = newROSW2; ROSW3_Old = newROSW3; TRIEUR_Old = newTRIEUR;
   KO2_Old = newKO2; LOSW_Old = newLOSW; RLOSW_Old = newRLOSW; LLOSW_Old = newLLOSW; CT_Old = newCT; CTP_Old = newCTP; RT1_Old = newRT1; RT1P_Old = newRT1P;
-  RT2_Old = newRT2; LT1_Old = newLT1; LT2_Old = newLT2; LT2P_Old = newLT2P; KO1_Old = newKO1; RAMP1_Old = newRAMP1; RAMP2_Old = newRAMP2;
+  RT2_Old = newRT2; LT1_Old = newLT1; LT2_Old = newLT2; LT2P_Old = newLT2P; KO1_Old = newKO1; RAMP1_Old = newRAMP1; RAMP2_Old = newRAMP2; START_Old = newSTART;
 }
 
 void ReadSolenoidSwitches() {

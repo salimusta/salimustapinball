@@ -150,7 +150,8 @@ void ManageGame() {
         
         //Retrieve the Player name
         ReadSolenoidSwitches(); delay(50);
-        RIGHT_FLIPPER = 0; LEFT_FLIPPER = 0;
+        ReadSwitches(); delay(50);
+        RIGHT_FLIPPER = 0; LEFT_FLIPPER = 0; START = 0;
         SendScreenData(FLIPPERS_STATE, 0);
         delay(50);
         
@@ -158,8 +159,10 @@ void ManageGame() {
         PlaySound(OMGYOUWON_HIGHSCORE);
         while (1) {
           ReadSolenoidSwitches();
+          ReadSwitches();
           byte flippers_state = RIGHT_FLIPPER;
           flippers_state = (flippers_state << 1) | LEFT_FLIPPER;
+          flippers_state = (flippers_state << 1) | START;
           SendScreenData(FLIPPERS_STATE, flippers_state);
   
           delay(50);
@@ -191,22 +194,23 @@ void ManageGame() {
   }
   //Game start 
   if (gameIsOn == false) {
-    lcd.setCursor(0, 0); lcd.print("Game Mode");
-    lcd.setCursor(0, 1); lcd.print("----------------");
+    //lcd.setCursor(0, 0); lcd.print("Game Mode");
+    //lcd.setCursor(0, 1); lcd.print("----------------");
     
     //Ask for player Number
-    delay(1000);
+    delay(200);
     DisplayScreen(SCREEN_PLAYER_SELECTION, PRIORITY_LOW);
     
     while (1) {
       ReadSolenoidSwitches();
+      ReadSwitches();
       byte flippers_state = RIGHT_FLIPPER;
       flippers_state = (flippers_state << 1) | LEFT_FLIPPER;
       SendScreenData(FLIPPERS_STATE, flippers_state);
 
       delay(30);
       nbPlayer = ReadPlayerNumber();
-      if (RIGHT_FLIPPER && LEFT_FLIPPER ) break;
+      if (START) break;
       delay(30);
     }
     //Here we have chosen the number of players
@@ -664,7 +668,7 @@ void ManageGame() {
       timeInHole1++;
       //KICK THE BALL OUT
       if(ballCatchedInHole2 && ballInPlay < 3){
-        ProvideANewBall();
+        FireANewBall();
         delay(500);
       
       //if first ball catched & no mode, launch a ball
@@ -706,7 +710,7 @@ void ManageGame() {
           
           delay(2000);
           RestoreLight();
-          ProvideANewBall();
+          FireANewBall();
           PlayRandomMultiballMusic();
           
           AnimLightData(DATA_KO1, 0b00001);
@@ -1067,7 +1071,7 @@ void ManageGame() {
     //Multiball Activation
     if ( nbBall == 1 && (ROSW2 || ROSW1 || ROSW3) && ballInPlay == 1) {
       DisplayScreen(SCREEN_MULTIBALL, PRIORITY_HIGH);
-      ProvideANewBall();
+      FireANewBall();
       PlayRandomMultiballMusic();
     }
 
@@ -1119,6 +1123,12 @@ void ProvideANewBall() {
   AnimLight(SNAKE_TOP_LIGHTS);
   ballLaunched = false;
   timeSinceNewBall = millis();
+}
+
+void FireANewBall() {
+  ShootABall();
+  ballInPlay++;
+  AnimLight(SNAKE_TOP_LIGHTS);
 }
 
 void RestoreLight() {
@@ -1174,9 +1184,9 @@ void RestoreLight() {
 }
 
 void WaitForRestart() {
-  ReadSolenoidSwitches();
-  while (!RIGHT_FLIPPER || !LEFT_FLIPPER) {
-    ReadSolenoidSwitches();
+  ReadSwitches();
+  while (!START) {
+    ReadSwitches();
 
     delay(100);
   }

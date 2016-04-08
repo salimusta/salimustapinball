@@ -56,6 +56,7 @@ bool KO1 = false;
 bool RAMP = false;
 bool RAMPA1 = false;
 bool RAMPA2 = false;
+bool START = false;
 
 
 int ROSW1_State = 0;
@@ -80,6 +81,7 @@ int KO1_State = 0;
 int RAMP_State = 0;
 int RAMPA1_State = 0;
 int RAMPA2_State = 0;
+int START_State = 0;
 
 int ROSW1_Old = 0;
 int ROSW2_Old = 0;
@@ -103,6 +105,7 @@ int KO1_Old = 0;
 int RAMP_Old = 0;
 int RAMPA1_Old = 0;
 int RAMPA2_Old = 0;
+int START_Old = 0;
 
 short delayMs = 400;
 
@@ -147,6 +150,7 @@ void loop(){
   LOSW_State = digitalRead(I3);
   RLOSW_State = digitalRead(I4);
   LLOSW_State = digitalRead(I6);
+  START_State = digitalRead(I7);
   
   //DRIVE LINE 12
   digitalWrite(D8, LOW);
@@ -274,6 +278,12 @@ void loop(){
     RAMPA2 = (RAMPA2_State == HIGH);
   }
   
+  if(START_State != START_Old){
+    if (START_State == HIGH) Serial.print("START ON\n");
+    else Serial.print("START OFF\n"); 
+    START = (START_State == HIGH);
+  }
+  
   ROSW1_Old = ROSW1_State;
   ROSW2_Old = ROSW2_State;
   ROSW3_Old = ROSW3_State;
@@ -296,6 +306,7 @@ void loop(){
   KO1_Old = KO1_State;
   RAMPA1_Old = RAMPA1_State;
   RAMPA2_Old = RAMPA2_State;
+  START_Old = START_State;
 }
 
 void requestEvent()
@@ -321,8 +332,9 @@ void requestEvent()
   response2 = (response2 << 1) | RLOSW;
   response2 = (response2 << 1) | LOSW;
   
-  //order starting from bit 0: LT1, LT2, LT2P, KO1, RAMP1, RAMP2
-  byte response3 = RAMPA2;
+  //order starting from bit 0: LT1, LT2, LT2P, KO1, RAMP1, RAMP2, START
+  byte response3 = START;
+  response3 = (response3 << 1) | RAMPA2;
   response3 = (response3 << 1) | RAMPA1;
   response3 = (response3 << 1) | KO1;
   response3 = (response3 << 1) | LT2P;
