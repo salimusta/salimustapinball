@@ -75,9 +75,20 @@ void SendHighScores() {
   byte i = 0;
   
   Wire.beginTransmission(4);
-  //Send scores from 0 to 9
+  //Send scores from 0 to 4
   //it is 4 x 5 = 20 bytes
   for(i = 0; i < 5; i++){
+    byte byte0 = scoreTab[i] & 0xFF;
+    byte byte1 = (scoreTab[i] & 0xFF00)>>8;
+    byte byte2 = (scoreTab[i] & 0xFF0000)>>16;
+    byte byte3 = (scoreTab[i] & 0xFF000000)>>24;
+    
+    Wire.write(byte3); Wire.write(byte2); Wire.write(byte1); Wire.write(byte0);
+  }
+  Wire.endTransmission();
+  
+  //Send next 5 highscores, 5 to 9
+  for(i = 5; i < 10; i++){
     byte byte0 = scoreTab[i] & 0xFF;
     byte byte1 = (scoreTab[i] & 0xFF00)>>8;
     byte byte2 = (scoreTab[i] & 0xFF0000)>>16;
@@ -111,6 +122,31 @@ void SendHighScores() {
   Wire.beginTransmission(4);
   Wire.write(highscoreName5, 11);
   Wire.write(5);
+  Wire.endTransmission();
+  
+  Wire.beginTransmission(4);
+  Wire.write(highscoreName6, 11);
+  Wire.write(6);
+  Wire.endTransmission();
+  
+  Wire.beginTransmission(4);
+  Wire.write(highscoreName7, 11);
+  Wire.write(7);
+  Wire.endTransmission();
+  
+  Wire.beginTransmission(4);
+  Wire.write(highscoreName8, 11);
+  Wire.write(8);
+  Wire.endTransmission();
+  
+  Wire.beginTransmission(4);
+  Wire.write(highscoreName9, 11);
+  Wire.write(9);
+  Wire.endTransmission();
+  
+  Wire.beginTransmission(4);
+  Wire.write(highscoreName10, 11);
+  Wire.write(10);
   Wire.endTransmission();
 }
 

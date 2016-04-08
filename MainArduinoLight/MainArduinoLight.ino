@@ -25,12 +25,17 @@ bool CT_Old = false; bool CTP_Old = false; bool RT1_Old = false; bool RT1P_Old =
 bool RAMP1_Old = false; bool RAMP2_Old = false;
 bool LEFT_FLIPPER_Old = false; bool RIGHT_FLIPPER_Old = false; bool START_Old = false;
 
-long scoreTab[5];
+long scoreTab[10];
 char highscoreName1[11]; 
 char highscoreName2[11]; 
 char highscoreName3[11]; 
 char highscoreName4[11]; 
-char highscoreName5[11]; 
+char highscoreName5[11];
+char highscoreName6[11]; 
+char highscoreName7[11]; 
+char highscoreName8[11]; 
+char highscoreName9[11]; 
+char highscoreName10[11]; 
 
 bool maintenanceMode = true;
 
@@ -67,7 +72,33 @@ void setup() {
 }
 
 void loop() {
+  /*
+  ResetScoreMemory();
+  
+  ReadScoreMemory();
+  
+  printHighScores();
+  Serial.print(getMinScore()); Serial.print("\n");
+  
+  addHighScore(550, "MEHMET");
+  WriteScoreMemory();
+  
+  ReadScoreMemory();
+  
+  addHighScore(300, "ALI");
+  WriteScoreMemory();
+  
+  ReadScoreMemory();
+  
+  printHighScores();
+  Serial.print(getMinScore()); Serial.print("\n");
+  */
+          
+  
+  while(1);
+  
   SendHighScores();
+ 
   
   
 /*

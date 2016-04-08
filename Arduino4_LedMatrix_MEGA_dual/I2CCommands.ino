@@ -1,4 +1,4 @@
-
+byte receptionFlag = true;
 
 void SendCommandToMaster(byte command){
   commandToSend = command;
@@ -77,6 +77,7 @@ void receiveEvent(int howMany)
     }
   }
   long newNb = 0;
+  //This is when receive the current game's score
   if(howMany == 4){
     byte byte3 = Wire.read();
     byte byte2 = Wire.read();
@@ -92,7 +93,7 @@ void receiveEvent(int howMany)
     newNb = newNb | byte0;
     
     score = newNb;
-  //Score for a specific player
+  //Score for a specific player's score
   }else if(howMany == 5){
     byte playerId = Wire.read();
     byte byte3 = Wire.read();
@@ -128,10 +129,14 @@ void receiveEvent(int howMany)
       newNb = newNb << 8;
       newNb = newNb | byte0;
       
-      scoresTab[i] = newNb;
+      if(receptionFlag) scoresTab[i] = newNb;
+      else scoresTab[i+5] = newNb;
     }
+    
+    receptionFlag = !receptionFlag;
   }
   
+  //Reception of player names (11 Byte string + 1 Byte index)
   if(howMany == 12){
     byte index = 0;
     char buf[11];
@@ -139,10 +144,15 @@ void receiveEvent(int howMany)
       byte data = Wire.read();
       if(index == 11){
         if(data == 1) strncpy(highscoreName1, buf, 11);
-        if(data == 2) strncpy(highscoreName2, buf, 11);
-        if(data == 3) strncpy(highscoreName3, buf, 11);
-        if(data == 4) strncpy(highscoreName4, buf, 11);
-        if(data == 5) strncpy(highscoreName5, buf, 11);
+        else if(data == 2) strncpy(highscoreName2, buf, 11);
+        else if(data == 3) strncpy(highscoreName3, buf, 11);
+        else if(data == 4) strncpy(highscoreName4, buf, 11);
+        else if(data == 5) strncpy(highscoreName5, buf, 11);
+        else if(data == 6) strncpy(highscoreName6, buf, 11);
+        else if(data == 7) strncpy(highscoreName7, buf, 11);
+        else if(data == 8) strncpy(highscoreName8, buf, 11);
+        else if(data == 9) strncpy(highscoreName9, buf, 11);
+        else if(data == 10) strncpy(highscoreName10, buf, 11);
         
       }else{
         buf[index] = data;

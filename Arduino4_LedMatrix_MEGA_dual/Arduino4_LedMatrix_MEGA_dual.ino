@@ -8,12 +8,18 @@ byte lowPriorityScreen = SCREEN_SALIMUSTAPINBALL;
 unsigned char  tmpBmp[512];
 
 
-unsigned long scoresTab[5] = {1000, 500, 133, 50, 5};
+unsigned long scoresTab[10] = {1000, 900, 800, 700, 600, 500, 400, 300, 200, 100};
 char highscoreName1[11] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', '\0'}; 
 char highscoreName2[11] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', '\0'}; 
 char highscoreName3[11] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', '\0'}; 
 char highscoreName4[11] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', '\0'}; 
 char highscoreName5[11] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', '\0'}; 
+char highscoreName6[11] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', '\0'};
+char highscoreName7[11] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', '\0'};
+char highscoreName8[11] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', '\0'};
+char highscoreName9[11] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', '\0'};
+char highscoreName10[11] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', '\0'};
+
 char name[11];
 bool nameEntered = false;
 bool nameEnterCanceled = false;
@@ -1147,11 +1153,18 @@ void loop(){
       time = 0;
       //Displaying next rank
       if(!flag){
+        //check if the score is 0 or not
         i++;
-        y = 33;
-        scoreDisplayed = 0;
+        //if the score is 0, finish the list and display press Start screen
+        if(scoresTab[i-1] == 0){
+          displayHighScore = false;
+          time = 0;
+        }else{
+          y = 33;
+          scoreDisplayed = 0;
+        }
       }
-      if(i == 6){
+      if(i == 11){
         //i = 0;
         displayHighScore = false;
         time = 0;
@@ -1170,12 +1183,13 @@ void loop(){
         i = 0;
         flag = true;
         time = 0;
+        y = 33;
       }
     }else{
       if(i == 0){
         if( y > 11 && flag) y--;
-        else if( y > -20 && !flag && time > 50) y--;
-        centerString(tmpBmp, "HIGHSCORES", y);
+        else if( y > -20 && !flag && time > 50) {y--; time+=2;}
+        drawString(tmpBmp, "HIGHSCORES",0, y, 50);
       }else{
         
         //Display Score Rank
@@ -1185,7 +1199,9 @@ void loop(){
         else if(!flag && y > -20 && time > 130) y--;
         if(!flag && time > 130) y2++;
         else y2 = 19;
-        drawString(tmpBmp, buf, 0, y, 50);
+        
+        //Draw High Score Number
+        if(i != 10) drawString(tmpBmp, buf, 0, y, 50);
         
         //Display Name
         
@@ -1194,6 +1210,11 @@ void loop(){
         else if(i == 3) drawString(tmpBmp, highscoreName3, 10, y, 50);
         else if(i == 4) drawString(tmpBmp, highscoreName4, 10, y, 50);
         else if(i == 5) drawString(tmpBmp, highscoreName5, 10, y, 50);
+        else if(i == 6) drawString(tmpBmp, highscoreName6, 10, y, 50);
+        else if(i == 7) drawString(tmpBmp, highscoreName7, 10, y, 50);
+        else if(i == 8) drawString(tmpBmp, highscoreName8, 10, y, 50);
+        else if(i == 9) drawString(tmpBmp, highscoreName9, 10, y, 50);
+        else if(i == 10) drawString(tmpBmp, highscoreName10, 10, y, 50);
           
         //Display Score
         if(!flag){
@@ -1255,7 +1276,7 @@ void loop(){
         currentChar = ' ';
       } 
     }
-    if(start_state == 1){
+    if(leftFlipper == 1 && rightFlipper == 1){
       if(index == 0 && currentChar == 'A') nameEnterCanceled = true;
       else nameEntered = true;
       //if(index > 1 ) nameEntered = true;
