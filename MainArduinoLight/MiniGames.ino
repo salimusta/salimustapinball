@@ -131,6 +131,8 @@ void PlayStarWarsGame(){
   
   //Restore the game score
   DisableIncrementalScore();
+  delay(100);
   DisplayScore(score);
+  delay(100);
   EnableIncrementalScore();
 }

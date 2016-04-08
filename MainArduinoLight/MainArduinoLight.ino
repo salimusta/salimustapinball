@@ -69,7 +69,8 @@ void setup() {
 void loop() {
   SendHighScores();
   
-
+  
+/*
   //Boucle
   int nbIteration = 0;
   while(1){
@@ -85,7 +86,7 @@ void loop() {
     nbIteration++;
     Serial.print("Succes = "); Serial.print(nbIteration); Serial.print("\n");
   }
-  
+  */
   /*
   AmbiLight(ALL_OFF);
     AnimLight(ALL_ANIM_OFF);
@@ -144,7 +145,7 @@ void loop() {
     delay(20);
   }
   /*---------*/
-  DisplayScreen(SCREEN_SALIMUSTAPINBALL, PRIORITY_LOW);
+  /*DisplayScreen(SCREEN_SALIMUSTAPINBALL, PRIORITY_LOW);
 
   printLine("<- MAINTENANCE", "    GAME MODE ->");
 
@@ -161,8 +162,8 @@ void loop() {
   }else{
     printLine("------GAME------", "------MODE------");
   }
-  
-  //maintenanceMode = false;
+  */
+  maintenanceMode = false;
   delay(100);
   if(maintenanceMode){
     AmbiLight(ALL_OFF);

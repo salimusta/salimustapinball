@@ -12,6 +12,12 @@ LONGS (4 Bytes)
 15: Score 4
 20: Score 5
 
+25: Score 6
+30: Score 7
+35: Score 8
+40: Score 9
+45: Score 10
+
 
 CHAR ( 10 caractere par nom)
 100: Nom 1
@@ -19,6 +25,12 @@ CHAR ( 10 caractere par nom)
 200: Nom 3
 250: Nom 4
 300: Nom 5
+
+350: Nom 6
+400: Nom 7
+450: Nom 8
+500: Nom 9
+550: Nom 10
 
 */
 

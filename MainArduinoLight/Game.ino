@@ -206,6 +206,7 @@ void ManageGame() {
       ReadSwitches();
       byte flippers_state = RIGHT_FLIPPER;
       flippers_state = (flippers_state << 1) | LEFT_FLIPPER;
+      flippers_state = (flippers_state << 1) | START;
       SendScreenData(FLIPPERS_STATE, flippers_state);
 
       delay(30);
@@ -1187,7 +1188,12 @@ void WaitForRestart() {
   ReadSwitches();
   while (!START) {
     ReadSwitches();
-
+    delay(100);
+  }
+  
+  ReadSwitches();
+  while(START){
+    ReadSwitches();
     delay(100);
   }
 }

@@ -86,8 +86,9 @@ void loop(){
   time = 0;
   while(requestedScreen == SCREEN_KO1_MULTIBALL){
     time++;
-    centerString(tmpBmp, "START MODE FOR", 3);
-    centerString(tmpBmp, "MULTIBALL!", 19);
+    centerString(tmpBmp, "START MODE", 1);
+    centerString(tmpBmp, "FOR", 11);
+    centerString(tmpBmp, "MULTIBALL", 22);
     
     DisplayMatrix(tmpBmp);
     EmptyMatrix(tmpBmp);
@@ -752,7 +753,7 @@ void loop(){
       time = 0;
     }
     bumpersStatus_Old = bumpersStatus;
-    if(time < 50){
+    if(time < 50 || countdown < 3){
       time++;
       if(time%3 == 0) flag = !flag;
     }else flag = false;
@@ -826,17 +827,16 @@ void loop(){
   }
   
   EmptyMatrix(tmpBmp);
-  time = 50;
+  time = 0;
   flag = false;
   while(requestedScreen == SCREEN_GREEN_TARGET_MODE_STATE || requestedScreen == SCREEN_RED_TARGET_MODE_STATE || requestedScreen == SCREEN_MIDDLE_TARGET_MODE_STATE){
     if(nb_hits != nb_hits_Old) time = 0;
     nb_hits_Old = nb_hits;
-    if(time < 50){
+    if(time < 50 || countdown < 3){
       time++;
       if(time%3 == 0) flag = !flag;
     }else flag = false;
     
-    if(countdown < 3 && time%3 == 0) flag = !flag;
     
     char buf[2];
     sprintf(buf, "TIME: %d", countdown);
@@ -1139,11 +1139,11 @@ void loop(){
   y = 33; y2 = 33; x = 0;
   byte x2 = 0; short i = 0; flag = true; bool flag2 = false;
   scoreDisplayed = 0;
-  bool displayHighScore = true;
+  bool displayHighScore = false;
   //using scoresTab
   while(requestedScreen == SCREEN_HIGHSCORES){
     time++;
-    if(time > 150 && !flag || time > 50 && flag){
+    if(displayHighScore && (time > 150 && !flag || time > 50 && flag)){
       time = 0;
       //Displaying next rank
       if(!flag){
@@ -1154,24 +1154,27 @@ void loop(){
       if(i == 6){
         //i = 0;
         displayHighScore = false;
+        time = 0;
       }
       flag = !flag; 
     }
     
     if(!displayHighScore){
       if(flag2){
-        centerString(tmpBmp, "PRESS", 1);
-        centerString(tmpBmp, "START", 17);
+        centerString(tmpBmp, "PRESS", 4);
+        centerString(tmpBmp, "START", 18);
       }
-      if(time%5 == 0) flag2 = !flag2;
-      if(time > 200){
+      if(time%25 == 0) flag2 = !flag2;
+      if(time > 500){
         displayHighScore = true;
         i = 0;
+        flag = true;
+        time = 0;
       }
     }else{
       if(i == 0){
         if( y > 11 && flag) y--;
-        else if( y > -20 && !flag && time > 50 && time%5==0) y--;
+        else if( y > -20 && !flag && time > 50) y--;
         centerString(tmpBmp, "HIGHSCORES", y);
       }else{
         
@@ -1423,7 +1426,7 @@ void loop(){
       //Display Timer
       char buf[2];
       sprintf(buf, "%d", countdown);
-      drawSmallString(tmpBmp, buf, 57, 0, 50);
+      drawSmallString(tmpBmp, buf, 54, 0, 50);
     
     }else{
       if(correct){

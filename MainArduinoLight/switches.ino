@@ -50,6 +50,7 @@ void ReadSwitches() {
     LT2P = (newLT2P && LT2P_Old != newLT2P); KO1 = (newKO1 && KO1_Old != newKO1);
     RAMP1 = (newRAMP1 && RAMP1_Old != newRAMP1);
     RAMP2 = (newRAMP2 && RAMP2_Old != newRAMP2);
+    START = (newSTART && START_Old != newSTART);
   }
   BSW1_Old = newBSW1; BSW2_Old = newBSW2; BSW3_Old = newBSW3; ROSW1_Old = newROSW1; ROSW2_Old = newROSW2; ROSW3_Old = newROSW3; TRIEUR_Old = newTRIEUR;
   KO2_Old = newKO2; LOSW_Old = newLOSW; RLOSW_Old = newRLOSW; LLOSW_Old = newLLOSW; CT_Old = newCT; CTP_Old = newCTP; RT1_Old = newRT1; RT1P_Old = newRT1P;
