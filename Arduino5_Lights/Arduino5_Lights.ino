@@ -106,6 +106,10 @@
 #define BLINK_KO2 75
 #define SNAKE_KO2 76
 
+#define START_ON 91
+#define START_BLINK 92
+#define START_OFF 93
+
 
 int latchPinA = 13; int latchPinB = 12;
 int latchPinC = 11; int latchPinD = 10;
@@ -173,6 +177,12 @@ byte LooseAnim = 0;
 byte LooseAnimMode = LOOSE_OFF;
 byte LooseAnimMode_Old = LOOSE_OFF;
 byte LooseAnimTime = 0;
+
+//START Anim
+byte StartAnim = 1;
+byte StartAnimMode = START_BLINK;
+byte StartAnimMode_Old = START_BLINK;
+byte StartAnimTime = 0;
 
 //Flash Anim
 byte FlashAnim = 0;
@@ -273,6 +283,8 @@ void setup() {
       allAnimModeFrame = 1;
       allAnimMode = ALL_IDLE;
       SetAllAnim();*/
+      
+ 
 }
 
 
@@ -320,6 +332,9 @@ void SetAllAnim(){
   Bumper1Mode = Bumper2Mode = Bumper3Mode = SNAKE_BUMPERS;
   
   Gate1Light = Gate2Light = Gate3Light = 1; 
+  
+  StartAnim = 1;
+  StartAnimMode = START_BLINK;
 }
 
 void SetAllOff(){
@@ -385,6 +400,9 @@ void SetAllOff(){
   Bumper3Mode_Old = Bumper3Mode;
   
   Gate1Light = Gate2Light = Gate3Light = 0;
+  
+  StartAnim = 0;
+  StartAnimMode = START_OFF;
 }
 
 
@@ -400,7 +418,7 @@ void receiveEvent(int howMany) {
     if(howMany > 2) data = Wire.read();
     
     allAnimMode = ALL_IDLE;
-    
+    //Serial.print("byte0 = ") ; Serial.print(byte0); Serial.print("\n");
     if(byte0 == ALL_ANIM_OFF || byte0 == VERT_SNAKE_ALL || byte0 == VERT_SNAKE_KEEP_ALL){
       SetAllOff();
       
@@ -412,6 +430,7 @@ void receiveEvent(int howMany) {
         allAnimMode = VERT_SNAKE_KEEP_ALL;
       }
     }else if(byte0 == ANIM_ALL){
+      //Serial.print("ANIM ALL\n");
       allAnim = true;
       allAnimModeFrame = 1;
       allAnimMode = ALL_IDLE;
@@ -854,6 +873,25 @@ void receiveEvent(int howMany) {
       LooseAnim = 0;
       LooseAnimMode = BLINK_LOOSE;
       
+    //START-----------------------------------------------------------------
+    }else if(byte0 == START_ON){
+      if(duration > 0){ StartAnimMode_Old = StartAnimMode; StartAnimTime = duration;}
+      else StartAnimTime = 0;
+      StartAnim = 1;
+      StartAnimMode = START_ON;
+      
+    }else if(byte0 == START_OFF){
+      if(duration > 0){ StartAnimMode_Old = StartAnimMode; StartAnimTime = duration;}
+      else StartAnimTime = 0;
+      StartAnim = 0;
+      StartAnimMode = START_OFF;  
+    
+    }else if(byte0 == START_BLINK){
+      if(duration > 0){ StartAnimMode_Old = StartAnimMode; StartAnimTime = duration;}
+      else StartAnimTime = 0;
+      StartAnim = 1;
+      StartAnimMode = START_BLINK; 
+      
     //KO1--------------------------------------------------
     }else if(byte0 == KO1_OFF){
       if(duration > 0){ KO1AnimMode_Old = KO1AnimMode; KO1AnimTime = duration;}
@@ -929,7 +967,7 @@ void loop() {
     shiftOut(dataPin, clockPin, MSBFIRST, ModesAnim);  
     digitalWrite(latchPinF, HIGH);
     
-    byte dataToShifterG = (LauncherAnim & 0b00011111) | (LooseAnim << 5);
+    byte dataToShifterG = (LauncherAnim & 0b00011111) | ((LooseAnim & 0b011) << 5) | (StartAnim << 7);
     digitalWrite(latchPinG, LOW);
     shiftOut(dataPin, clockPin, MSBFIRST, dataToShifterG);  
     digitalWrite(latchPinG, HIGH);
@@ -951,7 +989,9 @@ void loop() {
     
     //Managing the anim mode frames
     if(allAnim){
+      //Serial.print(".\n");
       if(time%80 == 0){
+        //Serial.print("SWITCH\n");
         allAnimModeFrame++;
         allAnimModeState = 1;
         if(allAnimModeFrame == 4) allAnimModeFrame = 1;
@@ -1091,8 +1131,20 @@ void loop() {
          } 
       }
       
-      //GATES-----------------------------------------------------------------------
-      
+      //START-----------------------------------------------------------------------
+      if(StartAnimMode == START_BLINK ){
+        if(time%5 == 0 ) StartAnim = ~StartAnim;
+      }else if(StartAnimMode == START_OFF ){
+        StartAnim = 0;
+      }else if(StartAnimMode == START_ON ){
+        StartAnim = 1;
+      }
+      if(StartAnimTime > 0){
+         StartAnimTime--;
+         if(StartAnimTime == 0){
+           StartAnimMode = StartAnimMode_Old;
+         } 
+      }
   
       
       //BUMPERS-----------------------------------------------------------------------

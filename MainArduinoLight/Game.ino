@@ -890,7 +890,7 @@ void ManageGame() {
               RestoreModesRandom();
             }
             while (alreadyActivatedModes[hasardMode]) hasardMode = random(10);
-            hasardMode = 7;
+            //hasardMode = 7;
             modeStarted = false;
             DisableKickers();
             if (hasardMode == 0) {
@@ -1315,6 +1315,8 @@ void WaitForRestart() {
     ReadSwitches();
     delay(100);
   }
+  
+  AnimLight(START_OFF);
 }
 
 void CheckPsit() {

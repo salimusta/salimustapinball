@@ -175,6 +175,10 @@
 #define BLINK_KO2 75
 #define SNAKE_KO2 76
 
+#define START_ON 91
+#define START_BLINK 92
+#define START_OFF 93
+
 //Light 2 Management
 #define RAMPGATE_OFF 10
 #define RAMPGATE_SNAKE 11
@@ -192,6 +196,8 @@
 #define RAMP_SNAKE 26
 #define RAMP_BLINK 27
 #define RAMP_ALTERNATE 28
+
+
 
 //AMBI LIGHTS
 #define RED_ON 1
