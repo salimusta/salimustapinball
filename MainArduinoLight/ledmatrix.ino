@@ -87,6 +87,8 @@ void SendHighScores() {
   }
   Wire.endTransmission();
   
+  delay(100);
+  Wire.beginTransmission(4);
   //Send next 5 highscores, 5 to 9
   for(i = 5; i < 10; i++){
     byte byte0 = scoreTab[i] & 0xFF;

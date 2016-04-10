@@ -25,7 +25,7 @@ void PlaySound(byte sound){
 
 void StopMusic(){
  byte i;
-  for(i = 100; i< 118; i++) {wTrig.trackStop(i);delay(20);}
+  for(i = 100; i< 120; i++) {wTrig.trackStop(i);delay(20);}
   delay(100);
 }
 
@@ -69,7 +69,7 @@ int PlayRandomMusic(){
   wTrig.masterGain(0);
   byte i;
   int timeRelease = 0;
-  for(i = 100; i< 118; i++){
+  for(i = 100; i< 120; i++){
     wTrig.trackLoop(i, true);
     wTrig.trackGain(i, -10);
   }
@@ -136,7 +136,7 @@ void PlayRandomMultiballMusic(){
   wTrig.masterGain(0);
   byte i;
   int timeRelease = 0;
-  for(i = 100; i< 118; i++){
+  for(i = 100; i< 120; i++){
     wTrig.trackLoop(i, true);
     wTrig.trackGain(i, -10);
   }
@@ -156,7 +156,7 @@ void PlayMusic(short musicId){
   wTrig.masterGain(0);
   byte i;
   int timeRelease = 0;
-  for(i = 100; i< 118; i++){
+  for(i = 100; i< 120; i++){
     wTrig.trackLoop(i, true);
     wTrig.trackGain(i, -10);
   }

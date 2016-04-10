@@ -151,6 +151,7 @@ void ReadScoreMemory(){
   ReadName(500, highscoreName9);
   ReadName(550, highscoreName10);
   
+  printHighScores();
 }
 
 void WriteScoreMemory(){
@@ -183,7 +184,7 @@ long getMinScore(){
 
 void addHighScore(long newScore, char *newPlayer){
   byte insertionIndex = 0;
-  
+  printHighScores();
   while( newScore < scoreTab[insertionIndex]){
     insertionIndex++; 
   }
@@ -265,5 +266,5 @@ void addHighScore(long newScore, char *newPlayer){
   }else if(insertionIndex == 9){
     scoreTab[9] = newScore; strncpy(highscoreName10, newPlayer, 11);
   }
-  
+  printHighScores();
 }

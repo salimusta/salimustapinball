@@ -7,6 +7,7 @@ byte lowPriorityScreen = SCREEN_SALIMUSTAPINBALL;
 
 unsigned char  tmpBmp[512];
 
+char* getReady = "GET READY";
 
 unsigned long scoresTab[10] = {1000, 900, 800, 700, 600, 500, 400, 300, 200, 100};
 char highscoreName1[11] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', '\0'}; 
@@ -87,6 +88,102 @@ short i;
 byte nbPlayer = 1;
 
 void loop(){
+  //SCREEN_SCORE_SAVED
+  time = 0;
+  while(requestedScreen == SCREEN_SCORE_SAVED){
+    time++;
+    centerString(tmpBmp, "SCORE", 5);
+    centerString(tmpBmp, "SAVED !", 18);
+
+    DisplayMatrix(tmpBmp);
+    EmptyMatrix(tmpBmp);
+    if(time > 300) requestedScreen = lowPriorityScreen;
+  }
+  
+  //SCREEN_MODE_DOUBLE_IDLE
+  while(requestedScreen == SCREEN_MODE_DOUBLE_IDLE){
+    if(nbPlayer == 1) centerString(tmpBmp, "SCORE X 2", 11);
+    else{
+      char buf[8];
+      sprintf(buf, "PLAYER %d", currentPlayer + 1 );
+      centerString(tmpBmp, buf, 2);
+      centerString(tmpBmp, "SCORE X 2", 19);
+     
+    }
+    DisplayMatrix(tmpBmp);
+    EmptyMatrix(tmpBmp);
+  }
+  
+  //SCREEN_MODE_DOUBLE_COMPLETE
+  time = 0;
+  while(requestedScreen == SCREEN_MODE_DOUBLE_COMPLETE){
+    time++;
+    centerString(tmpBmp, "EVERYTHING", 1);
+    centerString(tmpBmp, "IS", 11);
+    centerString(tmpBmp, "DOUBLED!", 22);
+
+    DisplayMatrix(tmpBmp);
+    EmptyMatrix(tmpBmp);
+    if(time > 200) requestedScreen = lowPriorityScreen;
+  }
+  
+  
+  //SCREEN_MODE_DOUBLE_STATE
+  time = 0;
+  while(requestedScreen == SCREEN_MODE_DOUBLE_STATE){
+    time++;
+    
+    char buf[2];
+    sprintf(buf, "RAMP: %d", countdown);
+    centerString(tmpBmp, buf, 19);
+    
+    centerString(tmpBmp, "SHOOT THE", 5);
+    centerString(tmpBmp, buf, 18);
+
+    DisplayMatrix(tmpBmp);
+    EmptyMatrix(tmpBmp);
+    if(time > 200) requestedScreen = lowPriorityScreen;
+  }  
+  
+  //SCREEN_MODE_DOUBLE_INTRO
+  EmptyMatrix(tmpBmp);
+  time = 0;
+  x = -50;
+  x2 = 82;
+  while(requestedScreen == SCREEN_MODE_DOUBLE_INTRO){
+    time++;
+    drawString(tmpBmp, "DOUBLE", x, 3, 50);
+    drawString(tmpBmp, "MODE", x2, 19, 50);
+    if(x < 14) x++;
+    if(x2 >18) x2--;
+    DisplayMatrix(tmpBmp);
+    EmptyMatrix(tmpBmp);
+    if(time > 250) requestedScreen = lowPriorityScreen;
+  }
+  
+  //SCREEN_RAMP_SUCCEED
+  time = 0;
+  while(requestedScreen == SCREEN_RAMP_SUCCEED){
+    time++;
+    centerString(tmpBmp, "RAMP !", 5);
+    centerString(tmpBmp, "+ 500 !", 18);
+
+    DisplayMatrix(tmpBmp);
+    EmptyMatrix(tmpBmp);
+    if(time > 200) requestedScreen = lowPriorityScreen;
+  }
+  
+  //SCREEN_RAMP_MISSED
+  time = 0;
+  while(requestedScreen == SCREEN_RAMP_MISSED){
+    time++;
+    centerString(tmpBmp, "RAMP", 5);
+    centerString(tmpBmp, "MISSED !", 18);
+
+    DisplayMatrix(tmpBmp);
+    EmptyMatrix(tmpBmp);
+    if(time > 200) requestedScreen = lowPriorityScreen;
+  }
   
   //SCREEN_KO1_MULTIBALL
   time = 0;
@@ -446,28 +543,7 @@ void loop(){
     floconY[i] = 0 - random(80);
   }
   while(requestedScreen == SCREEN_SALIMUSTAPINBALL){
-    time ++;
-    if(time < 200){
-      copyFrames(SalimUstaPinballFullBmp, tmpBmp);
-    }else{
-      centerString(tmpBmp, "JOYEUX",2);
-      centerString(tmpBmp, "NOEL!",19);
-      
-      if(time%2 == 0){
-        for(i = 0; i < 3 ; i++){
-          floconY[i]++;
-          if( floconY[i] > 40){
-            floconX[i] = random(64);
-            floconY[i] = 0 - random(80);
-          }
-        }
-      }
-      
-      drawBigMotif(tmpBmp, flocons[0], floconX[0]-5, floconY[0]-5, 11, 11);
-      drawBigMotif(tmpBmp, flocons[1], floconX[1]-5, floconY[1]-5, 11, 11);
-      drawBigMotif(tmpBmp, flocons[2], floconX[2]-5, floconY[2]-5, 11, 11);
-      
-    }
+    copyFrames(SalimUstaPinballFullBmp, tmpBmp);
     
     DisplayMatrix(tmpBmp);
     EmptyMatrix(tmpBmp);
@@ -484,8 +560,8 @@ void loop(){
       sprintf(buf, "PLAYER %d", currentPlayer + 1 );
       centerString(tmpBmp, buf, 2);
     }
-    if(nbPlayer > 1) drawString(tmpBmp, "GET READY", x, 19, 50);
-    else drawString(tmpBmp, "GET READY", x, 11, 50);
+    if(nbPlayer > 1) drawString(tmpBmp, getReady, x, 19, 50);
+    else drawString(tmpBmp, getReady, x, 11, 50);
     DisplayMatrix(tmpBmp);
     EmptyMatrix(tmpBmp);
     if(x < 5 && time < 200) x++;
@@ -535,12 +611,11 @@ void loop(){
  
   //FRAME x ball left------------------------------------------------------------
   while(requestedScreen == SCREEN_BALLLEFT){
-    if(receivedBallNb == 0) drawString(tmpBmp, "0", 16, 3, 50);
-    else if(receivedBallNb == 1) drawString(tmpBmp, "1", 16, 3, 50);
-    else if(receivedBallNb == 2) drawString(tmpBmp, "2", 16, 3, 50);
-    else if(receivedBallNb == 3) drawString(tmpBmp, "3", 16, 3, 50);
-    if(receivedBallNb > 1) drawString(tmpBmp, " BALLS", 25, 3, 50);
-    else drawString(tmpBmp, " BALL", 25, 3, 50);
+    char buf[8];
+    if(receivedBallNb > 1) sprintf(buf, "%d BALLS", receivedBallNb );
+    else sprintf(buf, "%d BALL", receivedBallNb );
+    
+    centerString(tmpBmp, buf, 3);
     centerString(tmpBmp, "LEFT", 19);
     DisplayMatrix(tmpBmp);
     EmptyMatrix(tmpBmp);
@@ -548,7 +623,8 @@ void loop(){
   
   //FRAME GAME OVER------------------------------------------------------------------------
   while(requestedScreen == SCREEN_GAMEOVER){
-    centerString(tmpBmp, "GAME OVER", 3);
+    centerString(tmpBmp, "GAME", 3);
+    centerString(tmpBmp, "OVER", 19);
     DisplayMatrix(tmpBmp);
     EmptyMatrix(tmpBmp);
   }
@@ -1276,7 +1352,7 @@ void loop(){
         currentChar = ' ';
       } 
     }
-    if(leftFlipper == 1 && rightFlipper == 1){
+    if((leftFlipper == 1 && rightFlipper == 1) || start_state == 1){
       if(index == 0 && currentChar == 'A') nameEnterCanceled = true;
       else nameEntered = true;
       //if(index > 1 ) nameEntered = true;

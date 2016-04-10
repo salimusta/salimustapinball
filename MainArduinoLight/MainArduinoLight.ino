@@ -72,6 +72,7 @@ void setup() {
 }
 
 void loop() {
+  SendHighScores();
   /*
   ResetScoreMemory();
   
@@ -95,10 +96,10 @@ void loop() {
   */
           
   
-  while(1);
+  /*while(1);
   
   SendHighScores();
- 
+ */
   
   
 /*
@@ -205,6 +206,7 @@ void loop() {
   }else{
     DisplayScreen(SCREEN_HIGHSCORES, PRIORITY_LOW);
     WaitForRestart();
+    PlaySound(PIECE);
     while(1) ManageGame();
   }
 }

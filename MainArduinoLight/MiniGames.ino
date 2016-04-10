@@ -16,7 +16,7 @@ void PlayBallGame(){
     if(gameStatus == BALL_BOUNCE) PlaySound(BOINNG);
     else if(gameStatus == BALL_CATCHED){
       PlaySound(BUMPER_2);
-      score += 10;
+      score += 10* scoreCoef;
       AnimLightFor(FLASH_TOP_LIGHTS, 30);
       
     }else if(gameStatus == GAME_LOST){
@@ -25,7 +25,7 @@ void PlayBallGame(){
     }else if(gameStatus == GAME_WIN){
       PlaySound(CAFARTE);
       DisplayScreen(SCREEN_3BUMPERS_MODE_SUCCESS, PRIORITY_LOW);
-      score += 1000;
+      score += 1000* scoreCoef;
       delay(2000);
       EnableFlippers();
       
@@ -76,7 +76,7 @@ void PlayWordGame(){
     }else if(gameStatus == GAME_WIN){
       PlaySound(CAFARTE);
       DisplayScreen(SCREEN_3BUMPERS_MODE_SUCCESS, PRIORITY_LOW);
-      score += 1000;
+      score += 1000* scoreCoef;
       delay(1000);
       EnableFlippers();
     }
@@ -117,7 +117,7 @@ void PlayStarWarsGame(){
     }else if(gameStatus == GAME_WIN){
       delay(3000);
       DisplayScreen(SCREEN_STARWARS_WIN, PRIORITY_LOW);
-      score += 3000;
+      score += 3000* scoreCoef;
       delay(1000);
       EnableFlippers();
       
