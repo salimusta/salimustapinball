@@ -12,6 +12,11 @@
 #define ALL_OFF 10
 #define ANIME_ALL 11
 
+#define WHITE_ON 12
+#define WHITE_OFF 13
+#define BOOST_ON 14
+#define BOOST_OFF 15
+
 void setup() {
   // put your setup code here, to run once:
   
@@ -19,6 +24,8 @@ void setup() {
   pinMode(11, OUTPUT);
   pinMode(10, OUTPUT);
   pinMode(9, OUTPUT);
+  pinMode(8, OUTPUT);
+  pinMode(7, OUTPUT);
   
   Wire.begin(6);
   Wire.onReceive(receiveEvent);
@@ -27,12 +34,96 @@ void setup() {
   digitalWrite(11, HIGH);
   digitalWrite(10, HIGH);
   digitalWrite(9, HIGH);
+  digitalWrite(8, HIGH);
+  digitalWrite(7, HIGH);
+  
+  Boost(true);
+  /*
+  delay(1000);
+  All(true); delay(2000);
+  All(false); delay(2000);
+  
+  Red(true); delay(2000);
+  Red(false); delay(2000);
+  
+  Green(true); delay(2000);
+  Green(false); delay(2000);
+  
+  Yellow(true); delay(2000);
+  Yellow(false); delay(2000);
+  
+  Blue(true); delay(2000);
+  Blue(false); delay(2000);
+  
+  White(true); delay(2000);
+  White(false); delay(2000);
+  
+  Blue(true); Red(true);delay(2000);
+  Blue(false); Red(false);delay(2000);
+  
+  Blue(true); Yellow(true);delay(2000);
+  Blue(false); Yellow(false);delay(2000);
+  
+  Red(true); Yellow(true);delay(2000);
+  Red(false); Yellow(false);delay(2000);
+  
+  Red(true); Green(true);delay(2000);
+  Red(false); Green(false);delay(2000);
+  
+  Yellow(true); Green(true);delay(2000);
+  Yellow(false); Green(false);delay(2000);
+  
+  Boost(true);
+  
+  All(true); delay(2000);
+  All(false); delay(2000);
+  
+  Red(true); delay(2000);
+  Red(false); delay(2000);
+  
+  Green(true); delay(2000);
+  Green(false); delay(2000);
+  
+  Yellow(true); delay(2000);
+  Yellow(false); delay(2000);
+  
+  Blue(true); delay(2000);
+  Blue(false); delay(2000);
+  
+  White(true); delay(2000);
+  White(false); delay(2000);
+  
+  Blue(true); Red(true);delay(2000);
+  Blue(false); Red(false);delay(2000);
+  
+  Blue(true); Yellow(true);delay(2000);
+  Blue(false); Yellow(false);delay(2000);
+  
+  Red(true); Yellow(true);delay(2000);
+  Red(false); Yellow(false);delay(2000);
+  
+  Red(true); Green(true);delay(2000);
+  Red(false); Green(false);delay(2000);
+  
+  Yellow(true); Green(true);delay(2000);
+  Yellow(false); Green(false);delay(2000);
+ 
+  */
+
   
 }
-bool modeAnim = false;
+bool modeAnim = true;
 unsigned long time = 0;
 short animMode = 0;
 
+void Boost(bool activate){
+  if(activate) digitalWrite(7, LOW);
+  else digitalWrite(7, HIGH);
+}
+void White(bool activate){
+  if(activate) digitalWrite(8, LOW);
+  else digitalWrite(8, HIGH);
+}
 void Red(bool activate){
   if(activate) digitalWrite(12, LOW);
   else digitalWrite(12, HIGH);
@@ -62,16 +153,22 @@ void receiveEvent(int howMany) {
     else if(byte0 == YELLOW_OFF) Yellow(false);
     else if(byte0 == BLUE_ON) Blue(true);
     else if(byte0 == BLUE_OFF) Blue(false);
+    else if(byte0 == WHITE_ON) White(true);
+    else if(byte0 == WHITE_OFF) White(false);
+    else if(byte0 == BOOST_ON) Boost(true);
+    else if(byte0 == BOOST_OFF) Boost(false);
     else if(byte0 == ALL_ON){
       Red(true);
       Green(true);
       Yellow(true);
       Blue(true);
+      White(true);
     }else if(byte0 == ALL_OFF){
       Red(false);
       Green(false);
       Yellow(false);
       Blue(false);
+      White(false);
     }else if(byte0 == ANIME_ALL){
       modeAnim = true;
       time = 0;
@@ -86,11 +183,13 @@ void All(bool activate){
     Green(true);
     Yellow(true);
     Blue(true);
+    White(true);
   }else{
     Red(false);
     Green(false);
     Yellow(false);
     Blue(false);
+    White(false);
   }
 }
 
@@ -102,6 +201,8 @@ void loop() {
     time++;
     if(time == 20 + randomTime){
       time = 0;
+      if( animMode%2 ==0) Boost(true);
+      else Boost(false);
       if(animMode == 0){
         All(true);
       }else if(animMode == 1){

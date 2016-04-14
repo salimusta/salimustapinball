@@ -332,6 +332,11 @@ void loop() {
          RampGateAnimTime--;
          if(RampGateAnimTime == 0){
            RampGateAnimMode = RampGateAnimMode_Old;
+           if(RampGateAnimMode == RAMPGATE_ALTERNATE) RampGateAnim = 0b01010;
+           else if(RampGateAnimMode == RAMPGATE_DUAL_SNAKE){
+             RampGateAnim = 1;
+             RampGateSide = true;
+           }
          } 
       }
       

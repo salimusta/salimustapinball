@@ -57,6 +57,7 @@ bool RAMP = false;
 bool RAMPA1 = false;
 bool RAMPA2 = false;
 bool START = false;
+bool TILT = false;
 
 
 int ROSW1_State = 0;
@@ -82,6 +83,7 @@ int RAMP_State = 0;
 int RAMPA1_State = 0;
 int RAMPA2_State = 0;
 int START_State = 0;
+int TILT_State = 0;
 
 int ROSW1_Old = 0;
 int ROSW2_Old = 0;
@@ -106,6 +108,7 @@ int RAMP_Old = 0;
 int RAMPA1_Old = 0;
 int RAMPA2_Old = 0;
 int START_Old = 0;
+int TILT_Old = 0;
 
 short delayMs = 400;
 
@@ -162,8 +165,9 @@ void loop(){
   BSW1_State = digitalRead(I2);
   BSW2_State = digitalRead(I3);
   BSW3_State = digitalRead(I4);
-  CT_State = digitalRead(I6);
   CTP_State = digitalRead(I5);
+  CT_State = digitalRead(I6);
+  TILT_State = digitalRead(I7);
   
   if(ROSW1_State != ROSW1_Old){
     if (ROSW1_State == HIGH) Serial.print("ROSW1 ON\n");
@@ -284,6 +288,12 @@ void loop(){
     START = (START_State == HIGH);
   }
   
+  if(TILT_State != TILT_Old){
+    if (TILT_State == HIGH) Serial.print("TILT ON\n");
+    else Serial.print("TILT OFF\n"); 
+    TILT = (TILT_State == HIGH);
+  }
+  
   ROSW1_Old = ROSW1_State;
   ROSW2_Old = ROSW2_State;
   ROSW3_Old = ROSW3_State;
@@ -307,6 +317,7 @@ void loop(){
   RAMPA1_Old = RAMPA1_State;
   RAMPA2_Old = RAMPA2_State;
   START_Old = START_State;
+  TILT_Old = TILT_State;
 }
 
 void requestEvent()
@@ -332,8 +343,9 @@ void requestEvent()
   response2 = (response2 << 1) | RLOSW;
   response2 = (response2 << 1) | LOSW;
   
-  //order starting from bit 0: LT1, LT2, LT2P, KO1, RAMP1, RAMP2, START
-  byte response3 = START;
+  //order starting from bit 0: LT1, LT2, LT2P, KO1, RAMP1, RAMP2, START, TILT
+  byte response3 = TILT;
+  response3 = (response3 << 1) | START;
   response3 = (response3 << 1) | RAMPA2;
   response3 = (response3 << 1) | RAMPA1;
   response3 = (response3 << 1) | KO1;

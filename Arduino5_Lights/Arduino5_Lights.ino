@@ -279,10 +279,10 @@ void setup() {
 //allAnimModeState = 1;
 //allAnimMode = VERT_SNAKE_ALL;
 
-  /*allAnim = true;
+  allAnim = true;
       allAnimModeFrame = 1;
       allAnimMode = ALL_IDLE;
-      SetAllAnim();*/
+      SetAllAnim();
       
  
 }

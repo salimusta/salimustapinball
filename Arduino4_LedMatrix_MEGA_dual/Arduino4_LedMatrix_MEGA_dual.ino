@@ -7,8 +7,6 @@ byte lowPriorityScreen = SCREEN_SALIMUSTAPINBALL;
 
 unsigned char  tmpBmp[512];
 
-char* getReady = "GET READY";
-
 unsigned long scoresTab[10] = {1000, 900, 800, 700, 600, 500, 400, 300, 200, 100};
 char highscoreName1[11] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', '\0'}; 
 char highscoreName2[11] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', '\0'}; 
@@ -130,16 +128,20 @@ void loop(){
   
   //SCREEN_MODE_DOUBLE_STATE
   time = 0;
+  flag = true;
   while(requestedScreen == SCREEN_MODE_DOUBLE_STATE){
     time++;
+    
+    centerString(tmpBmp, "SHOOT THE", 5);
     
     char buf[2];
     sprintf(buf, "RAMP: %d", countdown);
     centerString(tmpBmp, buf, 19);
     
-    centerString(tmpBmp, "SHOOT THE", 5);
-    centerString(tmpBmp, buf, 18);
-
+    if(countdown < 3 && time%5 == 0) flag = !flag;
+    
+    if(!flag) drawInvertRect(tmpBmp, 0, 0, 64, 32);
+    
     DisplayMatrix(tmpBmp);
     EmptyMatrix(tmpBmp);
     if(time > 200) requestedScreen = lowPriorityScreen;
@@ -251,7 +253,7 @@ void loop(){
   
   EmptyMatrix(tmpBmp);
   //nbPlayer = 4;
-  //playersScore[0]=12345;
+  //playersScore[0]=12345; playersScore[1]=50; playersScore[2]=650; playersScore[3]=9058;
   while(requestedScreen == SCREEN_PLAYER_SCORES){
     for(byte k = 0; k < nbPlayer ; k++){
       char bufPlayer[8];
@@ -268,7 +270,7 @@ void loop(){
     }
     
     //Highlist winning player
-    //drawInvertRect(tmpBmp, 0, 0, 64, 9);
+    //drawInvertRect(tmpBmp, 0, 0, 64, 32);
      
     DisplayMatrix(tmpBmp);
     EmptyMatrix(tmpBmp);
@@ -413,7 +415,7 @@ void loop(){
       shipExplosionFrameIndex = 0;
       SendCommandToMaster(ENEMI_DESTROYED);
       nbEnemiDestroyed++;
-    }else if(!shipExploding && enemi_x-5 < 14 && enemi_y+5 > ship_y-8 && enemi_y-5 < ship_y +8){
+    }else if(!shipExploding && enemi_x+4 > 0 && enemi_x-5 < 14 && enemi_y+5 > ship_y-8 && enemi_y-5 < ship_y +8){
       shipExploding = true;
       exploding = true;
       explosionFrameIndex = 0;
@@ -560,8 +562,8 @@ void loop(){
       sprintf(buf, "PLAYER %d", currentPlayer + 1 );
       centerString(tmpBmp, buf, 2);
     }
-    if(nbPlayer > 1) drawString(tmpBmp, getReady, x, 19, 50);
-    else drawString(tmpBmp, getReady, x, 11, 50);
+    if(nbPlayer > 1) drawString(tmpBmp, "GET READY", x, 19, 50);
+    else drawString(tmpBmp, "GET READY", x, 11, 50);
     DisplayMatrix(tmpBmp);
     EmptyMatrix(tmpBmp);
     if(x < 5 && time < 200) x++;
@@ -820,7 +822,7 @@ void loop(){
     drawString(tmpBmp, "MODE", x2, 19, 50);
     
     if(x < 3) x++;
-    if(x2 > 15) x2--;
+    if(x2 > 17) x2--;
     
     DisplayMatrix(tmpBmp);
     EmptyMatrix(tmpBmp);
@@ -1185,16 +1187,16 @@ void loop(){
   while(requestedScreen == SCREEN_PSIT_MODE_STATE){
     time++;
     
-    drawString(tmpBmp, "P S  I  T", 15, 3, 50);
+    drawString(tmpBmp, "P S  I  T", 15, 11, 50);
     
-    if((psit_state & 0b1000) >> 3) drawInvertRect(tmpBmp, 14, 2, 8, 11);
-    if((psit_state & 0b0100) >> 2) drawInvertRect(tmpBmp, 23, 2, 8, 11);
-    if((psit_state & 0b0010) >> 1) drawInvertRect(tmpBmp, 32, 2, 8, 11);
-    if(psit_state & 0b0001) drawInvertRect(tmpBmp, 41, 2, 8, 11);
+    if((psit_state & 0b1000) >> 3) drawInvertRect(tmpBmp, 14, 10, 8, 11);
+    if((psit_state & 0b0100) >> 2) drawInvertRect(tmpBmp, 23, 10, 8, 11);
+    if((psit_state & 0b0010) >> 1) drawInvertRect(tmpBmp, 32, 10, 8, 11);
+    if(psit_state & 0b0001) drawInvertRect(tmpBmp, 41, 10, 8, 11);
     
     DisplayMatrix(tmpBmp);
     EmptyMatrix(tmpBmp);
-    if(time > 50) requestedScreen = lowPriorityScreen;
+    if(time > 150) requestedScreen = lowPriorityScreen;
   }
   
   //FRAME SCREEN_PSIT_MODE_COMPLETE-----------------------------------------------------------------
@@ -1332,7 +1334,7 @@ void loop(){
     if(time%10 == 0) flag = !flag;
     if(time%100 == 0){
       instructionsIndex++;
-      if(instructionsIndex == 3) instructionsIndex = 0; 
+      if(instructionsIndex == 5) instructionsIndex = 0; 
     }
     
     if(!nameEntered && leftFlipper == 0 && leftFlipper != Old_leftFlipper){
@@ -1352,11 +1354,15 @@ void loop(){
         currentChar = ' ';
       } 
     }
-    if((leftFlipper == 1 && rightFlipper == 1) || start_state == 1){
-      if(index == 0 && currentChar == 'A') nameEnterCanceled = true;
-      else nameEntered = true;
-      //if(index > 1 ) nameEntered = true;
+    //Name entering Validation
+    if(start_state == 1){
+      nameEntered = true;
     }
+    //Name entering cancelation
+    if(leftFlipper == 1 && rightFlipper == 1){
+      nameEnterCanceled = true;
+    }
+    
     
     byte nameLength = getStringLengthAt(name, index, FONT_NORMAL);
     byte currentCharLength = getCharLength(currentChar, FONT_NORMAL);
@@ -1375,8 +1381,18 @@ void loop(){
       drawSmallString(tmpBmp, "NEXT LETTER >", 0, 9, 50);
     }else if(instructionsIndex == 2){
       drawSmallString(tmpBmp, "< + > TO", 1, 1, 50);
+      drawSmallString(tmpBmp, "CANCEL", 1, 9, 50);
+    }else if(instructionsIndex == 3){
+      drawSmallString(tmpBmp, "START TO", 1, 1, 50);
       drawSmallString(tmpBmp, "VALIDATE", 1, 9, 50);
+    }else if(instructionsIndex == 4){
+      char buf[8];
+      sprintf(buf, "PLAYER %d", currentPlayer + 1 );
+      drawSmallString(tmpBmp, buf, 1, 4, 50);
     }
+    
+    
+    
     Old_leftFlipper = leftFlipper;
     Old_rightFlipper = rightFlipper;
     
@@ -1428,8 +1444,9 @@ void loop(){
   //Question selection
   char answerHidden[9];
   byte nbLetterToHide = 0;
-  randomSeed(analogRead(0));
+  //randomSeed(analogRead(0));
   byte hasard = random(4);
+  //Serial.print("rand = "); Serial.print(hasard); Serial.print("\n");
   if(hasard == 0){
     copyString(superman, answerHidden, 9);
     stringSize = 8;
@@ -1444,8 +1461,12 @@ void loop(){
     stringSize = 6;
   }
   
+  
   answerHidden[stringSize] = '\0';
+  
+  //Serial.print("answerHidden = "); Serial.print(answerHidden); Serial.print("\n");
   nbLetterToHide = stringSize/2;
+  //Serial.print("nbLetterToHide = "); Serial.print(nbLetterToHide); Serial.print("\n");
   byte nbHiddenLetter = 0;
 
   //Hide randomly some letters
@@ -1458,6 +1479,8 @@ void loop(){
     index++;
     if(index == 7) index = 0;
   }
+  
+  Serial.print("answerHidden = "); Serial.print(answerHidden); Serial.print("\n");
 
   index = 0;
   while(answerHidden[index] != '_') index++;
