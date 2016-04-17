@@ -1,61 +1,58 @@
 #include <Wire.h>
 
+void SendSolenoidCommand( byte command){
+  Wire.beginTransmission(2);
+  Wire.write(command);
+  Wire.endTransmission();
+}
 //SOLENOID ARDUINO COMMAND REQUESTS
 //10- RampABall, 20- TestSolenoid, 30- Unable Flippers, 40- Enable Flippers
 void RampABall(){
+  nbBallFired++;
   //send a Launch command to the Solenoid arduino
-  Wire.beginTransmission(2);
-  Wire.write(10);
-  Wire.endTransmission();
+  SendSolenoidCommand(10);
 }
 
 void ShootABall(){
+  nbBallFired++;
   //send a Shoot command to the Solenoid arduino
-  Wire.beginTransmission(2);
-  Wire.write(90);
-  Wire.endTransmission();
+  SendSolenoidCommand(90);
 }
 
 void EnableFlippers(){
   //send a Launch command to the Solenoid arduino
-  Wire.beginTransmission(2);
-  Wire.write(40);
-  Wire.endTransmission();
+  SendSolenoidCommand(40);
 }
 void DisableFlippers(){
   //send a Launch command to the Solenoid arduino
-  Wire.beginTransmission(2);
-  Wire.write(30);
-  Wire.endTransmission();
+  SendSolenoidCommand(30);
 }
 void DisableKickers(){
   //send a Launch command to the Solenoid arduino
-  Wire.beginTransmission(2);
-  Wire.write(80);
-  Wire.endTransmission();
+  SendSolenoidCommand(80);
 }
 void FireKickout1(){
   //send a Launch command to the Solenoid arduino
-  Wire.beginTransmission(2);
-  Wire.write(50);
-  Wire.endTransmission();
+  SendSolenoidCommand(50);
+  ballCatchedInHole1 = false;
+  timeInHole1 = 0;
 }
 void FireKickout2(){
   //send a Launch command to the Solenoid arduino
-  Wire.beginTransmission(2);
-  Wire.write(60);
-  Wire.endTransmission();
+  SendSolenoidCommand(60);
+  ballCatchedInHole2 = false;
+  timeInHole2 = 0;
 }
 void TestSolenoids(){
   //Begin and send test signal
-  Wire.beginTransmission(2);
+  /*Wire.beginTransmission(2);
   Wire.write(20);
   Wire.endTransmission();
   lcd.setCursor(0, 1);
   lcd.print("Sending test....");
   delay(24000);
   lcd.setCursor(0, 1);
-  lcd.print("Done!-");
+  lcd.print("Done!-");*/
   
 }
 void EmptyAllBalls(){

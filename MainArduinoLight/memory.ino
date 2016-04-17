@@ -32,14 +32,33 @@ CHAR ( 10 caractere par nom)
 500: Nom 9
 550: Nom 10
 
+//Maintenance Data
+
+600: Total Ball Fired
+650: Total Bumper Fired
+700: Total Target Reached
+750: Total Game played
+
 */
 
+void WritePinballData(long ballFired, long bumperFired, long targets, long games){
+  long ballFiredTotal = ReadNumber(600) + ballFired;
+  long bumperFiredTotal = ReadNumber(650) + bumperFired;
+  long targetsTotal = ReadNumber(700) + targets;
+  long gamesTotal = ReadNumber(750) + games;
+  
+  WriteNumber(600, ballFiredTotal);
+  WriteNumber(650, bumperFiredTotal);
+  WriteNumber(700, targetsTotal);
+  WriteNumber(750, gamesTotal);
+}
+
 //This function write a score to a specific memory adress
-void WriteScore(int adress, long score){
-  byte byte0 = score & 0xFF;
-  byte byte1 = (score & 0xFF00)>>8;
-  byte byte2 = (score & 0xFF0000)>>16;
-  byte byte3 = (score & 0xFF000000)>>24;
+void WriteNumber(int adress, long number){
+  byte byte0 = number & 0xFF;
+  byte byte1 = (number & 0xFF00)>>8;
+  byte byte2 = (number & 0xFF0000)>>16;
+  byte byte3 = (number & 0xFF000000)>>24;
   
   EEPROM.write(adress, byte0);
   EEPROM.write(adress + 1, byte1);
@@ -47,23 +66,23 @@ void WriteScore(int adress, long score){
   EEPROM.write(adress + 3, byte3);
 }
 
-long ReadScore(int adress){
-  long score = 0;
+long ReadNumber(int adress){
+  long number = 0;
 
   byte byte0 = EEPROM.read(adress);
   byte byte1 = EEPROM.read(adress + 1);
   byte byte2 = EEPROM.read(adress + 2);
   byte byte3 = EEPROM.read(adress + 3);
   
-  score = byte3;
-  score = score<<8;
-  score = score | byte2;
-  score = score << 8;
-  score = score | byte1;
-  score = score << 8;
-  score = score | byte0;
+  number = byte3;
+  number = number<<8;
+  number = number | byte2;
+  number = number << 8;
+  number = number | byte1;
+  number = number << 8;
+  number = number | byte0;
   
-  return score;
+  return number;
  
 }
 
@@ -94,16 +113,16 @@ void ResetScoreMemory(){
   WriteName(500, " ");
   WriteName(550, " ");
   
-  WriteScore(0, 50);
-  WriteScore(5, 0);
-  WriteScore(10, 0);
-  WriteScore(15, 0);
-  WriteScore(20, 0);
-  WriteScore(25, 0);
-  WriteScore(30, 0);
-  WriteScore(35, 0);
-  WriteScore(40, 0);
-  WriteScore(45, 0);
+  WriteNumber(0, 50);
+  WriteNumber(5, 0);
+  WriteNumber(10, 0);
+  WriteNumber(15, 0);
+  WriteNumber(20, 0);
+  WriteNumber(25, 0);
+  WriteNumber(30, 0);
+  WriteNumber(35, 0);
+  WriteNumber(40, 0);
+  WriteNumber(45, 0);
 }
 
 void printHighScores(){
@@ -129,16 +148,16 @@ void printHighScores(){
   
 }
 void ReadScoreMemory(){
-  scoreTab[0] = ReadScore(0);
-  scoreTab[1] = ReadScore(5);
-  scoreTab[2] = ReadScore(10);
-  scoreTab[3] = ReadScore(15);
-  scoreTab[4] = ReadScore(20);
-  scoreTab[5] = ReadScore(25);
-  scoreTab[6] = ReadScore(30);
-  scoreTab[7] = ReadScore(35);
-  scoreTab[8] = ReadScore(40);
-  scoreTab[9] = ReadScore(45);
+  scoreTab[0] = ReadNumber(0);
+  scoreTab[1] = ReadNumber(5);
+  scoreTab[2] = ReadNumber(10);
+  scoreTab[3] = ReadNumber(15);
+  scoreTab[4] = ReadNumber(20);
+  scoreTab[5] = ReadNumber(25);
+  scoreTab[6] = ReadNumber(30);
+  scoreTab[7] = ReadNumber(35);
+  scoreTab[8] = ReadNumber(40);
+  scoreTab[9] = ReadNumber(45);
   
   ReadName(100, highscoreName1);
   ReadName(150, highscoreName2);
@@ -166,16 +185,16 @@ void WriteScoreMemory(){
   WriteName(500, highscoreName9);
   WriteName(550, highscoreName10);
   
-  WriteScore(0, scoreTab[0]);
-  WriteScore(5, scoreTab[1]);
-  WriteScore(10, scoreTab[2]);
-  WriteScore(15, scoreTab[3]);
-  WriteScore(20, scoreTab[4]);
-  WriteScore(25, scoreTab[5]);
-  WriteScore(30, scoreTab[6]);
-  WriteScore(35, scoreTab[7]);
-  WriteScore(40, scoreTab[8]);
-  WriteScore(45, scoreTab[9]);
+  WriteNumber(0, scoreTab[0]);
+  WriteNumber(5, scoreTab[1]);
+  WriteNumber(10, scoreTab[2]);
+  WriteNumber(15, scoreTab[3]);
+  WriteNumber(20, scoreTab[4]);
+  WriteNumber(25, scoreTab[5]);
+  WriteNumber(30, scoreTab[6]);
+  WriteNumber(35, scoreTab[7]);
+  WriteNumber(40, scoreTab[8]);
+  WriteNumber(45, scoreTab[9]);
 }
 
 long getMinScore(){

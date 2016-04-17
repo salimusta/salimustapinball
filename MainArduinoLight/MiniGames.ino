@@ -31,6 +31,7 @@ void PlayBallGame(){
       
       
       DisplayScreen(SCREEN_MULTIBALL, PRIORITY_HIGH);
+      PlaySound(MULTIBALL_SOUND);
       FireANewBall();
       PlayRandomMultiballMusic();
     }
@@ -122,6 +123,7 @@ void PlayStarWarsGame(){
       EnableFlippers();
       
       DisplayScreen(SCREEN_MULTIBALL, PRIORITY_HIGH);
+      PlaySound(MULTIBALL_SOUND);
       FireANewBall();
       PlayRandomMultiballMusic();
     }

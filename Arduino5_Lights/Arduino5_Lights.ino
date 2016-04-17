@@ -128,35 +128,35 @@ bool allAnim = false;
 //LEFT RED TARGET
 byte LeftRedAnim = 0;
 byte LeftRedTargetAnimMode = OFF_LEFT_RED_TARGET;
-byte LeftRedTargetAnimMode_Old = OFF_LEFT_RED_TARGET;
+byte LeftRedTargetAnimMode_Old = 0;
 int LeftRedTargetAnimTime = 0;
 byte LeftRedData = 0;
 
 //RIGHT RED TARGET
 byte RightRedAnim = 0;
 byte RightRedTargetAnimMode = OFF_RIGHT_RED_TARGET;
-byte RightRedTargetAnimMode_Old = OFF_RIGHT_RED_TARGET;
+byte RightRedTargetAnimMode_Old = 0;
 int RightRedTargetAnimTime = 0;
 byte RightRedData = 0;
 
 //LEFT GREEN TARGET
 byte LeftGreenAnim = 0;
 byte LeftGreenTargetAnimMode = OFF_LEFT_GREEN_TARGET;
-byte LeftGreenTargetAnimMode_Old = OFF_LEFT_GREEN_TARGET;
+byte LeftGreenTargetAnimMode_Old = 0;
 int LeftGreenTargetAnimTime = 0;
 byte LeftGreenData = 0;
 
 //RIGHT GREEN TARGET
 byte RightGreenAnim = 0;
 byte RightGreenTargetAnimMode = OFF_RIGHT_GREEN_TARGET;
-byte RightGreenTargetAnimMode_Old = OFF_RIGHT_GREEN_TARGET;
+byte RightGreenTargetAnimMode_Old = 0;
 int RightGreenTargetAnimTime = 0;
 byte RightGreenData = 0;
 
 //MIDDLE YELLOW TARGET
 byte MiddleYellowAnim = 0;
 byte YellowTargetAnimMode = OFF_YELLOW_TARGET;
-byte YellowTargetAnimMode_Old = OFF_YELLOW_TARGET;
+byte YellowTargetAnimMode_Old = 0;
 byte YellowTargetAnimTime = 0;
 byte MiddleYellowData = 0;
 
@@ -492,8 +492,10 @@ void receiveEvent(int howMany) {
       
       //LEFT GREEN TARGET--------------------------------------------------------
     }else if(byte0 == SNAKE_LEFT_GREEN_TARGET){
-      if(duration > 0){LeftGreenTargetAnimMode_Old = LeftGreenTargetAnimMode;LeftGreenTargetAnimTime = duration;}
-      else LeftGreenTargetAnimTime = 0;
+      if(duration > 0){
+        if(LeftGreenTargetAnimMode_Old == 0) LeftGreenTargetAnimMode_Old = LeftGreenTargetAnimMode;
+        LeftGreenTargetAnimTime = duration;
+      }else LeftGreenTargetAnimTime = 0;
       LeftGreenAnim = 1;
       LeftGreenTargetAnimMode = SNAKE_LEFT_GREEN_TARGET;
     }else if(byte0 == BLINK_LEFT_GREEN_TARGET){
@@ -502,7 +504,10 @@ void receiveEvent(int howMany) {
       LeftGreenAnim = 0;
       LeftGreenTargetAnimMode = BLINK_LEFT_GREEN_TARGET;
     }else if(byte0 == OFF_LEFT_GREEN_TARGET){
-      if(duration > 0){LeftGreenTargetAnimMode_Old = LeftGreenTargetAnimMode;LeftGreenTargetAnimTime = duration;}
+      if(duration > 0){
+          if(LeftGreenTargetAnimMode_Old == 0) LeftGreenTargetAnimMode_Old = LeftGreenTargetAnimMode;
+          LeftGreenTargetAnimTime = duration;
+      }
       else LeftGreenTargetAnimTime = 0;
       LeftGreenAnim = 0;
       LeftGreenTargetAnimMode = OFF_LEFT_GREEN_TARGET;
@@ -519,7 +524,10 @@ void receiveEvent(int howMany) {
       RightGreenAnim = 1;
       RightGreenTargetAnimMode = SNAKE_RIGHT_GREEN_TARGET;
     }else if(byte0 == BLINK_RIGHT_GREEN_TARGET){
-      if(duration > 0){RightGreenTargetAnimMode_Old = RightGreenTargetAnimMode;RightGreenTargetAnimTime = duration;}
+      if(duration > 0){ 
+        if(RightGreenTargetAnimMode_Old == 0) RightGreenTargetAnimMode_Old = RightGreenTargetAnimMode;
+        RightGreenTargetAnimTime = duration;
+      }
       else RightGreenTargetAnimTime = 0;
       RightGreenAnim = 0;
       RightGreenTargetAnimMode = BLINK_RIGHT_GREEN_TARGET;
@@ -541,7 +549,10 @@ void receiveEvent(int howMany) {
       LeftRedAnim = 1;
       LeftRedTargetAnimMode = SNAKE_LEFT_RED_TARGET;
     }else if(byte0 == BLINK_LEFT_RED_TARGET){
-      if(duration > 0){LeftRedTargetAnimMode_Old = LeftRedTargetAnimMode; LeftRedTargetAnimTime = duration;}
+      if(duration > 0){
+        if(LeftRedTargetAnimMode_Old == 0) LeftRedTargetAnimMode_Old = LeftRedTargetAnimMode;
+        LeftRedTargetAnimTime = duration;
+      }
       else LeftRedTargetAnimTime = 0;
       LeftRedAnim = 0;
       LeftRedTargetAnimMode = BLINK_LEFT_RED_TARGET;
@@ -568,7 +579,10 @@ void receiveEvent(int howMany) {
       RightRedAnim = 0;
       RightRedTargetAnimMode = BLINK_RIGHT_RED_TARGET;
     }else if(byte0 == OFF_RIGHT_RED_TARGET){
-      if(duration > 0){RightRedTargetAnimMode_Old = RightRedTargetAnimMode; RightRedTargetAnimTime = duration;}
+      if(duration > 0){
+        if(RightRedTargetAnimMode_Old == 0) RightRedTargetAnimMode_Old = RightRedTargetAnimMode;
+        RightRedTargetAnimTime = duration;
+      }
       else RightRedTargetAnimTime = 0;
       RightRedAnim = 0;
       RightRedTargetAnimMode = OFF_RIGHT_RED_TARGET;
@@ -590,7 +604,9 @@ void receiveEvent(int howMany) {
       MiddleYellowAnim = 0;
       YellowTargetAnimMode = BLINK_YELLOW_TARGET;
     }else if(byte0 == OFF_YELLOW_TARGET){
-      if(duration > 0){YellowTargetAnimMode_Old = YellowTargetAnimMode; YellowTargetAnimTime = duration;}
+      if(duration > 0){
+        if(YellowTargetAnimMode_Old == 0) YellowTargetAnimMode_Old = YellowTargetAnimMode;
+        YellowTargetAnimTime = duration;}
       else YellowTargetAnimTime = 0;
       MiddleYellowAnim = 0;
       YellowTargetAnimMode = OFF_YELLOW_TARGET;
@@ -1245,6 +1261,7 @@ void loop() {
          YellowTargetAnimTime--;
          if(YellowTargetAnimTime == 0){
            YellowTargetAnimMode = YellowTargetAnimMode_Old;
+           YellowTargetAnimMode_Old = 0;
            if(YellowTargetAnimMode == DATA_YELLOW_TARGET) MiddleYellowAnim = MiddleYellowData;
          } 
       }
@@ -1264,6 +1281,7 @@ void loop() {
          LeftGreenTargetAnimTime--;
          if(LeftGreenTargetAnimTime == 0){
            LeftGreenTargetAnimMode = LeftGreenTargetAnimMode_Old;
+           LeftGreenTargetAnimMode_Old = 0;
            if(LeftGreenTargetAnimMode == DATA_LEFT_GREEN_TARGET) LeftGreenAnim = LeftGreenData;
          } 
       }
@@ -1283,6 +1301,7 @@ void loop() {
          RightGreenTargetAnimTime--;
          if(RightGreenTargetAnimTime == 0){
            RightGreenTargetAnimMode = RightGreenTargetAnimMode_Old;
+           RightGreenTargetAnimMode_Old = 0;
            if(RightGreenTargetAnimMode == DATA_RIGHT_GREEN_TARGET) RightGreenAnim = RightGreenData;
          } 
       }
@@ -1302,6 +1321,7 @@ void loop() {
          LeftRedTargetAnimTime--;
          if(LeftRedTargetAnimTime == 0){
            LeftRedTargetAnimMode = LeftRedTargetAnimMode_Old;
+           LeftRedTargetAnimMode_Old = 0;
            if(LeftRedTargetAnimMode == DATA_LEFT_RED_TARGET) LeftRedAnim = LeftRedData;
          } 
       }
@@ -1321,6 +1341,7 @@ void loop() {
          RightRedTargetAnimTime--;
          if(RightRedTargetAnimTime == 0){
            RightRedTargetAnimMode = RightRedTargetAnimMode_Old;
+           RightRedTargetAnimMode_Old = 0;
            if(RightRedTargetAnimMode == DATA_RIGHT_RED_TARGET) RightRedAnim = RightRedData;
          } 
       }

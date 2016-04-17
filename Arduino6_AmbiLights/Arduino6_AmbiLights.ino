@@ -17,6 +17,10 @@
 #define BOOST_ON 14
 #define BOOST_OFF 15
 
+#define FLASH_WHITE 100
+#define SNAKE_ALL_COLORS 101
+
+
 void setup() {
   // put your setup code here, to run once:
   
@@ -29,6 +33,8 @@ void setup() {
   
   Wire.begin(6);
   Wire.onReceive(receiveEvent);
+  
+  Serial.begin(9600); 
   
   digitalWrite(12, HIGH);
   digitalWrite(11, HIGH);
@@ -112,36 +118,49 @@ void setup() {
 
   
 }
-bool modeAnim = true;
+bool modeAnim = false;
+bool modeSnake = false;
 unsigned long time = 0;
 short animMode = 0;
+
+bool redState, blueState, greenState, yellowState, whiteState, boostState, animState;
+bool redOldState, blueOldState, greenOldState, yellowOldState, whiteOldState, boostOldState, animOldState;
 
 void Boost(bool activate){
   if(activate) digitalWrite(7, LOW);
   else digitalWrite(7, HIGH);
+  boostState = activate;
 }
 void White(bool activate){
   if(activate) digitalWrite(8, LOW);
   else digitalWrite(8, HIGH);
+  whiteState = activate;
 }
 void Red(bool activate){
   if(activate) digitalWrite(12, LOW);
   else digitalWrite(12, HIGH);
+  redState = activate;
 }
 void Green(bool activate){
   if(activate) digitalWrite(11, LOW);
   else digitalWrite(11, HIGH);
+  greenState = activate;
 }
 void Yellow(bool activate){
   if(activate) digitalWrite(10, LOW);
   else digitalWrite(10, HIGH);
+  yellowState = activate;
 }
 void Blue(bool activate){
   if(activate) digitalWrite(9, LOW);
   else digitalWrite(9, HIGH);
+  blueState = activate;
 }
 void receiveEvent(int howMany) {
+  Serial.print("Event\n");
+  animOldState = modeAnim;
   modeAnim = false;
+  modeSnake = false;
   if(howMany == 1){
     byte byte0 = Wire.read();
     
@@ -173,6 +192,40 @@ void receiveEvent(int howMany) {
       modeAnim = true;
       time = 0;
       animMode = 0;
+    }else if(byte0 == FLASH_WHITE){
+      modeAnim = false;
+      redOldState = redState; blueOldState = blueState; greenOldState = greenState; yellowOldState; whiteOldState = whiteState; boostOldState = boostState;
+      
+      
+      byte flashNb = 20;
+      
+      All(false);
+      Boost(true);
+      while(flashNb > 1){
+        if(flashNb%2 == 0) White(true);
+        else White(false);
+        delay(5000);
+        flashNb --; 
+      }
+      
+      //Restore previous State
+      Boost(boostOldState);
+      Red(redOldState);
+      Green(greenOldState);
+      Yellow(yellowOldState);
+      Blue(blueOldState);
+      White(whiteOldState);
+      modeAnim = animOldState;
+      
+    }else if(byte0 == SNAKE_ALL_COLORS){
+      modeSnake = true;
+      
+      animMode = 0;
+
+      Boost(true);
+      All(false);
+      Red(true);
+      
     }
     
   }
@@ -232,7 +285,31 @@ void loop() {
      
     
     
+  }else if(modeSnake){
+    time++;
+    
+    if(time%7000 == 0){
+      animMode++;
+      if(animMode == 5) animMode = 0;
+    }
+    if(animMode == 0){
+      All(false);
+      Red(true);
+    }else if(animMode == 1){
+      All(false);
+      Blue(true);
+    }else if(animMode == 2){
+      All(false);
+      Green(true);
+    }else if(animMode == 3){
+      All(false);
+      Yellow(true);
+    }else if(animMode == 4){
+      All(false);
+      White(true);
+    }
+    
   }
  
   
-}
+  }

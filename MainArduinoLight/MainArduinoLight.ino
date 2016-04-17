@@ -73,6 +73,7 @@ void setup() {
 
 void loop() {
   SendHighScores();
+  
   /*
   ResetScoreMemory();
   

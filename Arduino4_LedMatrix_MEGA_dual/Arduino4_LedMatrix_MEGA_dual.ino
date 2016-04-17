@@ -86,6 +86,30 @@ short i;
 byte nbPlayer = 1;
 
 void loop(){
+  
+  //SCREEN_TILT_ACTIVE
+  time = 0;
+  while(requestedScreen == SCREEN_TILT_ACTIVE){
+    time++;
+    centerString(tmpBmp, "! TILT !", 11);
+
+    DisplayMatrix(tmpBmp);
+    EmptyMatrix(tmpBmp);
+    if(time > 150) requestedScreen = lowPriorityScreen;
+  }
+  
+  //SCREEN_TILT_WARNING
+  time = 0;
+  while(requestedScreen == SCREEN_TILT_WARNING){
+    time++;
+    centerString(tmpBmp, "TILT", 5);
+    centerString(tmpBmp, "WARNING !", 18);
+
+    DisplayMatrix(tmpBmp);
+    EmptyMatrix(tmpBmp);
+    if(time > 150) requestedScreen = lowPriorityScreen;
+  }
+  
   //SCREEN_SCORE_SAVED
   time = 0;
   while(requestedScreen == SCREEN_SCORE_SAVED){

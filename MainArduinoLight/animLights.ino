@@ -38,11 +38,11 @@ void AnimLightData2(byte light, byte data){
 }
 
 void TestAnimLights(){
-  printLine("Anim Lights Test", "On Going...");
+  /*printLine("Anim Lights Test", "On Going...");
   Serial.print("ALL OFF\n");
   AmbiLight(ALL_OFF);
   AnimLight(ALL_ANIM_OFF);
-  delay(2000);
+  delay(2000);*/
   /*
   AnimLight(ANIM_ALL); delay(2000);
   AnimLight(ALL_ANIM_OFF); delay(2000);
@@ -128,7 +128,7 @@ void TestAnimLights(){
  AnimLight(LOOSE_OFF);delay(2000);
  AnimLightFor(BLINK_LOOSE, 30);delay(2000);
 */
-
+/*
 AnimLight(KO1_OFF);delay(2000);
  AnimLightFor(BLINK_KO1, 30);delay(2000);
  AnimLightFor(SNAKE_KO1, 30);delay(2000);
@@ -141,7 +141,7 @@ AnimLight(KO1_OFF);delay(2000);
 
 
   delay(600000);
-  
+  */
   /*
   AnimLight(FLASH_TOP_LIGHTS); delay(2000); AnimLight(LIGHT_TOP_LIGHTS); delay(2000); AnimLight(ALTERN_TOP_LIGHTS); delay(2000); AnimLight(OFF_TOP_LIGHTS); delay(2000);
   AnimLight(SNAKE_GREEN_TARGET); delay(2000); AnimLight(BLINK_GREEN_TARGET); delay(2000); AnimLight(OFF_GREEN_TARGET); delay(2000);

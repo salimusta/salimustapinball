@@ -12,7 +12,7 @@ void ManageMaintenanceMode(){
     //in the main menu
     if(menu/10 == 0){
       menu++;
-      if(menu > 4){
+      if(menu > 5){
         menu = 1;
       }
     //In the 1 sub menu
@@ -33,7 +33,7 @@ void ManageMaintenanceMode(){
     if(menu/10 == 0){
       menu--;
       if(menu < 1){
-        menu = 4;
+        menu = 5;
       }
     }else if(menu/10 == 2){
       menu--;
@@ -59,6 +59,9 @@ void ManageMaintenanceMode(){
       delay(200);
       DisplayScreen(SCREEN_HIGHSCORES, PRIORITY_LOW);
       delay(200);
+    }else if( menu == 5){
+      
+      
     }else if( menu == 11){
       //Reset Scores
       ResetScoreMemory();
@@ -104,22 +107,22 @@ void ManageMaintenanceMode(){
         printLine("Test Mode", "7-DIGITS");
         break;
       case 22:
-        printLine("Test Mode", "Switches");
+        printLine("", "Switches");
         break;
       case 23:
-        printLine("Test Mode", "Solenoids");
+        printLine("", "Solenoids");
         break;
       case 24:
-        printLine("Test Mode", "Led Matrix");
+        printLine("", "Led Matrix");
         break;
       case 25:
-        printLine("Test Mode", "Anim Lights");
+        printLine("", "Anim Lights");
         break;
       case 26:
-        printLine("Test Mode", "Ambi Lights");
+        printLine("", "Ambi Lights");
         break;
       case 27:
-        printLine("Test Mode", "Sounds");
+        printLine("", "Sounds");
         break;
      case 3:
       printLine("Main Menu", "Empty all balls");
@@ -127,6 +130,9 @@ void ManageMaintenanceMode(){
      case 4:
       printLine("Main Menu", "High Scores");
       break;  
+     case 5:
+      printLine("Main Menu", "Data");
+      break; 
       
   }
   

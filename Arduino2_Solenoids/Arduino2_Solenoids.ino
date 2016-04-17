@@ -82,7 +82,7 @@ const int BUMPER1_FIRE_DURATION = 130;
 const int BUMPER2_FIRE_DURATION = 200;
 const int BUMPER3_FIRE_DURATION = 150;
 
-const int KICKER_FIRE_DURATION = 150;
+const int KICKER_FIRE_DURATION = 1000;
 int KICKOUT1_FIRE_DURATION = 100;
 int KICKOUT2_FIRE_DURATION = 100;
 int SHOOTER_FIRE_DURATION = 450;
@@ -468,7 +468,7 @@ void loop() {
   
   //Kicker activation switches
   if(RKickerState != RKickerOldState && RKickerState == HIGH){
-    if(time - RKickerSW_startTime > 500){
+    if(time - RKickerSW_startTime > 1000){
       RKickerSW_startTime = time;
       RightKicker_Duration = 0;
       KICKER_RIGHT = true;
@@ -478,11 +478,11 @@ void loop() {
    KICKER_RIGHT = false; 
   }
   if(LKickerState != LKickerOldState && LKickerState == HIGH){
-    if(time - LKickerSW_startTime > 500){
+    if(time - LKickerSW_startTime > 1000){
       LKickerSW_startTime = time;
       LeftKicker_Duration = 0;
       KICKER_LEFT = true;
-      //Serial.print("Left Kicker Activated ON\n");
+      Serial.print("Left Kicker Activated ON\n");
     }
   }else if(LKickerState == LOW){
    KICKER_LEFT = false; 
@@ -510,7 +510,7 @@ void loop() {
     SolenoidStatesBankB(RightKicker_State, LeftKicker_State, Kickout1_State, Kickout2_State, Shooter_State);
   }else {
     SolenoidStatesBankA(0, 0, 0, 0, 0);
-    SolenoidStatesBankB(0, 0, 0, 0, Shooter_State);
+    SolenoidStatesBankB(0, 0, Kickout1_State, Kickout2_State, Shooter_State);
   }
   
   buttonLeftOldState = buttonLeftState;

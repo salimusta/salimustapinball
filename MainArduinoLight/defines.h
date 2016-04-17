@@ -64,6 +64,8 @@
 #define SCREEN_MODE_DOUBLE_COMPLETE 57
 #define SCREEN_MODE_DOUBLE_IDLE 58
 #define SCREEN_SCORE_SAVED 59
+#define SCREEN_TILT_WARNING 60
+#define SCREEN_TILT_ACTIVE 61
 
 #define PRIORITY_LOW 0
 #define PRIORITY_HIGH 1
@@ -211,6 +213,13 @@
 #define ALL_ON 9
 #define ALL_OFF 10
 #define ANIME_ALL 11
+#define WHITE_ON 12
+#define WHITE_OFF 13
+#define BOOST_ON 14
+#define BOOST_OFF 15
+
+#define FLASH_WHITE 100
+#define SNAKE_ALL_COLORS 101
 
 //defines
 #define BUMPER_2 1
@@ -286,6 +295,15 @@
 #define GAME_OVER 70
 #define BALL_LOOSE 71
 #define CAISSE 72
+#define TILT_SOUND 73
+#define START_SOUND 74
+#define GET_READY 75
+#define GO_SOUND 76
+#define MULTIBALL_SOUND 77
+#define PLAYER_1 78
+#define PLAYER_2 79
+#define PLAYER_3 80
+#define PLAYER_4 81
 
 #define JIVE_BUNNY 100
 #define FALLIN_RAIN 101
@@ -304,10 +322,10 @@
 #define HIDEHO 114
 #define HEY 115
 #define RELAX 116
-
 #define STARWARSTHEME 117
 #define JAZZ 118
 #define MISSION_IMPOSSIBLE 119
+#define CANCAN_SPEED 120
 
 
 
