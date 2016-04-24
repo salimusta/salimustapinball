@@ -69,114 +69,24 @@ void setup() {
   
   //ResetScoreMemory();
   ReadScoreMemory();
+  
+  delay(100);
+  
+  //If there are balls caught in holes at the beginning, empty them and wait
+  ReadSwitches();
+  delay(1000);
+  if(KO1 || KO1_Old) FireKickout1();
+  delay(500);
+  if(KO2 || KO2_Old) FireKickout2();
+  
+  if(KO1 || KO1_Old || KO2 || KO2_Old){
+    delay(5000); 
+  }
 }
 
 void loop() {
   SendHighScores();
-  
-  /*
-  ResetScoreMemory();
-  
-  ReadScoreMemory();
-  
-  printHighScores();
-  Serial.print(getMinScore()); Serial.print("\n");
-  
-  addHighScore(550, "MEHMET");
-  WriteScoreMemory();
-  
-  ReadScoreMemory();
-  
-  addHighScore(300, "ALI");
-  WriteScoreMemory();
-  
-  ReadScoreMemory();
-  
-  printHighScores();
-  Serial.print(getMinScore()); Serial.print("\n");
-  */
-          
-  
-  /*while(1);
-  
-  SendHighScores();
- */
-  
-  
-/*
-  //Boucle
-  int nbIteration = 0;
-  while(1){
-    Serial.print("Lancement d'une balle...\n");
-    ShootABall();
-    delay(5000);
-    
-    ReadSwitches();
-    while( !LOSW ){
-      ReadSwitches();
-      delay(10);
-    }
-    nbIteration++;
-    Serial.print("Succes = "); Serial.print(nbIteration); Serial.print("\n");
-  }
-  */
-  /*
-  AmbiLight(ALL_OFF);
-    AnimLight(ALL_ANIM_OFF);
-    AnimLight2(ALL_ANIM_OFF);
-  
-  delay(3000);
-  
-  AnimLight2(RAMPGATE_SNAKE); delay(3000);
-  AnimLight2(RAMPGATE_BLINK); delay(3000);
-  AnimLight2(RAMPGATE_ON); delay(3000);
-  AnimLight2(RAMPGATE_DUAL_SNAKE); delay(3000);
-  AnimLight2(RAMPGATE_ALTERNATE); delay(3000);
-  AnimLight2(RAMPGATE_OFF); delay(3000);
-  
-  AnimLight2(RAMP_ON); delay(3000);
-  AnimLight2(RAMP_BLUE); delay(3000);
-  AnimLight2(RAMP_YELLOW); delay(3000);
-  AnimLight2(RAMP_SNAKE_BLUE); delay(3000);
-  AnimLight2(RAMP_SNAKE_YELLOW); delay(3000);
-  AnimLight2(RAMP_SNAKE); delay(3000);
-  AnimLight2(RAMP_BLINK); delay(3000);
-  AnimLight2(RAMP_ALTERNATE); delay(3000);
-  AnimLight2(RAMP_OFF); delay(3000);
-  delay(30000);
-  /*TESTING LIGHTS 
-  
-  AmbiLight(ALL_OFF);
-  AnimLight(ALL_ANIM_OFF);
-  
-  delay(2000);
-  PlaySound(DESIREHEY);
-  
-  AnimLightData(DATA_YELLOW_TARGET, 0b1);
-  AnimLightFor(BLINK_YELLOW_TARGET, 30);
-  delay(2000);
-  AnimLightData(DATA_YELLOW_TARGET, 0b11);
-  AnimLightFor(BLINK_YELLOW_TARGET, 30);
-  delay(2000);
-  AnimLightData(DATA_YELLOW_TARGET, 0b111);
-  delay(2000);
-  AnimLightFor(BLINK_YELLOW_TARGET, 30);
-  delay(2000);
-  AnimLightData(DATA_YELLOW_TARGET, 0b1111);
-  delay(2000);
-  AnimLightData(DATA_YELLOW_TARGET, 0b11111);
-  delay(200000);
-  */
-  
-/*
-  DisplayScreen(SCREEN_STARWARS_GAME, PRIORITY_LOW);
-  while(1){
-  
-    byte flippers_state = digitalRead(rightBoutonPin);;
-    flippers_state = (flippers_state << 1) | digitalRead(leftBoutonPin);
-    SendScreenData(FLIPPERS_STATE, flippers_state);
-    delay(20);
-  }
+
   /*---------*/
   /*DisplayScreen(SCREEN_SALIMUSTAPINBALL, PRIORITY_LOW);
 
@@ -196,7 +106,9 @@ void loop() {
     printLine("------GAME------", "------MODE------");
   }
   */
-  maintenanceMode = false;
+  delay(1000);
+  maintenanceMode = digitalRead(leftBoutonPin) == HIGH;
+
   delay(100);
   if(maintenanceMode){
     AmbiLight(ALL_OFF);

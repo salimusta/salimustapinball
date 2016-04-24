@@ -16,6 +16,8 @@ const int BASW3Pin = 6;
 const int RKickerPin = 8;
 const int LKickerPin = 7;
 
+const int RampPin = 9;
+
 //Data buffers
 unsigned char dataSolenoid = 0;
 unsigned char dataSolenoidOld = 99;
@@ -41,7 +43,8 @@ int LKickerState = 0;
 int RKickerOldState = 0;
 int LKickerOldState = 0;
 
-bool RAMP = false;
+int RampState = 0;
+int RampOldState = 0;
 
 int Bumper1_Duration = 9999;
 int Bumper2_Duration = 9999;
@@ -107,6 +110,7 @@ void setup() {
  pinMode(BASW3Pin, INPUT);
  pinMode(RKickerPin, INPUT);
  pinMode(LKickerPin, INPUT);
+ pinMode(RampPin, INPUT);
  
  Wire.begin(2);
  Wire.onReceive(receiveEvent);
@@ -155,7 +159,7 @@ void receiveEvent(int howMany) {
       //Serial.print("KICKOUT 2\n");
       kickout2Requested = true;
       Kickout2_Duration = 0;
-      randomTime = random(110);
+      randomTime = random(60);
       KICKOUT2_FIRE_DURATION = 120 + randomTime;
     }else if(data == 80){
       kickersEnabled = false;
@@ -207,6 +211,7 @@ void loop() {
   BASW3State = digitalRead(BASW3Pin);
   RKickerState = digitalRead(RKickerPin);
   LKickerState = digitalRead(LKickerPin);
+  RampState = digitalRead(RampPin);
 
   int leftSolenoidState = 0;
   int rightSolenoidState = 0;
@@ -221,17 +226,6 @@ void loop() {
   
   bool Ramping = false;
 
-  if(shooterRequested && !rampABallRequested){
-    
-    Shooter_Duration++;
-    Shooter_State = 1;
-    
-    if(Shooter_Duration > SHOOTER_FIRE_DURATION ){
-      Shooter_Duration = 9999;
-      shooterRequested = false;
-    }
-  }
-  
   if(kickout1Requested){
     Kickout1_State = 1;
     Kickout1_Duration++;
@@ -342,33 +336,62 @@ void loop() {
   //Push the ball trough sequence, we shoot a need ball
   if(rampABallRequested){
     unsigned long timeSinceRequested = time - timeRampABall;
-    
-    if(timeSinceRequested > 3200 && timeSinceRequested < 10000){
+    //time to shoot = 21
+    //End the sequence after 2173 ms (then shoot if needed)
+    if(timeSinceRequested > 3000 && timeSinceRequested < 10000){
       rampABallRequested = false;
-    }else if(timeSinceRequested > 1427){
+    
+    //Check if the ball fell down, refire again
+    }else if(timeSinceRequested > 2500){
+      //Serial.print("RAMP TEST\n");
+      if(RampState == HIGH){
+        //Serial.print("RAMP ON\n");
+        timeRampABall = time - 500;
+      }  
+    
+    //Cut the powering session
+    }else if(timeSinceRequested > 1027){
       SolenoidOff(3);
-      SolenoidOff(2);
-      
-      
-    }else if(timeSinceRequested > 1405){
-      SolenoidOn(3);
       Ramping = false;
       
-    }else if(timeSinceRequested > 805){
-      SolenoidOff(3);
+    }else if(timeSinceRequested > 1005 || Ramping){
+      //If one of the flippers are on, wait for them to be released to fire the ball
+      if(!Ramping && (leftSolenoidState == 1 || rightSolenoidState == 1)){
+        timeRampABall += time - old_time;
+      }else{
+        SolenoidOn(3);
+        Ramping = true;
+      }
       
-    }else if(timeSinceRequested > 800){
-      SolenoidOn(3);
-      Ramping = true;
-      
+    //Close Trieur
     }else if(timeSinceRequested > 300){
       SolenoidOff(2);
-      
+    
+    //Open Trieur
     }else if(timeSinceRequested >= 0){
       SolenoidOn(2);
     }
-    
   }
+  
+  //Shooting sequence
+  if(shooterRequested && !rampABallRequested){
+    Shooter_Duration++;
+    Shooter_State = 1;
+    
+    if(Shooter_Duration > SHOOTER_FIRE_DURATION ){
+      Shooter_Duration = 9999;
+      shooterRequested = false;
+    }
+  }
+  
+  //Ramp switch management
+  if(RampState != RampOldState && RampState == HIGH){
+    //Serial.print("RAMP ON\n"); 
+  }else if(RampState != RampOldState && RampState == LOW){
+    //Serial.print("RAMP OFF\n"); 
+  }
+  
+  
   if(buttonLeftState != buttonLeftOldState && buttonLeftState == HIGH){
     if(time - leftFlipper_startTime > 100){
       leftFlipper_startTime = time;
@@ -482,7 +505,7 @@ void loop() {
       LKickerSW_startTime = time;
       LeftKicker_Duration = 0;
       KICKER_LEFT = true;
-      Serial.print("Left Kicker Activated ON\n");
+      //Serial.print("Left Kicker Activated ON\n");
     }
   }else if(LKickerState == LOW){
    KICKER_LEFT = false; 
@@ -505,9 +528,15 @@ void loop() {
    LeftKicker_Duration= 9999;
   }
   
-  if(flippersEnabled && Ramping == false){
-    SolenoidStatesBankA(leftSolenoidState, rightSolenoidState, Bumper1_State, Bumper2_State, Bumper3_State);
-    SolenoidStatesBankB(RightKicker_State, LeftKicker_State, Kickout1_State, Kickout2_State, Shooter_State);
+  if(flippersEnabled){
+    if(Ramping == false){
+      SolenoidStatesBankA(leftSolenoidState, rightSolenoidState, Bumper1_State, Bumper2_State, Bumper3_State);
+      SolenoidStatesBankB(RightKicker_State, LeftKicker_State, Kickout1_State, Kickout2_State, Shooter_State);
+    }else{
+      SolenoidStatesBankA(leftSolenoidState, rightSolenoidState, 0, 0, 0);
+      SolenoidStatesBankB(0, 0, Kickout1_State, Kickout2_State, Shooter_State);
+    }
+    
   }else {
     SolenoidStatesBankA(0, 0, 0, 0, 0);
     SolenoidStatesBankB(0, 0, Kickout1_State, Kickout2_State, Shooter_State);
@@ -520,6 +549,7 @@ void loop() {
   BASW3OldState = BASW3State;
   RKickerOldState = RKickerState;
   LKickerOldState = LKickerState;
+  RampOldState = RampState;
   
  old_time = time;
 } // loop

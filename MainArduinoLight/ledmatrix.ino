@@ -1,12 +1,12 @@
 
 
 void TestLedMatrix(){
-  /*printLine("Led Matrix test", "On going...");
+  printLine("Led Matrix test", "On going...");
   DisplayScreen(SCREEN_SALIMUSTAPINBALL, PRIORITY_LOW); delay(2000); 
   DisplayScreen(SCREEN_FULL, PRIORITY_LOW); delay(2000);  
   DisplayScreen(SCREEN_GETREADY, PRIORITY_LOW); delay(2000);  
   DisplayScreen(SCREEN_MULTIBALL, PRIORITY_LOW); delay(2000);
-  DisplayScreen(SCREEN_GAMEOVER, PRIORITY_LOW); delay(2000);*/
+  DisplayScreen(SCREEN_GAMEOVER, PRIORITY_LOW); delay(2000);
 }
 
 void DisplayScreen(byte screen, byte priority){

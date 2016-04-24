@@ -148,7 +148,7 @@ void loop(){
   digitalWrite(D11, LOW);
   digitalWrite(D12, LOW);
   delayMicroseconds(delayMs);
-  RAMP_State = digitalRead(I5);
+  //RAMP_State = digitalRead(I5);
   KO2_State = digitalRead(I2);
   LOSW_State = digitalRead(I3);
   RLOSW_State = digitalRead(I4);

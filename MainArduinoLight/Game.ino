@@ -1,4 +1,5 @@
 #define BUMPER_BONUS_INTERVAL 1200
+#define MODES_DURATION 25000
 
 unsigned long score;
 unsigned long sendedScore;
@@ -326,7 +327,7 @@ void ManageGame() {
     delay(1);
     
     //TARGETS HIT MANAGEMENT----------------------------------------------------------
-    if (timeSinceYellowTargetHit < 1000) timeSinceYellowTargetHit++;
+    if (timeSinceYellowTargetHit < 100) timeSinceYellowTargetHit++;
     if (timeSinceLeftRedTargetHit < 100) timeSinceLeftRedTargetHit++;
     if (timeSinceRightRedTargetHit < 100) timeSinceRightRedTargetHit++;
     if (timeSinceLeftGreenTargetHit < 100) timeSinceLeftGreenTargetHit++;
@@ -416,7 +417,7 @@ void ManageGame() {
         }
       }
       
-      if(time - timeSinceNewBall > 10000 && !ballLaunched){
+      if(time - timeSinceNewBall > 15000 && !ballLaunched){
         timeSinceNewBall = millis();
         PlaySound(STILLWAITING);
       }
@@ -467,7 +468,7 @@ void ManageGame() {
         }
       }
       //BUMPERS-------------------------------------------------------------------------
-      if (BSW1) {
+      if (BSW1 && timeSinceBumper1Hit > 50) {
         nbBump++;
         timeSinceBumper1Hit = 0;
         score += 100* scoreCoef;
@@ -488,7 +489,7 @@ void ManageGame() {
           SendScreenData(BUMPER_STATUS, bumpersState);
         }
       }
-      if (BSW2) {
+      if (BSW2 && timeSinceBumper2Hit > 50) {
         nbBump++;
         timeSinceBumper2Hit = 0;
         score += 50* scoreCoef;
@@ -510,7 +511,7 @@ void ManageGame() {
         }
       }
   
-      if (BSW3) {
+      if (BSW3 && timeSinceBumper3Hit > 50) {
         nbBump++;
         timeSinceBumper3Hit = 0;
         score += 10* scoreCoef;
@@ -576,6 +577,7 @@ void ManageGame() {
       if (gate1Passed && gate2Passed && gate3Passed) {
         AnimLight(ALL_GATES_ON);
         AnimLightFor(FLASH_TOP_LIGHTS, 30);
+        AmbiLight(FLASH_WHITE);
         score += 1000* scoreCoef;
         DisplayScreen(SCREEN_ALL_GATES, PRIORITY_HIGH);
         PlaySound(WOULDUBEWONDERMAN);
@@ -584,7 +586,7 @@ void ManageGame() {
   
       //TARGETS-----------------------------------------------------------------------
       //MIDDLE YELLOW
-      if (CT && timeSinceYellowTargetHit > 100) {
+      if (CT && timeSinceYellowTargetHit > 90) {
         nbTarget++;
         timeSinceYellowTargetHit = 0;
         byte randSound = random(4);
@@ -856,17 +858,15 @@ void ManageGame() {
         } else if (timeInHole1 == 100 && ballCatchedInHole1 == false) {
           ballLaunched = true;
           AnimLight(BLINK_KO1);
-          byte randSound = random(2);
-          if (randSound == 0) PlaySound(KICKOUT_CATCH_1);
-          else PlaySound(YOURETHEHERO);
-  
+          PlaySound(KICKOUT_CATCH_1);
+      
           ballCatchedInHole1 = true;
           score += 100* scoreCoef;
           if (ballInPlay > 1 || activeMode != NO_MODE || ballCatchedInHole2){
             if (modeStarted == false) AnimLight(SNAKE_KO1);
             else AnimLight(KO1_OFF);
             FireKickout1();
-            PlaySound(WAW);
+            PlaySound(KICKOUT_CATCH_1);
             
             score += 100* scoreCoef;
           }else{
@@ -895,7 +895,6 @@ void ManageGame() {
           FireKickout2();
           PlaySound(KICKOUT_RELEASE_2);
 
-          // Serial.print("RELEASE BALL \n");
           if (modeStarted == false) {
   
             if (activeMode == BUMPERS_MODE) {
@@ -1205,7 +1204,7 @@ void ManageGame() {
       if (activeMode != NO_MODE && modeBeginTime != 0) {
         //END OF THE MODE
         if ( millis() - timeSinceUpdateScreen > 1000) {
-          unsigned long countdown = (25000 - (millis() - modeBeginTime)) / 1000;
+          unsigned long countdown = (MODES_DURATION - (millis() - modeBeginTime)) / 1000;
           byte countdownByted = countdown;
           if (countdownByted <= 0 ) countdownByted = 0;
           timeSinceUpdateScreen = millis();
@@ -1228,8 +1227,7 @@ void ManageGame() {
         else if (activeMode == DOUBLE_MODE) modeSucceded = false;
         
         
-        if (millis() - modeBeginTime >= 25000 || modeSucceded) { //END OF THE MODE
-          //Serial.print("END OF MODE\n");
+        if (millis() - modeBeginTime >= MODES_DURATION || modeSucceded) { //END OF THE MODE
           DisplayScreen(SCREEN_SCORE, PRIORITY_LOW);
           //BUMPER MODE SUCCESS extra score
           if (activeMode == BUMPERS_MODE && modeSucceded) {

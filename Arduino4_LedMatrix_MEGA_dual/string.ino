@@ -111,6 +111,7 @@ void drawString(unsigned char *targetBmp, char *str, short startxpos, short star
     else if(str[index] == '8') {drawMotif(targetBmp, number8, xpos, ypos-1, 7, 11); xpos += 8;}
     else if(str[index] == '9') {drawMotif(targetBmp, number9, xpos, ypos-1, 7, 11); xpos += 8;}
     else if(str[index] == '0') {drawMotif(targetBmp, number0, xpos, ypos-1, 7, 11); xpos += 8;}
+    else if(str[index] == '\'') {drawMotif(targetBmp, apostrophe, xpos, ypos-2, 2, 3); xpos += 3;}
     else if(str[index] == ' ') {xpos += 2;}
     index++;
   }

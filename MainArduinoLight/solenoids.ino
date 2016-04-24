@@ -45,14 +45,14 @@ void FireKickout2(){
 }
 void TestSolenoids(){
   //Begin and send test signal
-  /*Wire.beginTransmission(2);
+  Wire.beginTransmission(2);
   Wire.write(20);
   Wire.endTransmission();
   lcd.setCursor(0, 1);
   lcd.print("Sending test....");
   delay(24000);
   lcd.setCursor(0, 1);
-  lcd.print("Done!-");*/
+  lcd.print("Done!-");
   
 }
 void EmptyAllBalls(){

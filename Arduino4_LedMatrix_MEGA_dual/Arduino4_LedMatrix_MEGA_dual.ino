@@ -7,7 +7,7 @@ byte lowPriorityScreen = SCREEN_SALIMUSTAPINBALL;
 
 unsigned char  tmpBmp[512];
 
-unsigned long scoresTab[10] = {1000, 900, 800, 700, 600, 500, 400, 300, 200, 100};
+unsigned long scoresTab[10] = {99999, 900, 800, 700, 600, 500, 400, 300, 200, 100};
 char highscoreName1[11] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', '\0'}; 
 char highscoreName2[11] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', '\0'}; 
 char highscoreName3[11] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', '\0'}; 
@@ -215,8 +215,8 @@ void loop(){
   time = 0;
   while(requestedScreen == SCREEN_KO1_MULTIBALL){
     time++;
-    centerString(tmpBmp, "START MODE", 1);
-    centerString(tmpBmp, "FOR", 11);
+    centerString(tmpBmp, "START MODE", 2);
+    centerString(tmpBmp, "FOR", 12);
     centerString(tmpBmp, "MULTIBALL", 22);
     
     DisplayMatrix(tmpBmp);
@@ -288,14 +288,6 @@ void loop(){
       drawSmallString(tmpBmp, bufScore, 40, k*8, 50);
     }
     
-    byte best = 0;
-    for(byte k = 0; k < nbPlayer ; k++){
-      if(playersScore[k] > playersScore[best]) best = k;
-    }
-    
-    //Highlist winning player
-    //drawInvertRect(tmpBmp, 0, 0, 64, 32);
-     
     DisplayMatrix(tmpBmp);
     EmptyMatrix(tmpBmp);
   }
@@ -570,6 +562,7 @@ void loop(){
   }
   while(requestedScreen == SCREEN_SALIMUSTAPINBALL){
     copyFrames(SalimUstaPinballFullBmp, tmpBmp);
+    //drawInvertRect(tmpBmp, 0, 0, 64, 32);
     
     DisplayMatrix(tmpBmp);
     EmptyMatrix(tmpBmp);
@@ -1175,15 +1168,20 @@ void loop(){
   x = -64;
   time = 0;
   unsigned long scoreDisplayed = 0;
-  //score = 12305;
+  unsigned long millier, centaine;
+  //score = 12001;
   while(requestedScreen == SCREEN_SCORE_RESULT){
     time++;
     int scoreInc = score / 20;
     if(scoreDisplayed < score) scoreDisplayed += scoreInc;
     else scoreDisplayed = score;
     
-    char bufHits[5];
-    sprintf(bufHits, "%lu", scoreDisplayed);
+    millier = scoreDisplayed / 1000;
+    centaine = scoreDisplayed % 1000;
+    
+    char bufHits[6];
+    if(millier == 0) sprintf(bufHits, "%lu", scoreDisplayed);
+    else sprintf(bufHits, "%lu'%03lu", millier, centaine);
     centerString(tmpBmp, bufHits, 11);
     
     DisplayMatrix(tmpBmp);
@@ -1266,6 +1264,7 @@ void loop(){
           scoreDisplayed = 0;
         }
       }
+      //if we hit the end of the list
       if(i == 11){
         //i = 0;
         displayHighScore = false;
@@ -1295,28 +1294,29 @@ void loop(){
       }else{
         
         //Display Score Rank
-        char buf[1];
+        char buf[2];
         sprintf(buf, "%d", i);
+        
         if( y > 3 && flag) y--;
         else if(!flag && y > -20 && time > 130) y--;
         if(!flag && time > 130) y2++;
         else y2 = 19;
         
         //Draw High Score Number
-        if(i != 10) drawString(tmpBmp, buf, 0, y, 50);
+        //drawString(tmpBmp, buf, 0, y, 50);
         
         //Display Name
         
-        if(i == 1) drawString(tmpBmp, highscoreName1, 10, y, 50);
-        else if(i == 2) drawString(tmpBmp, highscoreName2, 10, y, 50);
-        else if(i == 3) drawString(tmpBmp, highscoreName3, 10, y, 50);
-        else if(i == 4) drawString(tmpBmp, highscoreName4, 10, y, 50);
-        else if(i == 5) drawString(tmpBmp, highscoreName5, 10, y, 50);
-        else if(i == 6) drawString(tmpBmp, highscoreName6, 10, y, 50);
-        else if(i == 7) drawString(tmpBmp, highscoreName7, 10, y, 50);
-        else if(i == 8) drawString(tmpBmp, highscoreName8, 10, y, 50);
-        else if(i == 9) drawString(tmpBmp, highscoreName9, 10, y, 50);
-        else if(i == 10) drawString(tmpBmp, highscoreName10, 10, y, 50);
+        if(i == 1) drawString(tmpBmp, highscoreName1, 0, y, 50);
+        else if(i == 2) drawString(tmpBmp, highscoreName2, 0, y, 50);
+        else if(i == 3) drawString(tmpBmp, highscoreName3, 0, y, 50);
+        else if(i == 4) drawString(tmpBmp, highscoreName4, 0, y, 50);
+        else if(i == 5) drawString(tmpBmp, highscoreName5, 0, y, 50);
+        else if(i == 6) drawString(tmpBmp, highscoreName6, 0, y, 50);
+        else if(i == 7) drawString(tmpBmp, highscoreName7, 0, y, 50);
+        else if(i == 8) drawString(tmpBmp, highscoreName8, 0, y, 50);
+        else if(i == 9) drawString(tmpBmp, highscoreName9, 0, y, 50);
+        else if(i == 10) drawString(tmpBmp, highscoreName10, 0, y, 50);
           
         //Display Score
         if(!flag){
@@ -1324,7 +1324,12 @@ void loop(){
           int scoreInc = scoresTab[i-1] / 20;
           if(scoreDisplayed < scoresTab[i-1] ) scoreDisplayed += scoreInc;
           else scoreDisplayed = scoresTab[i-1];
-          sprintf(bufScore, "%lu", scoreDisplayed);
+          
+          millier = scoreDisplayed / 1000;
+          centaine = scoreDisplayed % 1000;
+          
+          if(millier == 0) sprintf(bufScore, "%s- %lu", buf, scoreDisplayed);
+          else sprintf(bufScore, "%s- %lu'%03lu", buf, millier, centaine);
           
           centerString(tmpBmp, bufScore, y2);
         }

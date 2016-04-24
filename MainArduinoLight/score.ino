@@ -1,6 +1,6 @@
 
 void TestScore(){
-  /*delay(3000);
+  delay(3000);
   //printLine("7-DIGIT Test", "Sending test...");
   DisableIncrementalScore();
   score = 12345;
@@ -26,7 +26,7 @@ void TestScore(){
   score = 12345; DisplayScore(score); delay(200);
   BlinkScore(); delay(3000);
   
-  score = 0; DisplayScore(score);*/
+  score = 0; DisplayScore(score);
 }
 void SendScoreCommand(byte command){
   Wire.beginTransmission(1);
