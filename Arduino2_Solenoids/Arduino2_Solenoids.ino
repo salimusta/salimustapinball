@@ -76,8 +76,8 @@ bool shooterRequested = false;
 unsigned long timeRampABall = 0;
 
 
-const int POWER_TIME_LEFT_MS =  190;
-const int POWER_TIME_RIGHT_MS =  190;
+const int POWER_TIME_LEFT_MS =  170;
+const int POWER_TIME_RIGHT_MS =  170;
 const int HOLDON_PERIOD_MS =  16;
 const int HOLDON_DURATION_MS =  5;
 
@@ -97,7 +97,7 @@ short decalage3 = 130;
 long randomTime = 0;
 
 void setup() {
- Serial.begin(9600); 
+ //Serial.begin(9600); 
 
  SPI.begin(); 
  SPI.setBitOrder(MSBFIRST); 
@@ -153,14 +153,14 @@ void receiveEvent(int howMany) {
       //Serial.print("KICKOUT 1\n");
       kickout1Requested = true;
       Kickout1_Duration = 0;
-      randomTime = random(120);
-      KICKOUT1_FIRE_DURATION = 110 + randomTime;
+      randomTime = random(30);
+      KICKOUT1_FIRE_DURATION = 70 + randomTime;
     }else if(data == 60){
       //Serial.print("KICKOUT 2\n");
       kickout2Requested = true;
       Kickout2_Duration = 0;
-      randomTime = random(60);
-      KICKOUT2_FIRE_DURATION = 120 + randomTime;
+      randomTime = random(30);
+      KICKOUT2_FIRE_DURATION = 100 + randomTime;
     }else if(data == 80){
       kickersEnabled = false;
       
@@ -333,6 +333,12 @@ void loop() {
     testRequested = false;
   }
   
+  //At any time, if RAMP = ON Ramp the ball
+  if(!rampABallRequested && RampState == HIGH){
+     rampABallRequested = true;
+     timeRampABall = millis() + 500;
+  }
+  
   //Push the ball trough sequence, we shoot a need ball
   if(rampABallRequested){
     unsigned long timeSinceRequested = time - timeRampABall;
@@ -340,36 +346,32 @@ void loop() {
     //End the sequence after 2173 ms (then shoot if needed)
     if(timeSinceRequested > 3000 && timeSinceRequested < 10000){
       rampABallRequested = false;
-    
+      Ramping = false;
+      
     //Check if the ball fell down, refire again
     }else if(timeSinceRequested > 2500){
-      //Serial.print("RAMP TEST\n");
+      Ramping = true;
       if(RampState == HIGH){
-        //Serial.print("RAMP ON\n");
         timeRampABall = time - 500;
       }  
     
-    //Cut the powering session
+    //Cut the powering session Ramp off
     }else if(timeSinceRequested > 1027){
       SolenoidOff(3);
-      Ramping = false;
-      
-    }else if(timeSinceRequested > 1005 || Ramping){
-      //If one of the flippers are on, wait for them to be released to fire the ball
-      if(!Ramping && (leftSolenoidState == 1 || rightSolenoidState == 1)){
-        timeRampABall += time - old_time;
-      }else{
-        SolenoidOn(3);
-        Ramping = true;
-      }
+      Ramping = true;
+    //Open Ramp
+    }else if(timeSinceRequested > 1005){
+      SolenoidOn(3);
+      Ramping = true;
       
     //Close Trieur
     }else if(timeSinceRequested > 300){
       SolenoidOff(2);
-    
+      Ramping = true;
     //Open Trieur
     }else if(timeSinceRequested >= 0){
       SolenoidOn(2);
+      Ramping = true;
     }
   }
   
@@ -393,16 +395,16 @@ void loop() {
   
   
   if(buttonLeftState != buttonLeftOldState && buttonLeftState == HIGH){
-    if(time - leftFlipper_startTime > 100){
+    //if(time - leftFlipper_startTime > 20){
       leftFlipper_startTime = time;
       //Serial.print("LEFT ON\n");
-    }
+    //}
   }
   if(buttonRightState != buttonRightOldState && buttonRightState == HIGH){
-    if(time - rightFlipper_startTime > 100){
+    //if(time - rightFlipper_startTime > 20){
       rightFlipper_startTime = time;
       //Serial.print("RIGHT ON\n");
-    }
+   // }
   }
   
   if(buttonLeftState == HIGH){
@@ -533,7 +535,7 @@ void loop() {
       SolenoidStatesBankA(leftSolenoidState, rightSolenoidState, Bumper1_State, Bumper2_State, Bumper3_State);
       SolenoidStatesBankB(RightKicker_State, LeftKicker_State, Kickout1_State, Kickout2_State, Shooter_State);
     }else{
-      SolenoidStatesBankA(leftSolenoidState, rightSolenoidState, 0, 0, 0);
+      SolenoidStatesBankA(0, 0, 0, 0, 0);
       SolenoidStatesBankB(0, 0, Kickout1_State, Kickout2_State, Shooter_State);
     }
     

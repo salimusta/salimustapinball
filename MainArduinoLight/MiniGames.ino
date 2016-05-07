@@ -34,6 +34,7 @@ void PlayBallGame(){
       PlaySound(MULTIBALL_SOUND);
       FireANewBall();
       PlayRandomMultiballMusic();
+      delay(2000);
     }
     DisplayScore(score);
     delay(50);
@@ -126,6 +127,7 @@ void PlayStarWarsGame(){
       PlaySound(MULTIBALL_SOUND);
       FireANewBall();
       PlayRandomMultiballMusic();
+      delay(2000);
     }
     DisplayScore(gameScore);
     delay(50);

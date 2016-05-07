@@ -364,7 +364,7 @@ void ManageGame() {
     
     if(TILT_Time < 10000) TILT_Time++;
     //TILT Management----------------------------------------
-    if(TILT && TILT_Time > 2000){
+    if(TILT && TILT_Time > 2000 && ballInPlay > 0){
       TILT_WarningCount++; 
       TILT_Time = 0;
       if(TILT_WarningCount == 1){
@@ -837,10 +837,10 @@ void ManageGame() {
       
       if (KO1_Old || ballCatchedInHole1) {
         timeInHole1++;
-        //KICK THE BALL OUT
+        //KICK THE BALL OUT when the
         if(ballCatchedInHole2 && ballInPlay < 3){
           FireANewBall();
-          delay(500);
+          delay(2000);
         
         //if first ball catched & no mode, launch a ball
         }else if (timeInHole1 >= 30000 && !ballCatchedInHole2) {
@@ -878,6 +878,7 @@ void ManageGame() {
             RestoreLight();
             FireANewBall();
             PlayRandomMultiballMusic();
+            delay(2000);
             
             AnimLightData(DATA_KO1, 0b00001);
           }
@@ -1253,12 +1254,13 @@ void ManageGame() {
       }
   
       //Multiball Activation
+      /*
       if ( nbBall == 1 && (ROSW2 || ROSW1 || ROSW3) && ballInPlay == 1) {
         DisplayScreen(SCREEN_MULTIBALL, PRIORITY_HIGH);
         PlaySound(MULTIBALL_SOUND);
         FireANewBall();
         PlayRandomMultiballMusic();
-      }
+      }*/
     }else{ // END TILT Active
     
       //Manage KO2 Kickout event if Tilt Acrive
