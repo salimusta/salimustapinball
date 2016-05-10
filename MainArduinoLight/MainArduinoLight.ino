@@ -115,7 +115,7 @@ void loop() {
     AnimLight(ALL_ANIM_OFF);
     AnimLight2(ALL_ANIM_OFF);
     PlaySound(DESIREHEY);
-    while(1) ManageMaintenanceMode(); 
+    //while(1) ManageMaintenanceMode(); 
   }else{
     DisplayScreen(SCREEN_HIGHSCORES, PRIORITY_LOW);
     WaitForRestart();

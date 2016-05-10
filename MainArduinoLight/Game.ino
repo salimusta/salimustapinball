@@ -361,6 +361,7 @@ void ManageGame() {
 
     ReadSwitches();
     ReadSolenoidSwitches();
+    ReadBluetoothState();
     
     if(TILT_Time < 10000) TILT_Time++;
     //TILT Management----------------------------------------

@@ -1,4 +1,4 @@
-short menu = 1;
+/*short menu = 1;
 
 void ManageMaintenanceMode(){
   //Reading menu buttons
@@ -41,9 +41,6 @@ void ManageMaintenanceMode(){
         menu = 27;
       }
     }
-    /*Serial.print("MENU = ");
-    Serial.print(menu);
-    Serial.print("\n");*/
   }
   if(OkButton_State != OkButton_State_Old && OkButton_State == HIGH){
     //Serial.print("Button OK ON\n");
@@ -140,4 +137,4 @@ void ManageMaintenanceMode(){
   rightButton_State_Old = rightButton_State;
   OkButton_State_Old = OkButton_State;
   BackButton_State_Old = BackButton_State;
-}
+}*/

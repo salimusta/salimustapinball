@@ -61,3 +61,11 @@ void EmptyAllBalls(){
 }
 
 
+void SendSolenoidData(byte data){
+  //Begin and send test signal
+  Wire.beginTransmission(2);
+  Wire.write(data);
+  Wire.endTransmission();
+}
+
+
