@@ -31,6 +31,9 @@ int buttonRightState = 0;
 int buttonLeftOldState = 0;
 int buttonRightOldState = 0;
 
+int btButtonLeftState = 0;
+int btButtonRightState = 0;
+
 int BASW1State = 0;
 int BASW2State = 0;
 int BASW3State = 0;
@@ -97,7 +100,7 @@ short decalage3 = 130;
 long randomTime = 0;
 
 void setup() {
- //Serial.begin(9600); 
+ Serial.begin(9600); 
 
  SPI.begin(); 
  SPI.setBitOrder(MSBFIRST); 
@@ -169,6 +172,11 @@ void receiveEvent(int howMany) {
       timeRampABall = millis();
       shooterRequested = true;
       Shooter_Duration = 0;
+    }else{
+      //custom Data
+      
+      btButtonLeftState = (data & 0x2) >> 1;
+      btButtonRightState = data & 0x1;
     }
   }
 }
@@ -201,6 +209,17 @@ int rightFlipper_Time = 0;
 unsigned long time;
 unsigned long old_time = 0;
 
+void ReadBluetoothCommand() {
+
+  bool btLeftButton, btRightButton;
+  Wire.requestFrom(8, 1);
+  while (Wire.available()) {
+    char c = Wire.read(); // receive a byte as character
+    
+  }
+  
+}
+
 void loop() {
   time = millis();
   
@@ -212,6 +231,10 @@ void loop() {
   RKickerState = digitalRead(RKickerPin);
   LKickerState = digitalRead(LKickerPin);
   RampState = digitalRead(RampPin);
+  
+  //Bluetooth
+  if(btButtonLeftState == 1) buttonLeftState = HIGH;
+  if(btButtonRightState == 1) buttonRightState = HIGH;
 
   int leftSolenoidState = 0;
   int rightSolenoidState = 0;
