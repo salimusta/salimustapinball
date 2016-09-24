@@ -33,7 +33,6 @@
 //    not make as much sense. If you do, make sure your tracks are at least 10
 //    to 20 seconds long and have no silence at the start of the file.
 
-#include "Metro.h"
 #include "AltSoftSerial.h"    // Arduino build environment requires this
 #include "wavTrigger.h"
 
@@ -41,8 +40,6 @@
 
 wavTrigger wTrig;             // Our WAV Trigger object
 
-Metro gLedMetro(500);         // LED blink interval timer
-Metro gWTrigMetro(6000);      // WAV Trigger state machine interval timer
 
 byte gLedState = 0;           // LED State
 int  gWTrigState = 0;         // WAV Trigger state
@@ -62,6 +59,7 @@ void setup() {
   // WAV Trigger startup at 57600
   wTrig.start();
   
+  
   // If the Uno is powering the WAV Trigger, we should wait for the WAV Trigger
   //  to finish reset before trying to send commands.
   delay(1000);
@@ -70,6 +68,9 @@ void setup() {
   //  was already playing tracks. If we are powering the WAV Trigger, it doesn't
   //  hurt to do this.
   wTrig.stopAllTracks();
+  
+  Serial.print("TEST\n");
+
   
 }
 
@@ -83,11 +84,12 @@ void loop() {
   
   delay(2000);
   wTrig.masterGain(0);
-  wTrig.trackGain(102, -20);
+  wTrig.trackGain(102, 0);
   
   
-  wTrig.trackPlayPoly(102);
-  delay(3000);
+  wTrig.trackPlayPoly(100);
+  delay(10000);
+  /*delay(3000);
   
   
   wTrig.trackPlayPoly(14);
@@ -122,7 +124,7 @@ void loop() {
   wTrig.trackPlayPoly(9);
   delay(500);
   
-  delay(600000);
+  delay(600000);*/
   /*
 int i;
 

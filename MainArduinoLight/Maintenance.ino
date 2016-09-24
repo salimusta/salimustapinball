@@ -1,4 +1,4 @@
-/*short menu = 1;
+short menu = 1;
 
 void ManageMaintenanceMode(){
   //Reading menu buttons
@@ -137,4 +137,4 @@ void ManageMaintenanceMode(){
   rightButton_State_Old = rightButton_State;
   OkButton_State_Old = OkButton_State;
   BackButton_State_Old = BackButton_State;
-}*/
+}

@@ -5,7 +5,7 @@ void AmbiLight(byte light){
   Wire.endTransmission();
 }
 void TestAmbiLights(){
-  /*AmbiLight(ALL_OFF);
+  AmbiLight(ALL_OFF);
   printLine("Ambi Lights Test", ".....");
   AmbiLight(RED_ON); delay(2000); AmbiLight(RED_OFF);
 
@@ -15,5 +15,5 @@ void TestAmbiLights(){
 
   AmbiLight(BLUE_ON); delay(2000); AmbiLight(BLUE_OFF);
 
-  AmbiLight(ALL_ON); delay(2000); AmbiLight(ALL_OFF);*/
+  AmbiLight(ALL_ON); delay(2000); AmbiLight(ALL_OFF);
 }

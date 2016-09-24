@@ -86,7 +86,7 @@ void setup() {
 
 void loop() {
   SendHighScores();
-
+  PlaySound(DESIREHEY);
   /*---------*/
   /*DisplayScreen(SCREEN_SALIMUSTAPINBALL, PRIORITY_LOW);
 

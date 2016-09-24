@@ -39,7 +39,7 @@ void AnimLightData2(byte light, byte data){
 
 void TestAnimLights(){
   
-  /*
+  
   AnimLight(FLASH_TOP_LIGHTS); delay(2000); AnimLight(LIGHT_TOP_LIGHTS); delay(2000); AnimLight(ALTERN_TOP_LIGHTS); delay(2000); AnimLight(OFF_TOP_LIGHTS); delay(2000);
   AnimLight(SNAKE_LEFT_GREEN_TARGET); delay(2000); AnimLight(BLINK_LEFT_GREEN_TARGET); delay(2000); AnimLight(OFF_LEFT_GREEN_TARGET); delay(2000);
   AnimLight(SNAKE_LEFT_RED_TARGET); delay(2000); AnimLight(BLINK_LEFT_RED_TARGET); delay(2000); AnimLight(OFF_LEFT_RED_TARGET); delay(2000);
@@ -57,6 +57,6 @@ void TestAnimLights(){
   AnimLight(SNAKE_LAUNCHER); delay(2000); AnimLight(LAUNCHER_OFF); delay(2000); AnimLight(BLINK_LOOSE); delay(2000); AnimLight(LOOSE_OFF); delay(2000);
   AnimLight(SNAKE_KO1); delay(2000); AnimLight(BLINK_KO1); delay(2000); AnimLight(KO1_OFF); delay(2000);
   AnimLight(SNAKE_KO2); delay(2000); AnimLight(BLINK_KO2); delay(2000); AnimLight(KO2_OFF); delay(2000);
-  */
+  
   
 }

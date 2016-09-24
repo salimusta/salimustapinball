@@ -33,8 +33,8 @@
  //#define OUTPUT_COMPARE_C_PIN		 4 // unusable PWM
 
  #define ALTSS_USE_TIMER3
- #define INPUT_CAPTURE_PIN		10 // receive
- #define OUTPUT_COMPARE_A_PIN		 9 // transmit
+ #define INPUT_CAPTURE_PIN		10 // receive, was 10
+ #define OUTPUT_COMPARE_A_PIN		 9 // transmit, was 9
 
 
 
@@ -84,10 +84,15 @@
 //
 #elif defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__)
 
- #define ALTSS_USE_TIMER1
- #define INPUT_CAPTURE_PIN		 8 // receive
- #define OUTPUT_COMPARE_A_PIN		 9 // transmit
- #define OUTPUT_COMPARE_B_PIN		10 // unusable PWM
+ /*#define ALTSS_USE_TIMER1
+ #define INPUT_CAPTURE_PIN		 48 // receive, was 8
+ #define OUTPUT_COMPARE_A_PIN		 46 // transmit wa 9
+ #define OUTPUT_COMPARE_B_PIN		44 // unusable PWM wa 10*/
+ #define ALTSS_USE_TIMER5
+ #define INPUT_CAPTURE_PIN		48 // receive
+ #define OUTPUT_COMPARE_A_PIN		46 // transmit
+ #define OUTPUT_COMPARE_B_PIN		45 // unusable PWM
+ #define OUTPUT_COMPARE_C_PIN		44 // unusable PWM
 
 
 // Arduino Leonardo & Yun (from Cristian Maglie)
@@ -135,4 +140,5 @@
 #else
 #error "Please define your board timer and pins"
 #endif
+
 
