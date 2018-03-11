@@ -11,6 +11,11 @@ typedef struct {
   short nbBump;
   short nbTarget;
   bool alreadyActivatedModes[9] = {false, false, false, false, false, false, false, false, false};
+  byte leftRedTarget_Status;
+  byte rightRedTarget_Status;
+  byte leftGreenTarget_Status;
+  byte rightGreenTarget_Status;
+  byte yellowTarget_Status;
 
 }Player;
 
@@ -31,10 +36,13 @@ void initPlayers(byte nb){
     players[i].psitModeState = 0;
     players[i].nbBump = 0;
     players[i].nbTarget = 0;
-
+    players[i].leftRedTarget_Status = 0;
+    players[i].rightRedTarget_Status = 0;
+    players[i].leftGreenTarget_Status = 0;
+    players[i].rightGreenTarget_Status = 0;
+    players[i].yellowTarget_Status = 0;
     for(byte j = 0; j < 9; j++) players[i].alreadyActivatedModes[j] = false;
   }
-
 }
 
 void SelectPlayer(byte index){
@@ -51,6 +59,11 @@ void SelectPlayer(byte index){
   for(byte j = 0; j < 9; j++){
     players[currentPlayer].alreadyActivatedModes[j] = alreadyActivatedModes[j];
   }
+   players[currentPlayer].leftRedTarget_Status = leftRedTarget_Status;
+   players[currentPlayer].rightRedTarget_Status = rightRedTarget_Status;
+   players[currentPlayer].leftGreenTarget_Status = leftGreenTarget_Status;
+   players[currentPlayer].rightGreenTarget_Status = rightGreenTarget_Status;
+   players[currentPlayer].yellowTarget_Status = yellowTarget_Status;
   
   
   //Load the selected player status
@@ -66,6 +79,11 @@ void SelectPlayer(byte index){
   for(byte j = 0; j < 9; j++){
     alreadyActivatedModes[j] = players[currentPlayer].alreadyActivatedModes[j];
   }
+  leftRedTarget_Status = players[index].leftRedTarget_Status;
+  rightRedTarget_Status = players[index].rightRedTarget_Status;
+  leftGreenTarget_Status = players[index].leftGreenTarget_Status;
+  rightGreenTarget_Status = players[index].rightGreenTarget_Status;
+  yellowTarget_Status = players[index].yellowTarget_Status;
 
   currentPlayer = index;
 }

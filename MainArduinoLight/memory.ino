@@ -1,7 +1,7 @@
 
 /*EEPROM memory adress
 
-TOTAL 1000 Byte
+TOTAL 4096 Byte
 
 1 index = 1 Byte
 
@@ -17,6 +17,9 @@ LONGS (4 Bytes)
 35: Score 8
 40: Score 9
 45: Score 10
+
+60: Credit
+65: Total Credit Inserted
 
 
 CHAR ( 10 caractere par nom)
@@ -40,7 +43,23 @@ CHAR ( 10 caractere par nom)
 750: Total Game played
 
 */
+long ReadPinballData(int index){
 
+  if( index == 0) return ReadNumber(600);
+  if( index == 1) return ReadNumber(650);
+  if( index == 2) return ReadNumber(700);
+  if( index == 3) return ReadNumber(750);
+  
+  return 0;
+}
+
+void ResetPinballData() {
+  WriteNumber(600, 0);
+  WriteNumber(650, 0);
+  WriteNumber(700, 0);
+  WriteNumber(750, 0);
+  
+}
 void WritePinballData(long ballFired, long bumperFired, long targets, long games){
   long ballFiredTotal = ReadNumber(600) + ballFired;
   long bumperFiredTotal = ReadNumber(650) + bumperFired;
@@ -102,27 +121,27 @@ void ReadName(int adress, char buf[10]){
 }
 
 void ResetScoreMemory(){
-  WriteName(100, "SALIMUSTA");
-  WriteName(150, " ");
-  WriteName(200, " ");
-  WriteName(250, " ");
-  WriteName(300, " ");
-  WriteName(350, " ");
-  WriteName(400, " ");
-  WriteName(450, " ");
-  WriteName(500, " ");
-  WriteName(550, " ");
+  WriteName(100, "SALIM");
+  WriteName(150, "BOGOSS");
+  WriteName(200, "REDA");
+  WriteName(250, "AXEL");
+  WriteName(300, "KENNY");
+  WriteName(350, "DAI");
+  WriteName(400, "CAN");
+  WriteName(450, "TONI");
+  WriteName(500, "JAMES");
+  WriteName(550, "KENNY");
   
-  WriteNumber(0, 50);
-  WriteNumber(5, 0);
-  WriteNumber(10, 0);
-  WriteNumber(15, 0);
-  WriteNumber(20, 0);
-  WriteNumber(25, 0);
-  WriteNumber(30, 0);
-  WriteNumber(35, 0);
-  WriteNumber(40, 0);
-  WriteNumber(45, 0);
+  WriteNumber(0, 27310);
+  WriteNumber(5, 24080);
+  WriteNumber(10, 19950);
+  WriteNumber(15, 14370);
+  WriteNumber(20, 13150);
+  WriteNumber(25, 13090);
+  WriteNumber(30, 12910);
+  WriteNumber(35, 12390);
+  WriteNumber(40, 12180);
+  WriteNumber(45, 11370);
 }
 
 void printHighScores(){
@@ -196,6 +215,26 @@ void WriteScoreMemory(){
   WriteNumber(40, scoreTab[8]);
   WriteNumber(45, scoreTab[9]);
 }
+
+void WriteCredit(long creditParam) {
+ WriteNumber(60, creditParam); 
+ totalCredit++;
+ WriteNumber(65, totalCredit); 
+}
+
+long ReadCredit() {
+  return ReadNumber(60);
+}
+
+long ReadTotalCredit() {
+  return ReadNumber(65);
+}
+
+void ResetCredit() {
+  WriteNumber(60, 0);
+  WriteNumber(65, 0);
+}
+
 
 long getMinScore(){
   return scoreTab[9];

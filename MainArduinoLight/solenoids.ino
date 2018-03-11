@@ -19,6 +19,11 @@ void ShootABall(){
   SendSolenoidCommand(90);
 }
 
+void ShootABallOnly(){
+  //send a Shoot command to the Solenoid arduino
+  SendSolenoidCommand(100);
+}
+
 void EnableFlippers(){
   //send a Launch command to the Solenoid arduino
   SendSolenoidCommand(40);

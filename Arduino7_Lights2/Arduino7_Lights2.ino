@@ -42,6 +42,7 @@ void setup() {
   Wire.begin(7);
   Wire.onReceive(receiveEvent);
   
+ 
 }
 
 //ALL param
@@ -51,17 +52,17 @@ byte allAnimModeFrame = 0;
 bool allAnim = false;
        
 //RAMP GATE --------------------
-byte RampGateAnim = 0;
-byte RampGateAnimMode = RAMPGATE_OFF;
-byte RampGateAnimMode_Old = RAMPGATE_OFF;
+byte RampGateAnim = 1;
+byte RampGateAnimMode = RAMPGATE_DUAL_SNAKE;
+byte RampGateAnimMode_Old = RAMPGATE_DUAL_SNAKE;
 int RampGateAnimTime = 0;
 byte RampGateData = 0;
 bool RampGateSide = true; 
        
 //RAMP-------------------------------
-byte RampAnim = 0;
-byte RampAnimMode = RAMP_OFF;
-byte RampAnimMode_Old = RAMP_OFF;
+byte RampAnim = 1;
+byte RampAnimMode = RAMP_SNAKE;
+byte RampAnimMode_Old = RAMP_SNAKE;
 int RampAnimTime = 0;
 byte RampData = 0;
 

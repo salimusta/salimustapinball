@@ -5,24 +5,28 @@
 #define BANK_ONE 1 
 #define BANK_ZERO 0 
 #define pinMOSI 11
-#define DEBUG false
+#define DEBUG 0
 
 //PIN Connections
-const int buttonLeftPin = 2;
-const int buttonRightPin = 3;
+const int buttonLeftPin = 2; //Switch to activate left flipper
+const int buttonRightPin = 3; //Switch to activate right flipper
 const int BASW1Pin = 4;
 const int BASW2Pin = 5;
 const int BASW3Pin = 6;
 const int RKickerPin = 8;
 const int LKickerPin = 7;
-
 const int RampPin = 9;
+const int TopKickerPin = 12;
 
 //Data buffers
 unsigned char dataSolenoid = 0;
 unsigned char dataSolenoidOld = 99;
 unsigned char dataSolenoidBankB = 0;
 unsigned char dataSolenoidBankBOld = 99;
+
+byte lastData0 = 0;
+byte lastData1 = 0;
+
 byte board = 0;
 
 //Switches State
@@ -31,6 +35,7 @@ int buttonRightState = 0;
 int buttonLeftOldState = 0;
 int buttonRightOldState = 0;
 
+//BlueTooth feature
 int btButtonLeftState = 0;
 int btButtonRightState = 0;
 
@@ -46,49 +51,56 @@ int LKickerState = 0;
 int RKickerOldState = 0;
 int LKickerOldState = 0;
 
+int TopKickerState = 0;
+int TopKickerOldState = 0;
+
 int RampState = 0;
 int RampOldState = 0;
 
-int Bumper1_Duration = 9999;
-int Bumper2_Duration = 9999;
-int Bumper3_Duration = 9999;
+unsigned long Bumper1_Duration = 9999;
+unsigned long Bumper2_Duration = 9999;
+unsigned long Bumper3_Duration = 9999;
 
-int timeSinceFiredBumper1 = 0;
-int timeSinceFiredBumper2 = 0;
-int timeSinceFiredBumper3 = 0;
+unsigned long timeSinceFiredBumper1 = 10000;
+unsigned long timeSinceFiredBumper2 = 10000;
+unsigned long timeSinceFiredBumper3 = 10000;
 
-int RightKicker_Duration = 9999;
-int LeftKicker_Duration = 9999;
+long RightKicker_Duration = 9999;
+long LeftKicker_Duration = 9999;
 
-int Kickout1_Duration = 9999;
-int Kickout2_Duration = 9999;
+long Kickout1_Duration = 9999;
+long Kickout2_Duration = 9999;
 
-int Shooter_Duration = 9999;
+long TopKicker_Duration = 9999;
+
+long Shooter_Duration = 9999;
 
 bool KICKER_LEFT = 0;
 bool KICKER_RIGHT = 0;
+bool KICKER_TOP = 0;
 
 bool rampABallRequested = false;
 bool testRequested = false;
 bool flippersEnabled = false;
-bool kickersEnabled = true;
+bool kickersEnabled = false;
 bool kickout1Requested = false;
 bool kickout2Requested = false;
 bool shooterRequested = false;
+bool shooterOnlyRequested = false;
 
 unsigned long timeRampABall = 0;
 
-
-const int POWER_TIME_LEFT_MS =  170;
-const int POWER_TIME_RIGHT_MS =  170;
-const int HOLDON_PERIOD_MS =  16;
-const int HOLDON_DURATION_MS =  5;
+//FILPPER CONFIGURATION
+const int POWER_TIME_LEFT_MS =  300;
+const int POWER_TIME_RIGHT_MS =  300;
+const int HOLDON_PERIOD_MS =  15;
+const int HOLDON_DURATION_MS =  2;
 
 const int BUMPER1_FIRE_DURATION = 130;
 const int BUMPER2_FIRE_DURATION = 200;
 const int BUMPER3_FIRE_DURATION = 150;
 
-const int KICKER_FIRE_DURATION = 1000;
+const int KICKER_FIRE_DURATION = 200;
 int KICKOUT1_FIRE_DURATION = 100;
 int KICKOUT2_FIRE_DURATION = 100;
 int SHOOTER_FIRE_DURATION = 450;
@@ -100,7 +112,7 @@ short decalage3 = 130;
 long randomTime = 0;
 
 void setup() {
- Serial.begin(9600); 
+ if(DEBUG) Serial.begin(9600); 
 
  SPI.begin(); 
  SPI.setBitOrder(MSBFIRST); 
@@ -114,16 +126,17 @@ void setup() {
  pinMode(RKickerPin, INPUT);
  pinMode(LKickerPin, INPUT);
  pinMode(RampPin, INPUT);
+ pinMode(TopKickerPin, INPUT);
  
  Wire.begin(2);
  Wire.onReceive(receiveEvent);
  Wire.onRequest(requestEvent);
 
  SolenoidStatesBankA(0, 0, 0, 0, 0);
- SolenoidStatesBankB(0, 0, 0, 0, 0);
+ SolenoidStatesBankB(0, 0, 0, 0, 0, 0);
  SolenoidOff(2);
  SolenoidOff(3);
-
+ if(DEBUG) Serial.print("ARDUINO 1 SOLENOID\n");
 }
 
 
@@ -142,39 +155,45 @@ void receiveEvent(int howMany) {
     if(data == 10){
       rampABallRequested = true;
       timeRampABall = millis();
-      //Serial.print("RAMP A BALL\n");
+      if(DEBUG) Serial.print("RAMP A BALL\n");
     }else if(data == 20){
       testRequested = true;
+      if(DEBUG) Serial.print("Test Requested\n");
     }else if(data == 30){
-      //Serial.print("FLIPPERS DISABLED\n");
+      if(DEBUG) Serial.print("FLIPPERS DISABLED\n");
       flippersEnabled = false;
     }else if(data == 40){
-      //Serial.print("FLIPPERS ENABLED\n");
+      if(DEBUG) Serial.print("FLIPPERS ENABLED\n");
       flippersEnabled = true;
       kickersEnabled = true;
     }else if(data == 50){
-      //Serial.print("KICKOUT 1\n");
+      if(DEBUG) Serial.print("KICKOUT 1\n");
       kickout1Requested = true;
       Kickout1_Duration = 0;
       randomTime = random(30);
       KICKOUT1_FIRE_DURATION = 70 + randomTime;
     }else if(data == 60){
-      //Serial.print("KICKOUT 2\n");
+      if(DEBUG) Serial.print("KICKOUT 2\n");
       kickout2Requested = true;
       Kickout2_Duration = 0;
       randomTime = random(30);
       KICKOUT2_FIRE_DURATION = 100 + randomTime;
     }else if(data == 80){
       kickersEnabled = false;
-      
+      if(DEBUG) Serial.print("Disable Kickers\n");
     }else if(data == 90){
       rampABallRequested = true;
       timeRampABall = millis();
       shooterRequested = true;
       Shooter_Duration = 0;
+      if(DEBUG) Serial.print("Ramp and Shoot\n");
+    }else if(data == 100){
+      shooterOnlyRequested = true;
+      Shooter_Duration = 0;
+      if(DEBUG) Serial.print("Ramp and Shoot\n");
     }else{
       //custom Data
-      
+      if(DEBUG) Serial.print("Custom Data\n");
       btButtonLeftState = (data & 0x2) >> 1;
       btButtonRightState = data & 0x1;
     }
@@ -184,32 +203,35 @@ void receiveEvent(int howMany) {
 void requestEvent()
 {
   //write a byte like 
-  //order starting from bit 0: KickerLeft, KickerRight, LeftFLipper, RightFLipper
+  //order starting from bit 0: KickerTop, KickerLeft, KickerRight, LeftFLipper, RightFLipper
   byte response = buttonRightState;
   response = (response << 1) | buttonLeftState;
   response = (response << 1) | KICKER_RIGHT;
   response = (response << 1) | KICKER_LEFT;
+  response = (response << 1) | KICKER_TOP;
   
   Wire.write(response); 
 }
 
 
-int leftFlipper_startTime = 0;
-int rightFlipper_startTime = 0;
-int BASW1_startTime = 0;
-int BASW2_startTime = 0;
-int BASW3_startTime = 0;
-int RKickerSW_startTime = 0;
-int LKickerSW_startTime = 0;
+unsigned long leftFlipper_startTime = 0;
+unsigned long rightFlipper_startTime = 0;
+unsigned long BASW1_startTime = 0;
+unsigned long BASW2_startTime = 0;
+unsigned long BASW3_startTime = 0;
 
-int leftFlipper_Time = 0;
-int rightFlipper_Time = 0;
+unsigned long RKickerSW_startTime = 0;
+unsigned long LKickerSW_startTime = 0;
+unsigned long TopKickerSW_startTime = 0;
+
+unsigned long leftFlipper_Time = 0;
+unsigned long rightFlipper_Time = 0;
 
 
 unsigned long time;
 unsigned long old_time = 0;
 
-void ReadBluetoothCommand() {
+void d() {
 
   bool btLeftButton, btRightButton;
   Wire.requestFrom(8, 1);
@@ -231,6 +253,7 @@ void loop() {
   RKickerState = digitalRead(RKickerPin);
   LKickerState = digitalRead(LKickerPin);
   RampState = digitalRead(RampPin);
+  TopKickerState = digitalRead(TopKickerPin);
   
   //Bluetooth
   if(btButtonLeftState == 1) buttonLeftState = HIGH;
@@ -243,116 +266,118 @@ void loop() {
   int Bumper3_State = 0;
   int RightKicker_State = 0;
   int LeftKicker_State = 0;
+  int TopKicker_State = 0;
   int Kickout1_State = 0;
   int Kickout2_State = 0;
   int Shooter_State = 0;
   
   bool Ramping = false;
 
+  //KICKOUTS------------------------------------
   if(kickout1Requested){
     Kickout1_State = 1;
     Kickout1_Duration++;
     if(Kickout1_Duration > KICKOUT1_FIRE_DURATION){
-      Kickout1_Duration = 999;
+      Kickout1_Duration = 9999;
       kickout1Requested = false;
     }
   }
   if(kickout2Requested){
-    //Serial.print("REQUESTED");
     Kickout2_State = 1;
     Kickout2_Duration++;
     if(Kickout2_Duration > KICKOUT2_FIRE_DURATION){
-      Kickout2_Duration = 999;
+      Kickout2_Duration = 9999;
       kickout2Requested = false;
     }
   }
 
+  //TEST---------------------------------------
   if(testRequested){
-    //Serial.print("SEQUENCE DE TEST RECU\n");
+    if(DEBUG) Serial.print("SEQUENCE DE TEST RECU\n");
     SolenoidStatesBankA(0, 0, 0, 0, 0);
-    SolenoidStatesBankB(0, 0, 0, 0, 0);
+    SolenoidStatesBankB(0, 0, 0, 0, 0, 0);
     delay(2000);
-    //Serial.print("LEFT FLIPPER\n");
+    if(DEBUG) Serial.print("LEFT FLIPPER\n");
     //LEFT FLIPPER
     SolenoidStatesBankA(1, 0, 0, 0, 0);
     delay(200);
     SolenoidStatesBankA(0, 0, 0, 0, 0);
     delay(2000);
-    //Serial.print("RIGHT FLIPPER\n");
+    if(DEBUG) Serial.print("RIGHT FLIPPER\n");
     //RIGHT FLIPPER
     SolenoidStatesBankA(0, 1, 0, 0, 0);
     delay(200);
     SolenoidStatesBankA(0, 0, 0, 0, 0);
     delay(2000);
-    //Serial.print("TRIEUR\n");
+    if(DEBUG) Serial.print("TRIEUR\n");
     //TRIEUR
     SolenoidOn(2);
     delay(300);
     SolenoidOff(2);
     delay(2000);
-    //Serial.print("RAMP\n");
+    if(DEBUG) Serial.print("RAMP\n");
     //RAMP
     SolenoidOn(3);
     delay(50);
     SolenoidOff(3);
     delay(2000);
     
-    //Serial.print("Bumper 1\n");
+    if(DEBUG) Serial.print("Bumper 1\n");
     //Bumper 1
     SolenoidStatesBankA(0, 0, 1, 0, 0);
     delay(100);
     SolenoidStatesBankA(0, 0, 0, 0, 0);
     delay(2000);
     
-    //Serial.print("Bumper 2\n");
+    if(DEBUG) Serial.print("Bumper 2\n");
     //Bumper 2
     SolenoidStatesBankA(0, 0, 0, 1, 0);
     delay(100);
     SolenoidStatesBankA(0, 0, 0, 0, 0);
     delay(2000);
     
-    //Serial.print("Bumper 3\n");
+    if(DEBUG) Serial.print("Bumper 3\n");
     //Bumper 3
     SolenoidStatesBankA(0, 0, 0, 0, 1);
     delay(100);
     SolenoidStatesBankA(0, 0, 0, 0, 0);
     delay(2000);
     
-    //Serial.print("Kicker Left\n");
+    if(DEBUG) Serial.print("Kicker Left\n");
     //Kicker Left
-    SolenoidStatesBankB(0, 1, 0, 0, 0);
+    SolenoidStatesBankB(0, 1, 0, 0, 0, 0);
     delay(200);
-    SolenoidStatesBankB(0, 0, 0, 0, 0);
+    SolenoidStatesBankB(0, 0, 0, 0, 0, 0);
     delay(2000);
     
-    //Serial.print("Kicker Right\n");
+    if(DEBUG) Serial.print("Kicker Right\n");
     //Kicker Right
-    SolenoidStatesBankB(1, 0, 0, 0, 0);
+    SolenoidStatesBankB(1, 0, 0, 0, 0, 0);
     delay(200);
-    SolenoidStatesBankB(0, 0, 0, 0, 0);
+    SolenoidStatesBankB(0, 0, 0, 0, 0, 0);
     delay(2000);
     
-    //Serial.print("Kickout 1\n");
+    if(DEBUG) Serial.print("Kickout 1\n");
     //Kickout 1
-    SolenoidStatesBankB(0, 0, 1, 0, 0);
+    SolenoidStatesBankB(0, 0, 1, 0, 0, 0);
     delay(50);
-    SolenoidStatesBankB(0, 0, 0, 0, 0);
+    SolenoidStatesBankB(0, 0, 0, 0, 0, 0);
     delay(1000);
     
-    //Serial.print("Kickout 1\n");
+    if(DEBUG) Serial.print("Kickout 1\n");
     //Kickout 1
-    SolenoidStatesBankB(0, 0, 0, 1, 0);
+    SolenoidStatesBankB(0, 0, 0, 1, 0, 0);
     delay(50);
-    SolenoidStatesBankB(0, 0, 0, 0, 0);
+    SolenoidStatesBankB(0, 0, 0, 0, 0, 0);
     delay(1000);
     
     //Shooter
-    SolenoidStatesBankB(0, 0, 0, 0, 1);
+    SolenoidStatesBankB(0, 0, 0, 0, 1, 0);
     delay(50);
-    SolenoidStatesBankB(0, 0, 0, 0, 0);
+    SolenoidStatesBankB(0, 0, 0, 0, 0, 0);
     delay(1000);
     
-    //Serial.print("FIN DE SEQUENCE\n");
+    if(DEBUG) Serial.print("FIN DE SEQUENCE\n");
     testRequested = false;
   }
   
@@ -379,7 +404,7 @@ void loop() {
       }  
     
     //Cut the powering session Ramp off
-    }else if(timeSinceRequested > 1027){
+    }else if(timeSinceRequested > 1028){
       SolenoidOff(3);
       Ramping = true;
     //Open Ramp
@@ -399,35 +424,32 @@ void loop() {
   }
   
   //Shooting sequence
-  if(shooterRequested && !rampABallRequested){
+  if((shooterRequested || shooterOnlyRequested) && !rampABallRequested){
     Shooter_Duration++;
     Shooter_State = 1;
     
     if(Shooter_Duration > SHOOTER_FIRE_DURATION ){
       Shooter_Duration = 9999;
       shooterRequested = false;
+      shooterOnlyRequested = false;
     }
   }
   
   //Ramp switch management
   if(RampState != RampOldState && RampState == HIGH){
-    //Serial.print("RAMP ON\n"); 
+    if(DEBUG) Serial.print("RAMP ON\n"); 
   }else if(RampState != RampOldState && RampState == LOW){
-    //Serial.print("RAMP OFF\n"); 
+    if(DEBUG) Serial.print("RAMP OFF\n"); 
   }
   
   
   if(buttonLeftState != buttonLeftOldState && buttonLeftState == HIGH){
-    //if(time - leftFlipper_startTime > 20){
-      leftFlipper_startTime = time;
-      //Serial.print("LEFT ON\n");
-    //}
+    leftFlipper_startTime = time;
+    if(DEBUG)  Serial.print("LEFT ON\n");
   }
   if(buttonRightState != buttonRightOldState && buttonRightState == HIGH){
-    //if(time - rightFlipper_startTime > 20){
-      rightFlipper_startTime = time;
-      //Serial.print("RIGHT ON\n");
-   // }
+    rightFlipper_startTime = time;
+    if(DEBUG) Serial.print("RIGHT ON\n");
   }
   
   if(buttonLeftState == HIGH){
@@ -459,30 +481,30 @@ void loop() {
     if(time - BASW1_startTime > 100){
       BASW1_startTime = time;
       Bumper1_Duration = 0;
-      //Serial.print("BASW1 ON\n");
+      if(DEBUG) Serial.print("BASW1 ON\n");
     }
   }
   if(BASW2State != BASW2OldState && BASW2State == HIGH){
     if(time - BASW2_startTime > 100){
       BASW2_startTime = time;
       Bumper2_Duration = 0;
-      //Serial.print("BASW2 ON\n");
+      if(DEBUG) Serial.print("BASW2 ON\n");
     }
   }
   if(BASW3State != BASW3OldState && BASW3State == HIGH){
     if(time - BASW3_startTime > 100){
       BASW3_startTime = time;
       Bumper3_Duration = 0;
-      //Serial.print("BASW3 ON\n");
+      if(DEBUG) Serial.print("BASW3 ON\n");
     }
   }
   
   //BUMPER FIRE ACTIVATION
-  
-  if(timeSinceFiredBumper1 > 1000 && Bumper1_Duration < BUMPER1_FIRE_DURATION + decalage){
-    //Adding a little delay to let the ball enter the bumper
-   if (Bumper1_Duration > decalage) Bumper1_State = 1;
-   else Bumper1_State = 0;
+  //BUMPER1_FIRE_DURATION
+  if(timeSinceFiredBumper1 > 500 && Bumper1_Duration < BUMPER1_FIRE_DURATION + decalage){
+   if (Bumper1_Duration > decalage) {
+     Bumper1_State = 1; 
+   }else Bumper1_State = 0;
    Bumper1_Duration++;
    if(Bumper1_Duration == BUMPER1_FIRE_DURATION + decalage) timeSinceFiredBumper1 = 0;
   }else{
@@ -490,9 +512,10 @@ void loop() {
    Bumper1_Duration= 9999;
   }
   
-  if(timeSinceFiredBumper2 > 1000 && Bumper2_Duration < BUMPER2_FIRE_DURATION + decalage2){
-   if (Bumper2_Duration > decalage2) Bumper2_State = 1; 
-   else Bumper2_State = 0;
+  if(timeSinceFiredBumper2 > 500 && Bumper2_Duration < BUMPER2_FIRE_DURATION + decalage2){
+   if (Bumper2_Duration > decalage2) {
+     Bumper2_State = 1;
+   }else Bumper2_State = 0;
    Bumper2_Duration++;
    if(Bumper2_Duration == BUMPER2_FIRE_DURATION + decalage2) timeSinceFiredBumper2 = 0;
   }else{
@@ -500,7 +523,7 @@ void loop() {
    Bumper2_Duration= 9999;
   }
   
-  if(timeSinceFiredBumper3 > 1000 && Bumper3_Duration < BUMPER3_FIRE_DURATION + decalage3){
+  if(timeSinceFiredBumper3 > 500 && Bumper3_Duration < BUMPER3_FIRE_DURATION + decalage3){
    if (Bumper3_Duration > decalage3) Bumper3_State = 1;
    else Bumper3_State = 0;
    Bumper3_Duration++;
@@ -515,25 +538,32 @@ void loop() {
   if(timeSinceFiredBumper3 < 10000) timeSinceFiredBumper3++;
   
   //Kicker activation switches
-  if(RKickerState != RKickerOldState && RKickerState == HIGH){
-    if(time - RKickerSW_startTime > 1000){
+  if(RKickerState != RKickerOldState ){
+    KICKER_RIGHT = (RKickerState == HIGH);
+    if(time > RKickerSW_startTime + 500 && time > RKickerSW_startTime){
       RKickerSW_startTime = time;
       RightKicker_Duration = 0;
-      KICKER_RIGHT = true;
-      //Serial.print("Right Kicker Activated ON\n");
+      if(DEBUG) Serial.print("Right Kicker Activated ON\n");
     }
-  }else if(RKickerState == LOW){
-   KICKER_RIGHT = false; 
   }
-  if(LKickerState != LKickerOldState && LKickerState == HIGH){
-    if(time - LKickerSW_startTime > 1000){
+  
+  if(LKickerState != LKickerOldState){
+    KICKER_LEFT = (LKickerState == HIGH);
+    if(time > LKickerSW_startTime + 500 && time > LKickerSW_startTime ){
       LKickerSW_startTime = time;
       LeftKicker_Duration = 0;
-      KICKER_LEFT = true;
-      //Serial.print("Left Kicker Activated ON\n");
+      if(DEBUG) Serial.print("Left Kicker Activated ON\n");
     }
-  }else if(LKickerState == LOW){
-   KICKER_LEFT = false; 
+  }
+  
+  //Top Kicker
+  if(TopKickerState != TopKickerOldState){
+    KICKER_TOP = (TopKickerState == HIGH);
+    if(time > TopKickerSW_startTime + 500 && time > TopKickerSW_startTime ){
+      TopKickerSW_startTime = time;
+      TopKicker_Duration = 0;
+      if(DEBUG) Serial.print("TOP Kicker Activated ON\n");
+    }
   }
   
   //Kicker ACTIVATION
@@ -553,18 +583,27 @@ void loop() {
    LeftKicker_Duration= 9999;
   }
   
+  if(TopKicker_Duration < KICKER_FIRE_DURATION && kickersEnabled){
+   TopKicker_State = 1; 
+   TopKicker_Duration++;
+  }else{
+   TopKicker_State = 0;
+   TopKicker_Duration= 9999;
+  }
+  
+  
   if(flippersEnabled){
     if(Ramping == false){
       SolenoidStatesBankA(leftSolenoidState, rightSolenoidState, Bumper1_State, Bumper2_State, Bumper3_State);
-      SolenoidStatesBankB(RightKicker_State, LeftKicker_State, Kickout1_State, Kickout2_State, Shooter_State);
+      SolenoidStatesBankB(RightKicker_State, LeftKicker_State, Kickout1_State, Kickout2_State, Shooter_State, TopKicker_State);
     }else{
       SolenoidStatesBankA(0, 0, 0, 0, 0);
-      SolenoidStatesBankB(0, 0, Kickout1_State, Kickout2_State, Shooter_State);
+      SolenoidStatesBankB(0, 0, Kickout1_State, Kickout2_State, Shooter_State, 0);
     }
     
   }else {
     SolenoidStatesBankA(0, 0, 0, 0, 0);
-    SolenoidStatesBankB(0, 0, Kickout1_State, Kickout2_State, Shooter_State);
+    SolenoidStatesBankB(0, 0, Kickout1_State, Kickout2_State, Shooter_State, 0);
   }
   
   buttonLeftOldState = buttonLeftState;
@@ -574,18 +613,19 @@ void loop() {
   BASW3OldState = BASW3State;
   RKickerOldState = RKickerState;
   LKickerOldState = LKickerState;
+  TopKickerOldState = TopKickerState;
   RampOldState = RampState;
   
  old_time = time;
 } // loop
 
 //0 is left, 1 i right
-void SolenoidStatesBankA(byte solenoid0, byte solenoid1, byte Bumper1_Solenoid, byte Bumper2_Solenoid, byte Bumper3_Solenoid){
+void SolenoidStatesBankA(byte leftFlipper, byte rightFlipper, byte Bumper1_Solenoid, byte Bumper2_Solenoid, byte Bumper3_Solenoid){
   
-  if(solenoid0 == 1) dataSolenoid |= 1;
+  if(leftFlipper == 1) dataSolenoid |= 1;
   else dataSolenoid &= ~1;
   
-  if(solenoid1 == 1) dataSolenoid |= 1 << 1;
+  if(rightFlipper == 1) dataSolenoid |= 1 << 1;
   else dataSolenoid &= ~(1 << 1);
   
   if(Bumper1_Solenoid == 1) dataSolenoid |= 1 << 4;
@@ -599,12 +639,11 @@ void SolenoidStatesBankA(byte solenoid0, byte solenoid1, byte Bumper1_Solenoid, 
   
   if(dataSolenoid != dataSolenoidOld){
     sendPDBCommand(board, PDB_COMMAND_WRITE, BANK_ZERO, dataSolenoid);
-    //PrintBinary(dataSolenoid, 8);
   }
   dataSolenoidOld = dataSolenoid;
 }
 
-void SolenoidStatesBankB(byte RightKicker, byte LeftKicker, byte Kickout1, byte Kickout2, byte Shooter){
+void SolenoidStatesBankB(byte RightKicker, byte LeftKicker, byte Kickout1, byte Kickout2, byte Shooter, byte TopKicker){
   
   if(LeftKicker == 1) dataSolenoidBankB |= 1;
   else dataSolenoidBankB &= ~1;
@@ -621,9 +660,11 @@ void SolenoidStatesBankB(byte RightKicker, byte LeftKicker, byte Kickout1, byte 
   if(Shooter == 1) dataSolenoidBankB |= 1 << 4;
   else dataSolenoidBankB &= ~(1 << 4);
   
+  if(TopKicker == 1) dataSolenoidBankB |= 1 << 5;
+  else dataSolenoidBankB &= ~(1 << 5);
+  
   if(dataSolenoidBankB != dataSolenoidBankBOld){
     sendPDBCommand(board, PDB_COMMAND_WRITE, BANK_ONE, dataSolenoidBankB);
-    //PrintBinary(dataSolenoid, 8);
   }
   dataSolenoidBankBOld = dataSolenoidBankB;
 }
@@ -642,6 +683,11 @@ void SolenoidOff(byte solenoidNumber)
 
 void sendPDBCommand(byte addr, byte command, byte bankAddr, byte data) 
 { 
+  if(bankAddr == BANK_ZERO && data == lastData0) return;
+  if(bankAddr == BANK_ONE && data == lastData1) return;
+  if(DEBUG){
+      Serial.print(bankAddr); Serial.print("-");Serial.print(data);Serial.print("\n");
+   }
  byte cmdWord[5]; 
  cmdWord[0] = addr; 
  cmdWord[1] = command; 
@@ -658,6 +704,9 @@ void sendPDBCommand(byte addr, byte command, byte bankAddr, byte data)
  SPI.transfer(cmdWord[2]); 
  SPI.transfer(cmdWord[3]); 
  SPI.transfer(cmdWord[4]); 
+ 
+ if(bankAddr == BANK_ZERO) lastData0 = data;
+ else if(bankAddr == BANK_ONE) lastData1 = data;
  // Re-enable interrupts 
  interrupts(); 
  //Serial.println("Transferred ");

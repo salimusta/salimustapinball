@@ -1,5 +1,7 @@
 #include <Wire.h>
 
+#define DEBUG 0
+const int I1 = 13;
 const int I2 = 2;
 const int I3 = 3;
 const int I4 = 4;
@@ -7,21 +9,22 @@ const int I5 = 5;
 const int I6 = 6;
 const int I7 = 7;
 
-const int D8 = 8;
+//const int D8 = 8;
 const int D9 = 9;
 const int D10 = 10;
 const int D11 = 11;
 const int D12 = 12;
 
 void setup() {
-  Serial.begin(9600); 
+  if(DEBUG) Serial.begin(9600); 
   
-  pinMode(D8, OUTPUT);
+  //pinMode(D8, OUTPUT);
   pinMode(D9, OUTPUT);
   pinMode(D10, OUTPUT);
   pinMode(D11, OUTPUT);
   pinMode(D12, OUTPUT);
  
+  pinMode(I1, INPUT);
   pinMode(I2, INPUT);
   pinMode(I3, INPUT);   
   pinMode(I4, INPUT);
@@ -39,7 +42,7 @@ bool BSW3 = false;
 bool ROSW1 = false;
 bool ROSW2 = false;
 bool ROSW3 = false;
-bool TRIEUR = false;
+bool COIN = false;
 bool KO2 = false;
 bool LOSW = false;
 bool RLOSW = false;
@@ -53,7 +56,7 @@ bool LT1 = false;
 bool LT2 = false;
 bool LT2P = false;
 bool KO1 = false;
-bool RAMP = false;
+bool GATE = false;
 bool RAMPA1 = false;
 bool RAMPA2 = false;
 bool START = false;
@@ -79,11 +82,12 @@ int LT1_State = 0;
 int LT2_State = 0;
 int LT2P_State = 0;
 int KO1_State = 0;
-int RAMP_State = 0;
+int GATE_State = 0;
 int RAMPA1_State = 0;
 int RAMPA2_State = 0;
 int START_State = 0;
 int TILT_State = 0;
+int COIN_State = 0;
 
 int ROSW1_Old = 0;
 int ROSW2_Old = 0;
@@ -104,17 +108,21 @@ int LT1_Old = 0;
 int LT2_Old = 0;
 int LT2P_Old = 0;
 int KO1_Old = 0;
-int RAMP_Old = 0;
+int GATE_Old = 0;
 int RAMPA1_Old = 0;
 int RAMPA2_Old = 0;
 int START_Old = 0;
 int TILT_Old = 0;
+int COIN_Old = 0;
 
-short delayMs = 400;
+short delayMs = 300;
 
 void loop(){
+  
+  //Read the coin state
+  COIN_State = digitalRead(I1);
+  
   //DRIVE LINE 11
-  digitalWrite(D8, LOW);
   digitalWrite(D9, LOW);
   digitalWrite(D10, LOW);
   digitalWrite(D11, HIGH);
@@ -123,40 +131,37 @@ void loop(){
   ROSW1_State = digitalRead(I2);
   ROSW2_State = digitalRead(I3);
   ROSW3_State = digitalRead(I4);
-  LT2P_State = digitalRead(I5);
+  //LT2P_State = digitalRead(I5);
   LT2_State = digitalRead(I6);
   RAMPA2_State = digitalRead(I7);
   
   //DRIVE LINE 9
-  digitalWrite(D8, LOW);
   digitalWrite(D9, HIGH);
   digitalWrite(D10, LOW);
   digitalWrite(D11, LOW);
   digitalWrite(D12, LOW);
   delayMicroseconds(delayMs);
   RT1_State = digitalRead(I2);
-  RT1P_State = digitalRead(I3);
+  GATE_State = digitalRead(I3);
   RT2_State = digitalRead(I4);
   LT1_State = digitalRead(I5);
   KO1_State = digitalRead(I6);
   RAMPA1_State = digitalRead(I7);
   
   //DRIVE LINE 10
-  digitalWrite(D8, LOW);
   digitalWrite(D9, LOW);
   digitalWrite(D10, HIGH);
   digitalWrite(D11, LOW);
   digitalWrite(D12, LOW);
   delayMicroseconds(delayMs);
-  //RAMP_State = digitalRead(I5);
   KO2_State = digitalRead(I2);
   LOSW_State = digitalRead(I3);
   RLOSW_State = digitalRead(I4);
+  //RAMP_State = digitalRead(I5);
   LLOSW_State = digitalRead(I6);
   START_State = digitalRead(I7);
   
   //DRIVE LINE 12
-  digitalWrite(D8, LOW);
   digitalWrite(D9, LOW);
   digitalWrite(D10, LOW);
   digitalWrite(D11, LOW);
@@ -165,7 +170,7 @@ void loop(){
   BSW1_State = digitalRead(I2);
   BSW2_State = digitalRead(I3);
   BSW3_State = digitalRead(I4);
-  CTP_State = digitalRead(I5);
+  //CTP_State = digitalRead(I5);
   CT_State = digitalRead(I6);
   TILT_State = digitalRead(I7);
   
@@ -199,10 +204,10 @@ void loop(){
     else Serial.print("BSW3 OFF\n"); 
     BSW3 = (BSW3_State == HIGH);
   }
-  if(RAMP_State != RAMP_Old){
-    if (RAMP_State == HIGH) Serial.print("RAMP ON\n");
-    else Serial.print("RAMP OFF\n"); 
-    RAMP = (RAMP_State == HIGH);
+  if(GATE_State != GATE_Old){
+    if (GATE_State == HIGH) Serial.print("GATE ON\n");
+    else Serial.print("GATE OFF\n"); 
+    GATE = (GATE_State == HIGH);
   }
   if(KO2_State != KO2_Old){
     if (KO2_State == HIGH) Serial.print("KO2 ON\n");
@@ -294,13 +299,19 @@ void loop(){
     TILT = (TILT_State == HIGH);
   }
   
+  if(COIN_State != COIN_Old){
+    if (COIN_State == HIGH) Serial.print("COIN ON\n");
+    else Serial.print("COIN OFF\n"); 
+    COIN = (COIN_State == HIGH);
+  }
+  
   ROSW1_Old = ROSW1_State;
   ROSW2_Old = ROSW2_State;
   ROSW3_Old = ROSW3_State;
   BSW1_Old = BSW1_State;
   BSW2_Old = BSW2_State;
   BSW3_Old = BSW3_State;
-  RAMP_Old = RAMP_State;
+  GATE_Old = GATE_State;
   KO2_Old = KO2_State;
   LOSW_Old = LOSW_State;
   RLOSW_Old = RLOSW_State;
@@ -318,14 +329,15 @@ void loop(){
   RAMPA2_Old = RAMPA2_State;
   START_Old = START_State;
   TILT_Old = TILT_State;
+  COIN_Old = COIN_State;
 }
 
 void requestEvent()
 {
   //write a byte like 
-  //order starting from bit 0: BSW1, BSW2, BSW3, ROSW1, ROSW2, ROSW3, TRIEUR, KO2
+  //order starting from bit 0: BSW1, BSW2, BSW3, ROSW1, ROSW2, ROSW3, COIN, KO2
   byte response = KO2;
-  response = (response << 1) | TRIEUR;
+  response = (response << 1) | COIN;
   response = (response << 1) | ROSW3;
   response = (response << 1) | ROSW2;
   response = (response << 1) | ROSW1;
@@ -333,11 +345,11 @@ void requestEvent()
   response = (response << 1) | BSW2;
   response = (response << 1) | BSW1;
   
-  //order starting from bit 0: LOSW, RLOSW, LLOSW, CT, CTP, RT1, RT1P, RT2
+  //order starting from bit 0: LOSW, RLOSW, LLOSW, CT, GATE, RT1, RT1P, RT2
   byte response2 = RT2;
   response2 = (response2 << 1) | RT1P;
   response2 = (response2 << 1) | RT1;
-  response2 = (response2 << 1) | CTP;
+  response2 = (response2 << 1) | GATE;
   response2 = (response2 << 1) | CT;
   response2 = (response2 << 1) | LLOSW;
   response2 = (response2 << 1) | RLOSW;

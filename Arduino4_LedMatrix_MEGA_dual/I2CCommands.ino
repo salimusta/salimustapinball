@@ -73,7 +73,9 @@ void receiveEvent(int howMany)
      
     }else if(type == PLAYER_SELECTED){
       currentPlayer = Wire.read();
-      
+    
+    }else if(type == MAX_PLAYER){
+      maxPlayer = Wire.read();
     }
   }
   long newNb = 0;

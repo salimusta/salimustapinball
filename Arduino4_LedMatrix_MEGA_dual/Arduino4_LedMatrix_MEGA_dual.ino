@@ -33,6 +33,7 @@ byte nb_hits_Old = 0;
 byte flippers_state = 0;
 byte start_state = 0;
 byte currentPlayer = 0;
+byte maxPlayer = 1;
 unsigned long score = 0;
 unsigned long playersScore[4];
 bool Old_leftFlipper = 0;
@@ -192,7 +193,7 @@ void loop(){
   while(requestedScreen == SCREEN_RAMP_SUCCEED){
     time++;
     centerString(tmpBmp, "RAMP !", 5);
-    centerString(tmpBmp, "+ 500 !", 18);
+    centerString(tmpBmp, "+ 2000 !", 18);
 
     DisplayMatrix(tmpBmp);
     EmptyMatrix(tmpBmp);
@@ -249,12 +250,12 @@ void loop(){
   //SCREEN_PLAYER_SELECTION
   if(requestedScreen == SCREEN_PLAYER_SELECTION) nbPlayer = 1;
   while(requestedScreen == SCREEN_PLAYER_SELECTION){
-    drawSmallString(tmpBmp, "INSERT  CREDIT", 2, 4, 50); 
+    drawSmallString(tmpBmp, "SELECT  PLAYER", 2, 4, 50); 
     
-    drawString(tmpBmp, "1", 5, 19, 50);
-    drawString(tmpBmp, "2", 21, 19, 50);
-    drawString(tmpBmp, "3", 37, 19, 50);
-    drawString(tmpBmp, "4", 53, 19, 50);
+    if(maxPlayer > 0) drawString(tmpBmp, "1", 5, 19, 50);
+    if(maxPlayer > 1) drawString(tmpBmp, "2", 21, 19, 50);
+    if(maxPlayer > 2) drawString(tmpBmp, "3", 37, 19, 50);
+    if(maxPlayer > 3) drawString(tmpBmp, "4", 53, 19, 50);
 
     bool leftFlipper = flippers_state & 1;
     bool rightFlipper = (flippers_state & 2) >> 1;
@@ -263,7 +264,7 @@ void loop(){
       if(nbPlayer > 1) nbPlayer--;
     }
     if(rightFlipper == 0 && rightFlipper != Old_rightFlipper){
-      if(nbPlayer < 4) nbPlayer++;
+      if(nbPlayer < maxPlayer) nbPlayer++;
     }
     
     drawInvertRect(tmpBmp, 3+(nbPlayer-1)*16, 16, 11, 15);
@@ -674,7 +675,6 @@ void loop(){
     EmptyMatrix(tmpBmp);
     if(y < 11) y++; 
   }
-  
   
   //FRAME SCORE--------------------------------------------------------------------------
   while(requestedScreen == SCREEN_SCORE){
@@ -1275,8 +1275,8 @@ void loop(){
     
     if(!displayHighScore){
       if(flag2){
-        centerString(tmpBmp, "PRESS", 4);
-        centerString(tmpBmp, "START", 18);
+        centerString(tmpBmp, "INSERT", 4);
+        centerString(tmpBmp, "COIN", 18);
       }
       if(time%25 == 0) flag2 = !flag2;
       if(time > 500){

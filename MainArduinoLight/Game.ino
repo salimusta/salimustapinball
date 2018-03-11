@@ -102,7 +102,13 @@ void ManageGame() {
   }
   //GAME OVER- if the game is on, no more ball and no more player
   if (gameIsOn && nbBall <= 0) {
+    //Decrease Credit
+    credit = credit - nbPlayer;
+    if(credit < 0) credit = 0; //Just in case...
+    WriteCredit(credit);
+    
     //Game finished
+    RestoreTargetStatus();
     StopMusic();
     PlaySound(GAME_OVER);
     DisplayScreen(SCREEN_GAMEOVER, PRIORITY_LOW);
@@ -148,7 +154,7 @@ void ManageGame() {
     }
     
     //Write Maintenance Data
-    WritePinballData(0, nbBump, nbTarget, 1);
+    WritePinballData(nbBallFired, nbBump, nbTarget, 1);
     delay(100);
     
     //If multiplayer, Display all the scores
@@ -204,11 +210,12 @@ void ManageGame() {
     DisplayScreen(SCREEN_HIGHSCORES, PRIORITY_LOW);
     delay(100);
     StopMusic();
-    WaitForRestart();
+    WaitForCoin();
     nbBallFired = 0;
     PlaySound(PIECE);
     score = 0;
-    DisplayScore(score);
+    nbBallFired = 0;
+    //DisplayScore(score);
     delay(500);
     gameIsOn = false;
   }
@@ -223,6 +230,7 @@ void ManageGame() {
     
     bool oldRIGHT_FLIPPER = false;
     bool oldLEFT_FLIPPER = false;
+    SendScreenData(MAX_PLAYER, credit > 4 ? 4 : credit);
     while (1) {
       ReadSolenoidSwitches();
       ReadSwitches();
@@ -236,11 +244,21 @@ void ManageGame() {
       }
       oldRIGHT_FLIPPER = RIGHT_FLIPPER;
       oldLEFT_FLIPPER = LEFT_FLIPPER;
-      delay(30);
+      
+      //Check Any other coin as well
+      if(COIN){
+        TriggerCoin();
+        SendScreenData(MAX_PLAYER, credit > 4 ? 4 : credit);
+        DisplayScore(credit);
+      }
+      delay(10);
       nbPlayer = ReadPlayerNumber();
       if (START) break;
-      delay(30);
+      //delay(30);
     }
+    //Disable Coin eating
+    AmbiLight(COIN_OFF);
+    
     //Here we have chosen the number of players
     initPlayers(nbPlayer);
     selectedPlayer = 0;
@@ -248,7 +266,7 @@ void ManageGame() {
     RestoreModesRandom();
     SelectPlayer(selectedPlayer);
     SendScreenData(PLAYER_SELECTED, selectedPlayer);
-    
+  
     AmbiLight(ALL_OFF);
     AmbiLight(RED_ON);
     AnimLight(LAUNCHER_OFF);
@@ -313,7 +331,7 @@ void ManageGame() {
   modeBeginTime = 0;
   bumpersState = 0;
   
-  RestoreTargetStatus();
+  //RestoreTargetStatus();
   EnableIncrementalScore();
   //Serial.print("nbBall =  "); Serial.print(nbBall); Serial.print("\n");
   
@@ -397,13 +415,20 @@ void ManageGame() {
     }
 
     if(TILT_Active == false){
-      
+      //PressStart Shoots the ball
+      if(START && ballInPlay == 1 && ballLaunched==false) {
+        ShootABallOnly();
+        ballLaunched = true;
+      }
       //If any switch is activated, the ball is now in play
-      if (BSW1 || BSW2 || BSW3 || LKSW || RKSW || ROSW1 || ROSW2 || ROSW3 || CT || RT1 || RT2 || LT1 || LT2 || RLOSW || LLOSW || LOSW || RAMP1 || RAMP2) {
+      if (GATE || BSW1 || BSW2 || BSW3 || LKSW || RKSW || TKSW || ROSW1 || ROSW2 || ROSW3 || CT || RT1 || RT2 || LT1 || LT2 || RLOSW || LLOSW || LOSW || RAMP1 || RAMP2) {
         if(ballLaunched == false){
           ballLaunched = true;
           AnimLight(LAUNCHER_OFF);
           AnimLight(OFF_TOP_LIGHTS);
+          if (GATE) {
+            PlaySound(YIHHA); 
+          }
         }
         
         if(ballCatchedInHole1 && ballCatchedInHole2){
@@ -443,7 +468,7 @@ void ManageGame() {
       }
       
       if(RAMP2){
-        score += 500 * scoreCoef;
+        score += 2000 * scoreCoef;
         ramp1Passed = false;
         timeSinceRamp1 = 0;
         AnimLightFor(FLASH_TOP_LIGHTS, 50);
@@ -536,7 +561,8 @@ void ManageGame() {
       }
   
       //KICKERS-------------------------------------------------------------------------------
-      if (LKSW || RKSW) {
+      if (LKSW || RKSW || TKSW) {
+        //Serial.print("BOING\n");
         score += 50* scoreCoef;
         PlaySound(BOINNG);
       }
@@ -983,7 +1009,7 @@ void ManageGame() {
             else {
               //STARTING A MODE
               //IF THE SUPER PSIT WAS A BOUT TO BE COMPLETED= TOO LATE BRO!!!
-              if(allTargetsHitFiveTimes) RestoreTargetStatus();
+              //if(allTargetsHitFiveTimes) RestoreTargetStatus();
               
               byte hasardMode = random(10);
               while (psitModeActive && hasardMode == 6) hasardMode = random(10);
@@ -1254,14 +1280,6 @@ void ManageGame() {
         }
       }
   
-      //Multiball Activation
-      /*
-      if ( nbBall == 1 && (ROSW2 || ROSW1 || ROSW3) && ballInPlay == 1) {
-        DisplayScreen(SCREEN_MULTIBALL, PRIORITY_HIGH);
-        PlaySound(MULTIBALL_SOUND);
-        FireANewBall();
-        PlayRandomMultiballMusic();
-      }*/
     }else{ // END TILT Active
     
       //Manage KO2 Kickout event if Tilt Acrive
@@ -1413,21 +1431,7 @@ void RestoreLight() {
   
 }
 
-void WaitForRestart() {
-  ReadSwitches();
-  while (!START) {
-    ReadSwitches();
-    delay(100);
-  }
-  
-  ReadSwitches();
-  while(START){
-    ReadSwitches();
-    delay(100);
-  }
-  
-  AnimLight(START_OFF);
-}
+
 
 bool CheckPsit() {
   if ( psitModeState == 0b1111) {

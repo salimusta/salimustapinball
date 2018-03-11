@@ -217,6 +217,8 @@
 #define WHITE_OFF 13
 #define BOOST_ON 14
 #define BOOST_OFF 15
+#define COIN_ON 16
+#define COIN_OFF 17
 
 #define FLASH_WHITE 100
 #define SNAKE_ALL_COLORS 101
@@ -349,6 +351,7 @@
 #define FLIPPERS_STATE 3
 #define PSIT_STATE 4
 #define PLAYER_SELECTED 5
+#define MAX_PLAYER 6
 
 //LED MATRIX TO MASTER COMMAND
 #define BALL_BOUNCE 1

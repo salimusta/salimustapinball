@@ -16,6 +16,8 @@
 #define WHITE_OFF 13
 #define BOOST_ON 14
 #define BOOST_OFF 15
+#define COIN_ON 16
+#define COIN_OFF 17
 
 #define FLASH_WHITE 100
 #define SNAKE_ALL_COLORS 101
@@ -30,6 +32,7 @@ void setup() {
   pinMode(9, OUTPUT);
   pinMode(8, OUTPUT);
   pinMode(7, OUTPUT);
+  pinMode(6, OUTPUT);
   
   Wire.begin(6);
   Wire.onReceive(receiveEvent);
@@ -42,6 +45,8 @@ void setup() {
   digitalWrite(9, HIGH);
   digitalWrite(8, HIGH);
   digitalWrite(7, HIGH);
+  digitalWrite(6, HIGH); //Coin power activator
+  
   
   Boost(true);
   /*
@@ -156,6 +161,12 @@ void Blue(bool activate){
   else digitalWrite(9, HIGH);
   blueState = activate;
 }
+void Coin(bool activate){
+  modeAnim = animOldState;
+  if(activate) digitalWrite(6, LOW);
+  else digitalWrite(6, HIGH);
+}
+
 void receiveEvent(int howMany) {
   Serial.print("Event\n");
   animOldState = modeAnim;
@@ -176,6 +187,8 @@ void receiveEvent(int howMany) {
     else if(byte0 == WHITE_OFF) White(false);
     else if(byte0 == BOOST_ON) Boost(true);
     else if(byte0 == BOOST_OFF) Boost(false);
+    else if(byte0 == COIN_ON) Coin(true);
+    else if(byte0 == COIN_OFF) Coin(false);
     else if(byte0 == ALL_ON){
       Red(true);
       Green(true);
