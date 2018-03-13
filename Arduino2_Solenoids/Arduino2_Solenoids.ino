@@ -5,7 +5,7 @@
 #define BANK_ONE 1 
 #define BANK_ZERO 0 
 #define pinMOSI 11
-#define DEBUG 0
+#define DEBUG 1
 
 //PIN Connections
 const int buttonLeftPin = 2; //Switch to activate left flipper
@@ -170,14 +170,14 @@ void receiveEvent(int howMany) {
       if(DEBUG) Serial.print("KICKOUT 1\n");
       kickout1Requested = true;
       Kickout1_Duration = 0;
-      randomTime = random(30);
+      randomTime = random(10);
       KICKOUT1_FIRE_DURATION = 70 + randomTime;
     }else if(data == 60){
       if(DEBUG) Serial.print("KICKOUT 2\n");
       kickout2Requested = true;
       Kickout2_Duration = 0;
-      randomTime = random(30);
-      KICKOUT2_FIRE_DURATION = 100 + randomTime;
+      randomTime = random(10);
+      KICKOUT2_FIRE_DURATION = 70 + randomTime;
     }else if(data == 80){
       kickersEnabled = false;
       if(DEBUG) Serial.print("Disable Kickers\n");
