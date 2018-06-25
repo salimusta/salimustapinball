@@ -18,9 +18,13 @@ void TestSounds(){
   wTrig.stopAllTracks();*/
 }
 
-void PlaySound(byte sound){
-  wTrig.trackPlayPoly(sound);
-  delay(50);
+void PlaySound(byte sound, bool override){
+  if(override || (time - timeOfLastSoundPlayed > 0 && time - timeOfLastSoundPlayed > 400)) {
+    timeOfLastSoundPlayed = time;
+    wTrig.trackPlayPoly(sound);
+  }
+  
+  //delay(50);
 }
 
 void StopMusic(){
@@ -33,29 +37,29 @@ void PlayRandomLoose(){
   //randomSeed(analogRead(0));
   byte rand = random(12);
   if(rand == 0){
-    PlaySound(LOOSE_SINGE);
+    PlaySound(LOOSE_SINGE, false);
   }else  if(rand == 1){
-     PlaySound(LAUGH_1);
+     PlaySound(LAUGH_1, false);
   }else  if(rand == 2){
-     PlaySound(LOOSE_POINT_POINT);
+     PlaySound(LOOSE_POINT_POINT, false);
   }else  if(rand == 3){
-     PlaySound(ANADINMI);
+     PlaySound(ANADINMI, false);
   }else  if(rand == 4){
-     PlaySound(JAVOO_SALIM);
+     PlaySound(JAVOO_SALIM, false);
   }else  if(rand == 5){
-     PlaySound(CANDOBETTER);
+     PlaySound(CANDOBETTER, false);
   }else  if(rand == 6){
-     PlaySound(GRANDMOTHER);
+     PlaySound(GRANDMOTHER, false);
   }else  if(rand == 7){
-     PlaySound(MERRYCHRISTMASLOOSER);
+     PlaySound(MERRYCHRISTMASLOOSER, false);
   }else  if(rand == 8){
-     PlaySound(RIREBOTH);
+     PlaySound(RIREBOTH, false);
   }else  if(rand == 9){
-     PlaySound(RIRESALIM);
+     PlaySound(RIRESALIM, false);
   }else  if(rand == 10){
-     PlaySound(RIREDESIREE);
+     PlaySound(RIREDESIREE, false);
   }else  if(rand == 11){
-     PlaySound(WHYDIDUDOTHAT);
+     PlaySound(WHYDIDUDOTHAT, false);
   }
   
 }
@@ -75,49 +79,49 @@ int PlayRandomMusic(){
   }
   
   if(hasardSound == 0){
-    PlaySound(JIVE_BUNNY);
+    PlaySound(JIVE_BUNNY, true);
     timeRelease = 3000;
   }else  if(hasardSound == 1){
-     PlaySound(FALLIN_RAIN);
+     PlaySound(FALLIN_RAIN, true);
      timeRelease = 4700;
   }else  if(hasardSound == 2){
-     PlaySound(SURFIN_USA);
+     PlaySound(SURFIN_USA, true);
      timeRelease = 3500;
   }else  if(hasardSound == 3){
-     PlaySound(RELAX);
+     PlaySound(RELAX, true);
      timeRelease = 2000;
   }else  if(hasardSound == 4){
-     PlaySound(ELVIS);
+     PlaySound(ELVIS, true);
      timeRelease = 8000;
   }else  if(hasardSound == 5){
-     PlaySound(FINDERSKEEPERS);
+     PlaySound(FINDERSKEEPERS, true);
      timeRelease = 2500;
   }else  if(hasardSound == 6){
-     PlaySound(ROCKNROLLPARTY);
+     PlaySound(ROCKNROLLPARTY, true);
      timeRelease = 1000;
   }else  if(hasardSound == 7){
-     PlaySound(HEY);
+     PlaySound(HEY, true);
      timeRelease = 5500;
   }else  if(hasardSound == 8){
-     PlaySound(NOBLESURFER);
+     PlaySound(NOBLESURFER, true);
      timeRelease = 7000;
   }else  if(hasardSound == 9){
-     PlaySound(TWISTPARTY);
+     PlaySound(TWISTPARTY, true);
      timeRelease = 4500;
   }else  if(hasardSound == 10){
-     PlaySound(SHUTDOWN);
+     PlaySound(SHUTDOWN, true);
      timeRelease = 6500;
   }else  if(hasardSound == 11){
-     PlaySound(BUSINESS);
+     PlaySound(BUSINESS, true);
      timeRelease = 4000;
   }else  if(hasardSound == 12){
-     PlaySound(FISHBONE);
+     PlaySound(FISHBONE, true);
      timeRelease = 10500;
   }else  if(hasardSound == 13){
-     PlaySound(CUBA);
+     PlaySound(CUBA, true);
      timeRelease = 2500;
   }else  if(hasardSound == 14){
-     PlaySound(HIDEHO);
+     PlaySound(HIDEHO, true);
      timeRelease = 6800;
   }
   
@@ -142,9 +146,9 @@ void PlayRandomMultiballMusic(){
   }
   
   if(hasardSound == 0){
-    PlaySound(MISIRLOU);
+    PlaySound(MISIRLOU, true);
   }else{
-    PlaySound(CANCANYOU);
+    PlaySound(CANCANYOU, true);
   }
   
 
@@ -161,6 +165,6 @@ void PlayMusic(short musicId){
     wTrig.trackGain(i, -10);
   }
   
-  PlaySound(musicId);
+  PlaySound(musicId, true);
 
 }

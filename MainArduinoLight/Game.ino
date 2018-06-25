@@ -33,6 +33,7 @@ byte activeMode = NO_MODE;
 unsigned long modeBeginTime = 0;
 bool modeStarted = false;
 unsigned long time = 0;
+unsigned long timeOfLastSoundPlayed = 0;
 unsigned long timeSinceUpdateScreen = 0;
 byte nb_hits = 0;
 bool alreadyActivatedModes[10] = {false, false, false, false, false, false, false, false, false, false};
@@ -47,6 +48,11 @@ int timeSinceBumper3Hit = 100;
 int timeSinceLeftRedTargetHit = 100; int timeSinceRightRedTargetHit = 100;
 int timeSinceLeftGreenTargetHit = 100; int timeSinceRightGreenTargetHit = 100;
 int timeSinceYellowTargetHit = 100;
+
+//Kickers
+int timeSinceKickerLeftHit = 100;
+int timeSinceKickerRightHit = 100;
+int timeSinceKickerTopHit = 100;
 
 //Targets status, no multiplayer, lives for 1 ball
 byte leftRedTarget_Status = 0;
@@ -77,6 +83,8 @@ int nbTargetReached = 0;
 
 //Timings
 unsigned long timeSinceNewBall = 0;
+
+unsigned lastScore = 0;
 
 void ManageGame() {
 
@@ -110,7 +118,7 @@ void ManageGame() {
     //Game finished
     RestoreTargetStatus();
     StopMusic();
-    PlaySound(GAME_OVER);
+    PlaySound(GAME_OVER, true);
     DisplayScreen(SCREEN_GAMEOVER, PRIORITY_LOW);
     DisableIncrementalScore();
     DisplayScore(score);
@@ -180,7 +188,7 @@ void ManageGame() {
         delay(50);
         
         DisplayScreen(SCREEN_ENTER_NAME, PRIORITY_LOW);
-        PlaySound(OMGYOUWON_HIGHSCORE);
+        PlaySound(OMGYOUWON_HIGHSCORE, true);
         while (1) {
           ReadSolenoidSwitches();
           ReadSwitches();
@@ -212,7 +220,7 @@ void ManageGame() {
     StopMusic();
     WaitForCoin();
     nbBallFired = 0;
-    PlaySound(PIECE);
+    PlaySound(PIECE, true);
     score = 0;
     nbBallFired = 0;
     //DisplayScore(score);
@@ -240,7 +248,7 @@ void ManageGame() {
       SendScreenData(FLIPPERS_STATE, flippers_state);
 
       if((RIGHT_FLIPPER != oldRIGHT_FLIPPER && RIGHT_FLIPPER == 1) || (LEFT_FLIPPER != oldLEFT_FLIPPER && LEFT_FLIPPER == 1)){
-        PlaySound(BIP);
+        PlaySound(BIP, true);
       }
       oldRIGHT_FLIPPER = RIGHT_FLIPPER;
       oldLEFT_FLIPPER = LEFT_FLIPPER;
@@ -291,29 +299,29 @@ void ManageGame() {
   
   //Initial screen
   DisplayScreen(SCREEN_GETREADY, PRIORITY_LOW); 
-  PlaySound(VALIDATION);
+  PlaySound(VALIDATION, true);
   //PlaySound(GET_READY);
   
   AllLightsOff();
   
   if(nbPlayer > 1 ){
     Serial.print(selectedPlayer);
-    if(selectedPlayer == 0) PlaySound(PLAYER_1);
-    else if(selectedPlayer == 1) PlaySound(PLAYER_2);
-    else if(selectedPlayer == 2) PlaySound(PLAYER_3);
-    else if(selectedPlayer == 3) PlaySound(PLAYER_4);
+    if(selectedPlayer == 0) PlaySound(PLAYER_1, true);
+    else if(selectedPlayer == 1) PlaySound(PLAYER_2, true);
+    else if(selectedPlayer == 2) PlaySound(PLAYER_3, true);
+    else if(selectedPlayer == 3) PlaySound(PLAYER_4, true);
     
     delay(1500);
-    PlaySound(GET_READY);
+    PlaySound(GET_READY, true);
     delay(1200);
     
   }else{
-    PlaySound(GET_READY);
+    PlaySound(GET_READY, true);
     delay(1500);
   }
   
   DisplayScreen(SCREEN_GO, PRIORITY_LOW);
-  PlaySound(START_SOUND);
+  PlaySound(START_SOUND, true);
   
   //Initial lights
   AnimLight(FLASH_TOP_LIGHTS);
@@ -338,11 +346,14 @@ void ManageGame() {
   TILT_WarningCount = 0;
   TILT_Active = false;
   TILT_Time = 10000;
+  
+  lastScore = score;
 
   //Game is on
   while (ballIsInPlay) {
     time = millis();
     delay(1);
+    
     
     //TARGETS HIT MANAGEMENT----------------------------------------------------------
     if (timeSinceYellowTargetHit < 100) timeSinceYellowTargetHit++;
@@ -350,6 +361,9 @@ void ManageGame() {
     if (timeSinceRightRedTargetHit < 100) timeSinceRightRedTargetHit++;
     if (timeSinceLeftGreenTargetHit < 100) timeSinceLeftGreenTargetHit++;
     if (timeSinceRightGreenTargetHit < 100) timeSinceRightGreenTargetHit++;
+    if (timeSinceKickerLeftHit < 100) timeSinceKickerLeftHit++;
+    if (timeSinceKickerRightHit < 100) timeSinceKickerRightHit++;
+    if (timeSinceKickerTopHit < 100) timeSinceKickerTopHit++;
      
     //BUMPER HITTEN MANAGEMENT----------------------------
     if (timeSinceBumper1Hit < BUMPER_BONUS_INTERVAL) {
@@ -388,12 +402,12 @@ void ManageGame() {
       TILT_Time = 0;
       if(TILT_WarningCount == 1){
         DisplayScreen(SCREEN_TILT_WARNING, PRIORITY_HIGH);
-        PlaySound(TILT_SOUND);
+        PlaySound(TILT_SOUND, true);
       }else if(TILT_WarningCount == 2){
         TILT_Active = true;
         DisplayScreen(SCREEN_TILT_ACTIVE, PRIORITY_LOW);
         
-        PlaySound(TILT_SOUND);
+        PlaySound(TILT_SOUND, true);
         
         StopMusic();
         
@@ -419,6 +433,9 @@ void ManageGame() {
       if(START && ballInPlay == 1 && ballLaunched==false) {
         ShootABallOnly();
         ballLaunched = true;
+      } else if (START) {
+        ResetSolenoids();
+       delay(100) ;
       }
       //If any switch is activated, the ball is now in play
       if (GATE || BSW1 || BSW2 || BSW3 || LKSW || RKSW || TKSW || ROSW1 || ROSW2 || ROSW3 || CT || RT1 || RT2 || LT1 || LT2 || RLOSW || LLOSW || LOSW || RAMP1 || RAMP2) {
@@ -427,25 +444,25 @@ void ManageGame() {
           AnimLight(LAUNCHER_OFF);
           AnimLight(OFF_TOP_LIGHTS);
           if (GATE) {
-            PlaySound(YIHHA); 
+            PlaySound(YIHHA, true); 
           }
         }
         
         if(ballCatchedInHole1 && ballCatchedInHole2){
           FireKickout1();
-          PlaySound(KICKOUT_RELEASE_1);
+          PlaySound(KICKOUT_RELEASE_1, false);
           
           AnimLight(SNAKE_KO1);
           delay(100);
           FireKickout2();
-          PlaySound(KICKOUT_RELEASE_2);
+          PlaySound(KICKOUT_RELEASE_2, false);
           AnimLight(SNAKE_KO2);
         }
       }
       
       if(time - timeSinceNewBall > 15000 && !ballLaunched){
         timeSinceNewBall = millis();
-        PlaySound(STILLWAITING);
+        PlaySound(STILLWAITING, false);
       }
       
       //RAMPS-----------------------------------------------------
@@ -462,7 +479,7 @@ void ManageGame() {
           ramp1Passed = true;
         }else{
           DisplayScreen(SCREEN_RAMP_MISSED, PRIORITY_HIGH);
-          PlaySound(NOPE);
+          PlaySound(NOPE, false);
           ramp1Passed = false;
         }
       }
@@ -475,7 +492,7 @@ void ManageGame() {
         AmbiLight(FLASH_WHITE);
         
         if(activeMode == DOUBLE_MODE){
-          PlaySound(EVERYTHING_DOUBLED);
+          PlaySound(EVERYTHING_DOUBLED, true);
           
           DisplayScreen(SCREEN_MODE_DOUBLE_IDLE, PRIORITY_LOW);
           delay(100);
@@ -489,7 +506,7 @@ void ManageGame() {
           delay(2000);
           AmbiLight(SNAKE_ALL_COLORS);
         }else{
-          PlaySound(YIHHA);
+          PlaySound(YIHHA, false);
           DisplayScreen(SCREEN_RAMP_SUCCEED, PRIORITY_HIGH); 
         }
       }
@@ -504,10 +521,10 @@ void ManageGame() {
         if (timeSinceBumper2Hit < BUMPER_BONUS_INTERVAL && timeSinceBumper3Hit < BUMPER_BONUS_INTERVAL) {
           AnimLight(FLASH_TOP_LIGHTS);
           AmbiLight(FLASH_WHITE);
-          PlaySound(THREEBUMPERS);
+          PlaySound(THREEBUMPERS, true);
           score += 500*scoreCoef;
         }else{
-          PlaySound(BUMPER_3);
+          PlaySound(BUMPER_3, false);
         }
         
         if (activeMode == BUMPERS_MODE){
@@ -520,15 +537,15 @@ void ManageGame() {
         timeSinceBumper2Hit = 0;
         score += 50* scoreCoef;
         AnimLight(BLINK_BUMPER_2);
-        PlaySound(BUMPER_2);
+        PlaySound(BUMPER_2, false);
         //If 3 Bumper hit in a short amount of time
         if (timeSinceBumper1Hit < BUMPER_BONUS_INTERVAL && timeSinceBumper3Hit < BUMPER_BONUS_INTERVAL){
           AnimLight(FLASH_TOP_LIGHTS);
           AmbiLight(FLASH_WHITE);
-          PlaySound(THREEBUMPERS);
+          PlaySound(THREEBUMPERS, true);
           score += 500*scoreCoef;
         }else{
-          PlaySound(BUMPER_2);
+          PlaySound(BUMPER_2, false);
         }
         
         if (activeMode == BUMPERS_MODE){
@@ -543,15 +560,15 @@ void ManageGame() {
         score += 10* scoreCoef;
         AnimLight(BLINK_BUMPER_3);
 
-        PlaySound(BUMPER_1);
+        PlaySound(BUMPER_1, false);
         //If 3 Bumper hit in a short amount of time
         if (timeSinceBumper2Hit < BUMPER_BONUS_INTERVAL && timeSinceBumper1Hit < BUMPER_BONUS_INTERVAL){
           AnimLight(FLASH_TOP_LIGHTS);
           AmbiLight(FLASH_WHITE);
-          PlaySound(THREEBUMPERS);
+          PlaySound(THREEBUMPERS, true);
           score += 500*scoreCoef;
         }else{
-          PlaySound(BUMPER_1);
+          PlaySound(BUMPER_1, false);
         }
         
         if (activeMode == BUMPERS_MODE){
@@ -561,44 +578,46 @@ void ManageGame() {
       }
   
       //KICKERS-------------------------------------------------------------------------------
-      if (LKSW || RKSW || TKSW) {
-        //Serial.print("BOING\n");
+      if ((LKSW && timeSinceKickerLeftHit > 90) || (RKSW && timeSinceKickerRightHit > 90) || (TKSW && timeSinceKickerTopHit > 90)) {
+        if(LKSW) timeSinceKickerLeftHit = 0;
+        if(RKSW) timeSinceKickerRightHit = 0;
+        if(TKSW) timeSinceKickerTopHit = 0;
         score += 50* scoreCoef;
-        PlaySound(BOINNG);
+        PlaySound(BOINNG, false);
       }
   
       //GATES-------------------------------------------------
       if (ROSW1) {
         score += 100* scoreCoef;
         if (gate1Passed) {
-          PlaySound(GATE_BUZZ);
+          PlaySound(GATE_BUZZ, false);
         } else {
           DisplayScreen(SCREEN_ROSW1, PRIORITY_HIGH);
           AnimLight(GATE_1_OFF);
           gate1Passed = true;
-          PlaySound(GATE1);
+          PlaySound(GATE1, true);
         }
       }
       if (ROSW2) {
         score += 200* scoreCoef;
         if (gate2Passed) {
-          PlaySound(GATE_BUZZ);
+          PlaySound(GATE_BUZZ, false);
         } else {
           DisplayScreen(SCREEN_ROSW2, PRIORITY_HIGH);
           AnimLight(GATE_2_OFF);
           gate2Passed = true;
-          PlaySound(GATE2);
+          PlaySound(GATE2, true);
         }
       }
       if (ROSW3) {
         score += 300* scoreCoef;
         if (gate3Passed) {
-          PlaySound(DESIREHEY);
+          PlaySound(DESIREHEY, true);
         } else {
           DisplayScreen(SCREEN_ROSW3, PRIORITY_HIGH);
           AnimLight(GATE_3_OFF);
           gate3Passed = true;
-          PlaySound(GATE3);
+          PlaySound(GATE3, true);
         }
       }
       if (gate1Passed && gate2Passed && gate3Passed) {
@@ -607,7 +626,7 @@ void ManageGame() {
         AmbiLight(FLASH_WHITE);
         score += 1000* scoreCoef;
         DisplayScreen(SCREEN_ALL_GATES, PRIORITY_HIGH);
-        PlaySound(WOULDUBEWONDERMAN);
+        PlaySound(WOULDUBEWONDERMAN, true);
         gate1Passed = gate2Passed = gate3Passed = false;
       }
   
@@ -617,10 +636,10 @@ void ManageGame() {
         nbTarget++;
         timeSinceYellowTargetHit = 0;
         byte randSound = random(4);
-        if (randSound == 0) PlaySound(KABOOM);
-        else if (randSound == 1) PlaySound(WAWWHATASHOT);
-        else if( randSound == 2) PlaySound(RICOCHET);
-        else PlaySound(OUCH);
+        if (randSound == 0) PlaySound(KABOOM, false);
+        else if (randSound == 1) PlaySound(WAWWHATASHOT, false);
+        else if( randSound == 2) PlaySound(RICOCHET, false);
+        else PlaySound(OUCH, false);
         
         if (activeMode == NO_MODE) {
           score += 100* scoreCoef;
@@ -638,7 +657,7 @@ void ManageGame() {
           //Super Psit Jackpot
           if(allTargetsHitFiveTimes){
             score += 10000* scoreCoef;
-            PlaySound(CAISSE);
+            PlaySound(CAISSE, true);
             RestoreTargetStatus();
             DisplayScreen(SCREEN_SCORE, PRIORITY_LOW);
             DisplayScreen(SCREEN_SUPER_PSIT_COMPLETE, PRIORITY_HIGH);
@@ -700,8 +719,8 @@ void ManageGame() {
         
         if(playSound){
           byte randSound = random(2);
-          if (randSound == 0) PlaySound(TARGET_1);
-          else PlaySound(WHATASHOT);
+          if (randSound == 0) PlaySound(TARGET_1, false);
+          else PlaySound(WHATASHOT, false);
         }
       }
       //LEFT RED
@@ -745,8 +764,8 @@ void ManageGame() {
         
         if(playSound){
           byte randSound = random(2);
-          if (randSound == 0) PlaySound(TARGET_1);
-          else PlaySound(YOUHITTHATRIGHT);
+          if (randSound == 0) PlaySound(TARGET_1, false);
+          else PlaySound(YOUHITTHATRIGHT, false);
         }
       }
   
@@ -791,8 +810,8 @@ void ManageGame() {
         
         if(playSound){
           byte randSound = random(2);
-          if (randSound == 0) PlaySound(TARGET_2);
-          else PlaySound(OUCH);
+          if (randSound == 0) PlaySound(TARGET_2, false);
+          else PlaySound(OUCH, false);
         }
       }
       //LEFT GREEN
@@ -837,8 +856,8 @@ void ManageGame() {
         
         if(playSound){
           byte randSound = random(2);
-          if (randSound == 0) PlaySound(TARGET_2);
-          else PlaySound(OUCH);
+          if (randSound == 0) PlaySound(TARGET_2, false);
+          else PlaySound(OUCH, false);
         }
       }
   
@@ -875,8 +894,8 @@ void ManageGame() {
           else AnimLight(KO1_OFF);
           FireKickout1();
           byte randSound = random(2);
-          if (randSound == 0) PlaySound(KICKOUT_RELEASE_1);
-          else PlaySound(WANG);
+          if (randSound == 0) PlaySound(KICKOUT_RELEASE_1, false);
+          else PlaySound(WANG, false);
   
           
           score += 100* scoreCoef;
@@ -885,7 +904,7 @@ void ManageGame() {
         } else if (timeInHole1 == 100 && ballCatchedInHole1 == false) {
           ballLaunched = true;
           AnimLight(BLINK_KO1);
-          PlaySound(KICKOUT_CATCH_1);
+          PlaySound(KICKOUT_CATCH_1, false);
       
           ballCatchedInHole1 = true;
           score += 100* scoreCoef;
@@ -893,7 +912,7 @@ void ManageGame() {
             if (modeStarted == false) AnimLight(SNAKE_KO1);
             else AnimLight(KO1_OFF);
             FireKickout1();
-            PlaySound(KICKOUT_CATCH_1);
+            PlaySound(KICKOUT_CATCH_1, false);
             
             score += 100* scoreCoef;
           }else{
@@ -901,7 +920,7 @@ void ManageGame() {
             
             DisplayScreen(SCREEN_KO1_MULTIBALL, PRIORITY_HIGH);
             
-            delay(2000);
+            //delay(2000);
             RestoreLight();
             FireANewBall();
             PlayRandomMultiballMusic();
@@ -921,7 +940,7 @@ void ManageGame() {
         //RELEASE BALL FROM HOLE 2
         if (timeInHole2 >= 5000 && !ballCatchedInHole1) {
           FireKickout2();
-          PlaySound(KICKOUT_RELEASE_2);
+          PlaySound(KICKOUT_RELEASE_2, false);
 
           if (modeStarted == false) {
   
@@ -999,7 +1018,7 @@ void ManageGame() {
           //BALL CATCHED IN HOLE 2
           if (ballCatchedInHole2 == false) {
             AnimLight(BLINK_KO2);
-            PlaySound(KICKOUT_CATCH_1);
+            PlaySound(KICKOUT_CATCH_1, false);
             ballCatchedInHole2 = true;
             
             //Cancel Double Mode
@@ -1019,6 +1038,7 @@ void ManageGame() {
                 RestoreModesRandom();
               }
               while (alreadyActivatedModes[hasardMode]) hasardMode = random(10);
+              hasardMode = 6;
               //hasardMode = 7;
               //Serial.print("Rand = "); Serial.print(hasardMode); Serial.print("\n");
               modeStarted = false;
@@ -1039,7 +1059,7 @@ void ManageGame() {
                 bumpersState = 0;
                 SendScreenData(BUMPER_STATUS, bumpersState);
                 SendScreenData(COUNTDOWN, 25);
-                PlaySound(BUMPERS_ROUND);
+                PlaySound(BUMPERS_ROUND, true);
                 delay(3000);
                 delay(PlayRandomMusic());
   
@@ -1058,7 +1078,7 @@ void ManageGame() {
                 nb_hits = 0;
                 SendScreenData(COUNTDOWN, 25);
                 SendScreenData(NB_HITS, nb_hits);
-                PlaySound(GREEN_TARGETS_ROUND);
+                PlaySound(GREEN_TARGETS_ROUND, true);
                 delay(1000);
                 delay(PlayRandomMusic());
                 
@@ -1078,7 +1098,7 @@ void ManageGame() {
                 SendScreenData(COUNTDOWN, 25);
                 SendScreenData(NB_HITS, nb_hits);
   
-                PlaySound(RED_TARGET_ROUND);
+                PlaySound(RED_TARGET_ROUND, true);
                 delay(3000);
                 delay(PlayRandomMusic());
               } else if (hasardMode == 3) {
@@ -1098,8 +1118,8 @@ void ManageGame() {
                 SendScreenData(NB_HITS, nb_hits);
   
                 byte randSound = random(2);
-                if (randSound == 0) PlaySound(MIDDLE_TARGET_ROUND);
-                else PlaySound(MIDDLE_SHOT_ROUND);
+                if (randSound == 0) PlaySound(MIDDLE_TARGET_ROUND, true);
+                else PlaySound(MIDDLE_SHOT_ROUND, true);
                 delay(2000);
                 delay(PlayRandomMusic());
               } else if (hasardMode == 4) {
@@ -1117,7 +1137,7 @@ void ManageGame() {
                 nb_hits = 0;
                 SendScreenData(COUNTDOWN, 25);
                 SendScreenData(NB_HITS, nb_hits);
-                PlaySound(HITALLTHETARGETUCAN);
+                PlaySound(HITALLTHETARGETUCAN, true);
                 delay(2000);
   
                 delay(PlayRandomMusic());
@@ -1129,7 +1149,7 @@ void ManageGame() {
                 AnimLight(BLINK_MODES);
                 DisableFlippers();
                 DisplayScreen(SCREEN_BALL_GAME_INTRO, PRIORITY_LOW);
-                PlaySound(EXTRABALL_ROUND);
+                PlaySound(EXTRABALL_ROUND, true);
                 delay(3000);
                 AnimLight(MODE_EXTRA_BALL);
                 StopMusic();
@@ -1143,7 +1163,7 @@ void ManageGame() {
                 AnimLight(BLINK_MODES);
                 DisplayScreen(SCREEN_PSIT_MODE_ACTIVE, PRIORITY_LOW);
                 StopMusic();
-                PlaySound(PSIT_MODE);
+                PlaySound(PSIT_MODE, true);
                 delay(4000);
                 DisplayScreen(SCREEN_PSIT_ANIM, PRIORITY_LOW);
                 delay(PlayRandomMusic());
@@ -1161,7 +1181,7 @@ void ManageGame() {
                 AnimLight(BLINK_MODES);
                 DisableFlippers();
                 DisplayScreen(SCREEN_BALL_GAME_INTRO, PRIORITY_LOW);
-                PlaySound(EXTRABALL_ROUND);
+                PlaySound(EXTRABALL_ROUND, false);
                 delay(3000);
                 AnimLight(MODE_EXTRA_BALL);
                 PlayMusic(JAZZ);
@@ -1207,7 +1227,7 @@ void ManageGame() {
                 AnimLight(BLINK_MODES);
 
                 DisplayScreen(SCREEN_MODE_DOUBLE_INTRO, PRIORITY_LOW);
-                PlaySound(DOUBLE_ROUND_INTRO);
+                PlaySound(DOUBLE_ROUND_INTRO, false);
                 delay(3000);
                 AnimLight(MODE_DOUBLE);
                 //StopMusic();
@@ -1241,7 +1261,7 @@ void ManageGame() {
           
           //Sound for the Double Mode
           if(activeMode == DOUBLE_MODE && countdownByted % 6 == 0 ){
-            PlaySound(SHOOT_THE_RAMP); 
+            PlaySound(SHOOT_THE_RAMP, false); 
           }
         }
         //MODE SUCCEEDED or ended
@@ -1308,16 +1328,20 @@ void ManageGame() {
       //Si on perd une balle mais il y en a d autres en jeu
       if(!TILT_Active){
         if (ballInPlay > 0) {
-          PlaySound(LOOSE_BADLY);
+          PlaySound(LOOSE_BADLY, false);
         } else {
           PlayRandomLoose();
         }
       }
       if(ballCatchedInHole1 && !TILT_Active){
          FireKickout1();
-         PlaySound(KICKOUT_RELEASE_1);
+         PlaySound(KICKOUT_RELEASE_1, false);
          AnimLight(SNAKE_KO1);
       }
+    }
+    if(ballInPlay ==0 && score - lastScore < 50 ) {
+     FireANewBall();
+     delay(3000);
     }
     if (ballInPlay == 0) {
       activeMode = NO_MODE;
@@ -1326,7 +1350,7 @@ void ManageGame() {
       AnimLight(BLINK_LOOSE);
       delay(3000);
       AnimLight(LOOSE_OFF);
-      PlaySound(BALL_LOOSE);
+      PlaySound(BALL_LOOSE, true);
       nbBall = nbBall - 1;
       scoreCoef = 1;
 
@@ -1441,9 +1465,9 @@ bool CheckPsit() {
     score += 5000* scoreCoef;
     AnimLight(SNAKE_LETTERS);
     AnimLightFor(FLASH_TOP_LIGHTS, 50);
-    PlaySound(PSITSUCCESS5000);
+    PlaySound(PSITSUCCESS5000, true);
   }else if(psitModeState == 0b1110 || psitModeState == 0b1101 || psitModeState == 0b1011 || psitModeState == 0b0111){
-    PlaySound(ONEMOREFOREXTRAPOINT);
+    PlaySound(ONEMOREFOREXTRAPOINT, true);
     return false;
   }
   return true;
@@ -1453,7 +1477,7 @@ void CheckTarget(){
   if(leftRedTarget_Status == 5 && rightRedTarget_Status == 5 && leftGreenTarget_Status == 5 && rightGreenTarget_Status == 5 && yellowTarget_Status == 5 ){
     DisplayScreen(SCREEN_SUPER_PSIT, PRIORITY_LOW);
     PlayMusic(MISSION_IMPOSSIBLE);
-    PlaySound(SUPER_PSIT_MODE);
+    PlaySound(SUPER_PSIT_MODE, true);
     
     if(allTargetsHitFiveTimes == false){
       AmbiLight(ALL_OFF);

@@ -13,17 +13,17 @@ void PlayBallGame(){
     SendScreenData(FLIPPERS_STATE, flippers_state);
     
     gameStatus = ReadBallGameStatus();
-    if(gameStatus == BALL_BOUNCE) PlaySound(BOINNG);
+    if(gameStatus == BALL_BOUNCE) PlaySound(BOINNG, true);
     else if(gameStatus == BALL_CATCHED){
-      PlaySound(BUMPER_2);
+      PlaySound(BUMPER_2, true);
       score += 10* scoreCoef;
       AnimLightFor(FLASH_TOP_LIGHTS, 30);
       
     }else if(gameStatus == GAME_LOST){
-      PlaySound(LOOSE_POINT_POINT);
+      PlaySound(LOOSE_POINT_POINT, true);
       
     }else if(gameStatus == GAME_WIN){
-      PlaySound(CAFARTE);
+      PlaySound(CAFARTE, true);
       DisplayScreen(SCREEN_3BUMPERS_MODE_SUCCESS, PRIORITY_LOW);
       score += 1000* scoreCoef;
       delay(2000);
@@ -31,7 +31,7 @@ void PlayBallGame(){
       
       
       DisplayScreen(SCREEN_MULTIBALL, PRIORITY_HIGH);
-      PlaySound(MULTIBALL_SOUND);
+      PlaySound(MULTIBALL_SOUND, true);
       FireANewBall();
       PlayRandomMultiballMusic();
       delay(2000);
@@ -73,10 +73,10 @@ void PlayWordGame(){
     }else gameStatus = ReadBallGameStatus();
     
     if(gameStatus == GAME_LOST){
-      PlaySound(LOOSE_POINT_POINT);
+      PlaySound(LOOSE_POINT_POINT, true);
       
     }else if(gameStatus == GAME_WIN){
-      PlaySound(CAFARTE);
+      PlaySound(CAFARTE, true);
       DisplayScreen(SCREEN_3BUMPERS_MODE_SUCCESS, PRIORITY_LOW);
       score += 1000* scoreCoef;
       delay(1000);
@@ -94,6 +94,7 @@ void PlayStarWarsGame(){
    modeBeginTime = millis();
   gameStatus = GAME_IDLE;
   while(gameStatus != GAME_WIN && gameStatus != GAME_LOST){
+    time = millis();
     ReadSolenoidSwitches();
     ReadSwitches();
     //Order starting at 0: LEFT 0 then RIGHT 1
@@ -104,18 +105,18 @@ void PlayStarWarsGame(){
     
     gameStatus = ReadBallGameStatus();
     if(gameStatus == GAME_LOST){
-      PlaySound(DARTHVADORFAIL);
+      PlaySound(DARTHVADORFAIL, true);
       DisplayScreen(SCREEN_STARWARS_LOST, PRIORITY_LOW);   
       delay(4000);  
     }else if(gameStatus == ENEMI_DESTROYED){
-      PlaySound(PETITEEXPLOSION);
+      PlaySound(PETITEEXPLOSION, false);
       AnimLightFor(FLASH_TOP_LIGHTS, 5);
       gameScore++;
     }else if(gameStatus == SHIP_DESTROYED){
-      PlaySound(BIGEXPLOSION);
+      PlaySound(BIGEXPLOSION, true);
       AnimLightFor(FLASH_TOP_LIGHTS, 30);
     }else if(gameStatus == LASER_SHOT){
-      PlaySound(BLASTER);
+      PlaySound(BLASTER, true);
     }else if(gameStatus == GAME_WIN){
       delay(3000);
       DisplayScreen(SCREEN_STARWARS_WIN, PRIORITY_LOW);
@@ -124,10 +125,10 @@ void PlayStarWarsGame(){
       EnableFlippers();
       
       DisplayScreen(SCREEN_MULTIBALL, PRIORITY_HIGH);
-      PlaySound(MULTIBALL_SOUND);
+      PlaySound(MULTIBALL_SOUND, true);
       FireANewBall();
       PlayRandomMultiballMusic();
-      delay(2000);
+      delay(4000);
     }
     DisplayScore(gameScore);
     delay(50);

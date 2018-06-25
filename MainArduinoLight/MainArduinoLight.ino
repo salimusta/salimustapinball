@@ -98,7 +98,7 @@ void setup() {
 void loop() {
   //Send High Scores to the led screen
   SendHighScores();
-  PlaySound(DESIREHEY);
+  PlaySound(DESIREHEY, true);
   
   printLine("Press Left for ", "Maintenance");
   unsigned long timeToPress = millis();
@@ -113,14 +113,14 @@ void loop() {
     AmbiLight(ALL_OFF);
     AnimLight(ALL_ANIM_OFF);
     AnimLight2(ALL_ANIM_OFF);
-    PlaySound(DESIREHEY);
+    PlaySound(DESIREHEY, true);
     Serial.print("Entering Maintenance mode...");
     while(maintenanceMode) ManageMaintenanceMode(); 
   }else{
     printLine("SalimUstaPinball", "Operating...");
     DisplayScreen(SCREEN_HIGHSCORES, PRIORITY_LOW);
     WaitForCoin();
-    PlaySound(PIECE);
+    PlaySound(PIECE, true);
     while(1) ManageGame();
   }
 }
@@ -142,7 +142,7 @@ void WaitForCoin() {
       startPressed = true;
     }
   }
- PlaySound(YIHHA);
+ PlaySound(YIHHA, true);
 }
 
 void TriggerCoin() {
@@ -151,7 +151,7 @@ void TriggerCoin() {
   delay(100);
   DisplayScore(credit);
   WriteCredit(credit);
-  PlaySound(PIECE);
+  PlaySound(PIECE, true);
   AnimLight(START_BLINK);
 }
 
