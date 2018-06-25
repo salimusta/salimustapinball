@@ -5,7 +5,7 @@
 #define BANK_ONE 1 
 #define BANK_ZERO 0 
 #define pinMOSI 11
-#define DEBUG 1
+#define DEBUG 0
 
 //PIN Connections
 const int buttonLeftPin = 2; //Switch to activate left flipper
@@ -88,6 +88,8 @@ bool kickout2Requested = false;
 bool shooterRequested = false;
 bool shooterOnlyRequested = false;
 
+bool reset = false;
+
 unsigned long timeRampABall = 0;
 
 //FILPPER CONFIGURATION
@@ -103,7 +105,7 @@ const int BUMPER3_FIRE_DURATION = 150;
 const int KICKER_FIRE_DURATION = 200;
 int KICKOUT1_FIRE_DURATION = 100;
 int KICKOUT2_FIRE_DURATION = 100;
-int SHOOTER_FIRE_DURATION = 450;
+int SHOOTER_FIRE_DURATION = 250;
 
 short decalage = 130;
 short decalage2 = 110;
@@ -171,13 +173,13 @@ void receiveEvent(int howMany) {
       kickout1Requested = true;
       Kickout1_Duration = 0;
       randomTime = random(10);
-      KICKOUT1_FIRE_DURATION = 70 + randomTime;
+      KICKOUT1_FIRE_DURATION = 50;
     }else if(data == 60){
       if(DEBUG) Serial.print("KICKOUT 2\n");
       kickout2Requested = true;
       Kickout2_Duration = 0;
       randomTime = random(10);
-      KICKOUT2_FIRE_DURATION = 70 + randomTime;
+      KICKOUT2_FIRE_DURATION = 80 + randomTime;
     }else if(data == 80){
       kickersEnabled = false;
       if(DEBUG) Serial.print("Disable Kickers\n");
@@ -191,6 +193,9 @@ void receiveEvent(int howMany) {
       shooterOnlyRequested = true;
       Shooter_Duration = 0;
       if(DEBUG) Serial.print("Ramp and Shoot\n");
+    }else if(data == 200){
+      reset = true;
+      if(DEBUG) Serial.print("RESET ALL\n");
     }else{
       //custom Data
       if(DEBUG) Serial.print("Custom Data\n");
@@ -241,8 +246,15 @@ void d() {
   }
   
 }
-
+unsigned long timeInc = 0;
 void loop() {
+  //Delay of 1ms divides by 8
+  //Delay of 2ms, divide by 16
+  //delay(2);
+  timeInc++;
+  if (timeInc > 1000) {
+    timeInc = 0;
+  }
   time = millis();
   
   buttonLeftState = digitalRead(buttonLeftPin);
@@ -357,6 +369,13 @@ void loop() {
     SolenoidStatesBankB(0, 0, 0, 0, 0, 0);
     delay(2000);
     
+    if(DEBUG) Serial.print("Kicker Top\n");
+    //Kicker Right
+    SolenoidStatesBankB(0, 0, 0, 0, 0, 1);
+    delay(200);
+    SolenoidStatesBankB(0, 0, 0, 0, 0, 0);
+    delay(2000);
+    
     if(DEBUG) Serial.print("Kickout 1\n");
     //Kickout 1
     SolenoidStatesBankB(0, 0, 1, 0, 0, 0);
@@ -404,7 +423,7 @@ void loop() {
       }  
     
     //Cut the powering session Ramp off
-    }else if(timeSinceRequested > 1028){
+    }else if(timeSinceRequested > 1026){
       SolenoidOff(3);
       Ramping = true;
     //Open Ramp
@@ -592,7 +611,15 @@ void loop() {
   }
   
   
-  if(flippersEnabled){
+  if(reset) {
+    if(DEBUG){
+      Serial.print("RESET Action \n");
+   }
+    sendPDBCommand(board, PDB_COMMAND_WRITE, BANK_ONE, 0, true);
+    sendPDBCommand(board, PDB_COMMAND_WRITE, BANK_ZERO, 0, true);
+    delay(1000);
+    reset = false;
+  }else  if(flippersEnabled){
     if(Ramping == false){
       SolenoidStatesBankA(leftSolenoidState, rightSolenoidState, Bumper1_State, Bumper2_State, Bumper3_State);
       SolenoidStatesBankB(RightKicker_State, LeftKicker_State, Kickout1_State, Kickout2_State, Shooter_State, TopKicker_State);
@@ -621,7 +648,7 @@ void loop() {
 
 //0 is left, 1 i right
 void SolenoidStatesBankA(byte leftFlipper, byte rightFlipper, byte Bumper1_Solenoid, byte Bumper2_Solenoid, byte Bumper3_Solenoid){
-  
+  dataSolenoid = 0;
   if(leftFlipper == 1) dataSolenoid |= 1;
   else dataSolenoid &= ~1;
   
@@ -637,14 +664,15 @@ void SolenoidStatesBankA(byte leftFlipper, byte rightFlipper, byte Bumper1_Solen
   if(Bumper3_Solenoid == 1) dataSolenoid |= 1 << 6;
   else dataSolenoid &= ~(1 << 6);
   
-  if(dataSolenoid != dataSolenoidOld){
-    sendPDBCommand(board, PDB_COMMAND_WRITE, BANK_ZERO, dataSolenoid);
+  if(dataSolenoid != dataSolenoidOld || (dataSolenoid == 0 && timeInc%2 == 0)){
+    bool override = dataSolenoid == 0 ;
+    sendPDBCommand(board, PDB_COMMAND_WRITE, BANK_ZERO, dataSolenoid, override);
   }
   dataSolenoidOld = dataSolenoid;
 }
 
 void SolenoidStatesBankB(byte RightKicker, byte LeftKicker, byte Kickout1, byte Kickout2, byte Shooter, byte TopKicker){
-  
+  dataSolenoidBankB = 0;
   if(LeftKicker == 1) dataSolenoidBankB |= 1;
   else dataSolenoidBankB &= ~1;
   
@@ -663,28 +691,33 @@ void SolenoidStatesBankB(byte RightKicker, byte LeftKicker, byte Kickout1, byte 
   if(TopKicker == 1) dataSolenoidBankB |= 1 << 5;
   else dataSolenoidBankB &= ~(1 << 5);
   
-  if(dataSolenoidBankB != dataSolenoidBankBOld){
-    sendPDBCommand(board, PDB_COMMAND_WRITE, BANK_ONE, dataSolenoidBankB);
+  if(dataSolenoidBankB != dataSolenoidBankBOld || (dataSolenoidBankB == 0 && timeInc%2 ==0)){
+    bool override = dataSolenoidBankB == 0;
+    sendPDBCommand(board, PDB_COMMAND_WRITE, BANK_ONE, dataSolenoidBankB, override);
   }
   dataSolenoidBankBOld = dataSolenoidBankB;
 }
 
 void SolenoidOn(byte solenoidNumber)
 {
+  dataSolenoid = 0;
  dataSolenoid |= 1 << solenoidNumber; // set solenoid bit to one
- sendPDBCommand(board, PDB_COMMAND_WRITE, BANK_ZERO, dataSolenoid);
+ sendPDBCommand(board, PDB_COMMAND_WRITE, BANK_ZERO, dataSolenoid, false);
 }
 
 void SolenoidOff(byte solenoidNumber)
 { 
+  dataSolenoid = 0;
  dataSolenoid &= ~(1 << solenoidNumber); // set solenoid bit to zero
- sendPDBCommand(board, PDB_COMMAND_WRITE, 0, dataSolenoid);
+ sendPDBCommand(board, PDB_COMMAND_WRITE, 0, dataSolenoid, false);
 }
 
-void sendPDBCommand(byte addr, byte command, byte bankAddr, byte data) 
+void sendPDBCommand(byte addr, byte command, byte bankAddr, byte data, bool override) 
 { 
-  if(bankAddr == BANK_ZERO && data == lastData0) return;
-  if(bankAddr == BANK_ONE && data == lastData1) return;
+  if (override == false) {
+    if(bankAddr == BANK_ZERO && data == lastData0) return;
+    if(bankAddr == BANK_ONE && data == lastData1) return;
+  }
   if(DEBUG){
       Serial.print(bankAddr); Serial.print("-");Serial.print(data);Serial.print("\n");
    }
