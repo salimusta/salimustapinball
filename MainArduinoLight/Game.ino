@@ -1,5 +1,6 @@
 #define BUMPER_BONUS_INTERVAL 1200
-#define MODES_DURATION 25000
+#define MODES_DURATION 30000
+#define MODES_DURATION_SEC 30
 
 unsigned long score;
 unsigned long sendedScore;
@@ -268,7 +269,8 @@ void ManageGame() {
     AmbiLight(COIN_OFF);
     
     //Here we have chosen the number of players
-    initPlayers(nbPlayer);
+    RestoreTargetStatus();
+    initPlayers();
     selectedPlayer = 0;
     
     RestoreModesRandom();
@@ -1038,8 +1040,6 @@ void ManageGame() {
                 RestoreModesRandom();
               }
               while (alreadyActivatedModes[hasardMode]) hasardMode = random(10);
-              hasardMode = 6;
-              //hasardMode = 7;
               //Serial.print("Rand = "); Serial.print(hasardMode); Serial.print("\n");
               modeStarted = false;
               DisableKickers();
@@ -1058,7 +1058,7 @@ void ManageGame() {
                 StopMusic();
                 bumpersState = 0;
                 SendScreenData(BUMPER_STATUS, bumpersState);
-                SendScreenData(COUNTDOWN, 25);
+                SendScreenData(COUNTDOWN, MODES_DURATION_SEC);
                 PlaySound(BUMPERS_ROUND, true);
                 delay(3000);
                 delay(PlayRandomMusic());
@@ -1076,7 +1076,7 @@ void ManageGame() {
   
                 StopMusic();
                 nb_hits = 0;
-                SendScreenData(COUNTDOWN, 25);
+                SendScreenData(COUNTDOWN, MODES_DURATION_SEC);
                 SendScreenData(NB_HITS, nb_hits);
                 PlaySound(GREEN_TARGETS_ROUND, true);
                 delay(1000);
@@ -1095,7 +1095,7 @@ void ManageGame() {
   
                 StopMusic();
                 nb_hits = 0;
-                SendScreenData(COUNTDOWN, 25);
+                SendScreenData(COUNTDOWN, MODES_DURATION_SEC);
                 SendScreenData(NB_HITS, nb_hits);
   
                 PlaySound(RED_TARGET_ROUND, true);
@@ -1114,7 +1114,7 @@ void ManageGame() {
   
                 StopMusic();
                 nb_hits = 0;
-                SendScreenData(COUNTDOWN, 25);
+                SendScreenData(COUNTDOWN, MODES_DURATION_SEC);
                 SendScreenData(NB_HITS, nb_hits);
   
                 byte randSound = random(2);
@@ -1135,7 +1135,7 @@ void ManageGame() {
   
                 StopMusic();
                 nb_hits = 0;
-                SendScreenData(COUNTDOWN, 25);
+                SendScreenData(COUNTDOWN, MODES_DURATION_SEC);
                 SendScreenData(NB_HITS, nb_hits);
                 PlaySound(HITALLTHETARGETUCAN, true);
                 delay(2000);

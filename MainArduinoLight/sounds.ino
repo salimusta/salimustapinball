@@ -70,7 +70,7 @@ int PlayRandomMusic(){
   randomSeed(analogRead(0));
   hasardSound = random(15);
   
-  wTrig.masterGain(0);
+  //wTrig.masterGain(0);
   byte i;
   int timeRelease = 0;
   for(i = 100; i< 121; i++){
@@ -130,6 +130,11 @@ int PlayRandomMusic(){
 
 }
 
+void SetVolume(int volume) {
+ double number = (volume - 100) * 0.7;
+ wTrig.masterGain((int)(number)); 
+}
+
 void PlayRandomMultiballMusic(){
   StopMusic();
   
@@ -137,7 +142,6 @@ void PlayRandomMultiballMusic(){
   randomSeed(analogRead(0));
   hasardSound = random(2);
   
-  wTrig.masterGain(0);
   byte i;
   int timeRelease = 0;
   for(i = 100; i< 121; i++){
@@ -157,7 +161,6 @@ void PlayRandomMultiballMusic(){
 void PlayMusic(short musicId){
   StopMusic();
   
-  wTrig.masterGain(0);
   byte i;
   int timeRelease = 0;
   for(i = 100; i< 121; i++){

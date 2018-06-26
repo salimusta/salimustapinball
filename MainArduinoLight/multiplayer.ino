@@ -22,13 +22,13 @@ typedef struct {
 
 Player players[4];
 
-void initPlayers(byte nb){
+void initPlayers(){
   score = 0;
   nbBall = 3;
   gate1Passed = gate2Passed = gate3Passed = false;
   psitModeActive = false;
   psitModeState = nbBump = nbTarget = 0;
-  for(byte i = 0; i < nb; i++){
+  for(byte i = 0; i < 4; i++){
     players[i].score = 0;
     players[i].nbBall = 3;
     players[i].gate1Passed = players[i].gate2Passed = players[i].gate3Passed = false;

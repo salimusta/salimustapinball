@@ -21,6 +21,8 @@ LONGS (4 Bytes)
 60: Credit
 65: Total Credit Inserted
 
+80: Volume
+
 
 CHAR ( 10 caractere par nom)
 100: Nom 1
@@ -63,13 +65,25 @@ void ResetPinballData() {
 void WritePinballData(long ballFired, long bumperFired, long targets, long games){
   long ballFiredTotal = ReadNumber(600) + ballFired;
   long bumperFiredTotal = ReadNumber(650) + bumperFired;
-  long targetsTotal = ReadNumber(700) + targets;
+  long targetsTotal = ReadNumber(700) + targets;  
   long gamesTotal = ReadNumber(750) + games;
   
   WriteNumber(600, ballFiredTotal);
   WriteNumber(650, bumperFiredTotal);
   WriteNumber(700, targetsTotal);
   WriteNumber(750, gamesTotal);
+}
+
+void WriteVolume(int volumeParam) {
+  WriteNumber(80, volumeParam);
+}
+
+int ReadVolume() {
+  int volumeRead = ReadNumber(80);
+  if(volumeRead < 0 || volumeRead > 100) {
+    volumeRead = 100;
+  }
+  return volumeRead;
 }
 
 //This function write a score to a specific memory adress
@@ -217,12 +231,15 @@ void WriteScoreMemory(){
 }
 
 void WriteCredit(long creditParam) {
- WriteNumber(60, creditParam); 
- totalCredit++;
- WriteNumber(65, totalCredit); 
+ if(!freePlay) {
+   WriteNumber(60, creditParam); 
+   totalCredit++;
+   WriteNumber(65, totalCredit); 
+ }
 }
 
 long ReadCredit() {
+  if (freePlay) return 99;
   return ReadNumber(60);
 }
 

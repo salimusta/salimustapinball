@@ -1,5 +1,5 @@
 short menu = 1;
-
+int tempVolume = 0;
 void ManageMaintenanceMode(){
   //Reading menu buttons
   leftButton_State = digitalRead(leftBoutonPin);
@@ -12,7 +12,7 @@ void ManageMaintenanceMode(){
     //in the main menu
     if(menu/10 == 0){
       menu++;
-      if(menu > 6){
+      if(menu > 8){
         menu = 1;
       }
     //In the 1 sub menu
@@ -28,6 +28,13 @@ void ManageMaintenanceMode(){
       if(menu >= 59){
         menu = 51;
       }
+    }else if(menu == 61){
+      tempVolume += 5;
+      if(tempVolume > 100) tempVolume = 100;
+      SetVolume(tempVolume);
+      PlaySound(DESIREHEY, true);
+    }else if(menu == 71){
+      freePlay = !freePlay;
     }
     Serial.print("MENU = ");
     Serial.print(menu);
@@ -39,7 +46,7 @@ void ManageMaintenanceMode(){
     if(menu/10 == 0){
       menu--;
       if(menu < 1){
-        menu = 6;
+        menu = 8;
       }
     }
     else if(menu/10 == 2){
@@ -53,6 +60,13 @@ void ManageMaintenanceMode(){
       if(menu <= 50){
         menu = 58;
       }
+    }else if(menu == 61){
+      tempVolume -= 5;
+      if(tempVolume < 0) tempVolume = 0;
+      SetVolume(tempVolume);
+      PlaySound(DESIREHEY, true);
+    }else if(menu == 71){
+      freePlay = !freePlay;
     }
   }
   if(OkButton_State != OkButton_State_Old && OkButton_State == HIGH){
@@ -72,6 +86,11 @@ void ManageMaintenanceMode(){
     }else if( menu == 5){
       menu = 51;
     }else if( menu == 6){
+      menu = 61;
+      tempVolume = volume;
+    }else if( menu == 7){
+      menu = 71;
+    }else if( menu == 8){
       maintenanceMode = false;
     }else if( menu == 11){
       //Reset Scores
@@ -141,10 +160,22 @@ void ManageMaintenanceMode(){
       delay(2000);
       printLine("Erasing...", "Done!");
       delay(1000);
+    }else if(menu == 61){
+      volume = tempVolume;
+      WriteVolume(volume);
+      delay(500);
+      SetVolume(volume);
+      delay(500);
+      menu = menu/10;
+    }else if(menu == 71){
+      menu = menu/10;
     }
   }
   if(BackButton_State != BackButton_State_Old && BackButton_State == HIGH){
     //Serial.print("Button Back ON\n");
+    if(menu == 61) {
+      SetVolume(volume);
+    }
     menu = menu/10;
   }
   
@@ -211,9 +242,24 @@ void ManageMaintenanceMode(){
         break;
       case 58:
         printLine("Data", "8.Reset Credit");
-        break;  
+        break;
    case 6:
-    printLine("Main Menu", "6.Exit");
+      printLine("Main Menu", "6.Volume");
+      break;
+      case 61:
+        char buf[8];
+        sprintf(buf, "%i", tempVolume);
+        printLine("Volume", buf);
+        break;
+   case 7:
+      printLine("Main Menu", "7.Free Play");
+      break;
+      case 71:
+        if (freePlay) printLine("FreePlay", "ON");
+        else printLine("FreePlay", "OFF");
+        break;
+   case 8:
+    printLine("Main Menu", "8.Exit");
     break;
   }
   

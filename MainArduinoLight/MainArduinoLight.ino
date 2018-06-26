@@ -48,7 +48,12 @@ long totalCredit = 0;
 // initialize the library with the numbers of the interface pins
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
+//Sound Management
 wavTrigger wTrig;
+int volume = 100;
+
+bool freePlay = false;
+
 
 void setup() {
   Serial.begin(9600); 
@@ -64,6 +69,8 @@ void setup() {
   
   //Initialize the serial communication
   wTrig.start();
+  volume = ReadVolume();
+  SetVolume(volume);
   
   delay(500);
   AmbiLight(ANIME_ALL);
@@ -126,21 +133,25 @@ void loop() {
 }
 
 void WaitForCoin() {
-  AmbiLight(COIN_ON);
+  if(!freePlay) AmbiLight(COIN_ON);
   if (credit > 0) AnimLight(START_BLINK);
   else AnimLight(START_OFF);
   DisplayScore(credit);
   bool startPressed = false;
-  while(!startPressed || credit == 0) {
+  while(!startPressed || (credit == 0 && !freePlay)) {
     ReadSwitches();
     delay(10);
     //Coin inserted
-    if(COIN){
+    if(COIN && !freePlay){
       TriggerCoin();
     }
     if (START) {
       startPressed = true;
     }
+  }
+  if(freePlay){
+    credit = 99;
+    DisplayScore(credit);
   }
  PlaySound(YIHHA, true);
 }
