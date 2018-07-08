@@ -22,6 +22,9 @@ bool gameIsOn = false;
 bool ballIsInPlay = false;
 byte ballInPlay = 0;
 bool ballLaunched = false;
+byte ballInRamp = 0;
+
+bool gateClosed = false;
 
 //Variable pour les Kickouts
 int timeInHole1 = 0;
@@ -86,6 +89,8 @@ int nbTargetReached = 0;
 unsigned long timeSinceNewBall = 0;
 
 unsigned lastScore = 0;
+unsigned scoreToBeat = 0;
+unsigned willEnterTheHighScore = false;
 
 void ManageGame() {
 
@@ -112,9 +117,12 @@ void ManageGame() {
   //GAME OVER- if the game is on, no more ball and no more player
   if (gameIsOn && nbBall <= 0) {
     //Decrease Credit
-    credit = credit - nbPlayer;
-    if(credit < 0) credit = 0; //Just in case...
-    WriteCredit(credit);
+    if (!willEnterTheHighScore) {
+      credit = credit - nbPlayer;
+      if(credit < 0) credit = 0; //Just in case...
+      WriteCredit(credit);
+    }
+    
     
     //Game finished
     RestoreTargetStatus();
@@ -271,6 +279,8 @@ void ManageGame() {
     //Here we have chosen the number of players
     RestoreTargetStatus();
     initPlayers();
+    scoreToBeat = getMinScore();
+    willEnterTheHighScore = false;
     selectedPlayer = 0;
     
     RestoreModesRandom();
@@ -295,6 +305,7 @@ void ManageGame() {
   if(nbBall !=3  || selectedPlayer > 0) PlayRandomMusic();
   EnableFlippers();
   gameIsOn = true;
+  OpenGate();
   DisableIncrementalScore();delay(50);
   DisplayScore(score);
   ProvideANewBall();
@@ -416,6 +427,7 @@ void ManageGame() {
         //Turn Off Lights
         AllLightsOff();
         
+        OpenGate();
         
         delay(100);
         //If Ball Catched in KO2, release
@@ -490,8 +502,15 @@ void ManageGame() {
         score += 2000 * scoreCoef;
         ramp1Passed = false;
         timeSinceRamp1 = 0;
-        AnimLightFor(FLASH_TOP_LIGHTS, 50);
-        AmbiLight(FLASH_WHITE);
+        
+        byte shouldStartMode = random(2) == 0 && activeMode == NO_MODE && ballInPlay == 1;
+        if(shouldStartMode){
+          CloseGate();
+          delay(200);
+        }else{
+          AnimLightFor(FLASH_TOP_LIGHTS, 50);
+          AmbiLight(FLASH_WHITE);
+        }
         
         if(activeMode == DOUBLE_MODE){
           PlaySound(EVERYTHING_DOUBLED, true);
@@ -509,7 +528,11 @@ void ManageGame() {
           AmbiLight(SNAKE_ALL_COLORS);
         }else{
           PlaySound(YIHHA, false);
-          DisplayScreen(SCREEN_RAMP_SUCCEED, PRIORITY_HIGH); 
+          DisplayScreen(SCREEN_RAMP_SUCCEED, PRIORITY_HIGH);
+          if(gateClosed) {
+            ballInRamp = ballInRamp + 1;
+            SelectAMode(true);
+          }
         }
       }
       //BUMPERS-------------------------------------------------------------------------
@@ -1010,8 +1033,6 @@ void ManageGame() {
             } else {
               AnimLight(SNAKE_KO2);
             }
-  
-  
           } else {
             AnimLight(KO2_OFF);
           }
@@ -1031,214 +1052,8 @@ void ManageGame() {
               //STARTING A MODE
               //IF THE SUPER PSIT WAS A BOUT TO BE COMPLETED= TOO LATE BRO!!!
               //if(allTargetsHitFiveTimes) RestoreTargetStatus();
+              SelectAMode(false);
               
-              byte hasardMode = random(10);
-              while (psitModeActive && hasardMode == 6) hasardMode = random(10);
-  
-              if ( alreadyActivatedModes[0] && alreadyActivatedModes[1] && alreadyActivatedModes[2] && alreadyActivatedModes[3] && alreadyActivatedModes[4] &&
-                   alreadyActivatedModes[5] && alreadyActivatedModes[6] && alreadyActivatedModes[7] && alreadyActivatedModes[8] && alreadyActivatedModes[9]) {
-                RestoreModesRandom();
-              }
-              while (alreadyActivatedModes[hasardMode]) hasardMode = random(10);
-              //Serial.print("Rand = "); Serial.print(hasardMode); Serial.print("\n");
-              modeStarted = false;
-              DisableKickers();
-              if (hasardMode == 0) {
-                alreadyActivatedModes[0] = true;
-                activeMode = BUMPERS_MODE;
-                //ALL LIGHTS OFF
-                AllLightsOff();
-                AnimLight(BLINK_MODES);
-                timeInHole2 = 5000;
-  
-                DisplayScreen(SCREEN_3BUMPERS_MODE_STATE, PRIORITY_LOW);
-                DisplayScreen(SCREEN_3BUMPERS_MODE, PRIORITY_HIGH);
-  
-                //STOP MUSIC
-                StopMusic();
-                bumpersState = 0;
-                SendScreenData(BUMPER_STATUS, bumpersState);
-                SendScreenData(COUNTDOWN, MODES_DURATION_SEC);
-                PlaySound(BUMPERS_ROUND, true);
-                delay(3000);
-                delay(PlayRandomMusic());
-  
-              } else if (hasardMode == 1) {
-                alreadyActivatedModes[1] = true;
-                activeMode = GREEN_TARGET_MODE;
-                //ALL LIGHTS OFF
-                AllLightsOff();
-                AnimLight(BLINK_MODES);
-                timeInHole2 = 5000;
-  
-                DisplayScreen(SCREEN_GREEN_TARGET_MODE_STATE, PRIORITY_LOW);
-                DisplayScreen(SCREEN_GREEN_TARGET_MODE, PRIORITY_HIGH);
-  
-                StopMusic();
-                nb_hits = 0;
-                SendScreenData(COUNTDOWN, MODES_DURATION_SEC);
-                SendScreenData(NB_HITS, nb_hits);
-                PlaySound(GREEN_TARGETS_ROUND, true);
-                delay(1000);
-                delay(PlayRandomMusic());
-                
-              } else if (hasardMode == 2) {
-                alreadyActivatedModes[2] = true;
-                activeMode = RED_TARGET_MODE;
-                //ALL LIGHTS OFF
-                AllLightsOff();
-                AnimLight(BLINK_MODES);
-                timeInHole2 = 4800;
-  
-                DisplayScreen(SCREEN_RED_TARGET_MODE_STATE, PRIORITY_LOW);
-                DisplayScreen(SCREEN_RED_TARGET_MODE, PRIORITY_HIGH);
-  
-                StopMusic();
-                nb_hits = 0;
-                SendScreenData(COUNTDOWN, MODES_DURATION_SEC);
-                SendScreenData(NB_HITS, nb_hits);
-  
-                PlaySound(RED_TARGET_ROUND, true);
-                delay(3000);
-                delay(PlayRandomMusic());
-              } else if (hasardMode == 3) {
-                alreadyActivatedModes[3] = true;
-                activeMode = MIDDLE_TARGET_MODE;
-                //ALL LIGHTS OFF
-                AllLightsOff();
-                AnimLight(BLINK_MODES);
-                timeInHole2 = 5000;
-  
-                DisplayScreen(SCREEN_MIDDLE_TARGET_MODE_STATE, PRIORITY_LOW);
-                DisplayScreen(SCREEN_MIDDLE_TARGET_MODE, PRIORITY_HIGH);
-  
-                StopMusic();
-                nb_hits = 0;
-                SendScreenData(COUNTDOWN, MODES_DURATION_SEC);
-                SendScreenData(NB_HITS, nb_hits);
-  
-                byte randSound = random(2);
-                if (randSound == 0) PlaySound(MIDDLE_TARGET_ROUND, true);
-                else PlaySound(MIDDLE_SHOT_ROUND, true);
-                delay(2000);
-                delay(PlayRandomMusic());
-              } else if (hasardMode == 4) {
-                alreadyActivatedModes[4] = true;
-                activeMode = ALL_TARGET_MODE;
-                //ALL LIGHTS OFF
-                AllLightsOff();
-                AnimLight(BLINK_MODES);
-                timeInHole2 = 5000;
-  
-                DisplayScreen(SCREEN_RED_TARGET_MODE_STATE, PRIORITY_LOW);
-                DisplayScreen(SCREEN_ALL_TARGET_MODE, PRIORITY_HIGH);
-  
-                StopMusic();
-                nb_hits = 0;
-                SendScreenData(COUNTDOWN, MODES_DURATION_SEC);
-                SendScreenData(NB_HITS, nb_hits);
-                PlaySound(HITALLTHETARGETUCAN, true);
-                delay(2000);
-  
-                delay(PlayRandomMusic());
-              } else if (hasardMode == 5) {
-                alreadyActivatedModes[5] = true;
-                activeMode = EXTRA_BALL_MODE;
-                //ALL LIGHTS OFF
-                AllLightsOff();
-                AnimLight(BLINK_MODES);
-                DisableFlippers();
-                DisplayScreen(SCREEN_BALL_GAME_INTRO, PRIORITY_LOW);
-                PlaySound(EXTRABALL_ROUND, true);
-                delay(3000);
-                AnimLight(MODE_EXTRA_BALL);
-                StopMusic();
-                DisplayScreen(SCREEN_BALL_GAME, PRIORITY_LOW);
-                PlayBallGame();
-                timeInHole2 = 5000;
-  
-              } else if (hasardMode == 6) {
-                alreadyActivatedModes[6] = true;
-                AllLightsOff();
-                AnimLight(BLINK_MODES);
-                DisplayScreen(SCREEN_PSIT_MODE_ACTIVE, PRIORITY_LOW);
-                StopMusic();
-                PlaySound(PSIT_MODE, true);
-                delay(4000);
-                DisplayScreen(SCREEN_PSIT_ANIM, PRIORITY_LOW);
-                delay(PlayRandomMusic());
-                
-                
-                DisplayScreen(SCREEN_SCORE, PRIORITY_LOW);
-                psitModeActive = true;
-                psitModeState = 0;
-                timeInHole2 = 5000;
-              }else if (hasardMode == 7) {
-                alreadyActivatedModes[7] = true;
-                activeMode = WORD_GAME_MODE;
-                //ALL LIGHTS OFF
-                AllLightsOff();
-                AnimLight(BLINK_MODES);
-                DisableFlippers();
-                DisplayScreen(SCREEN_BALL_GAME_INTRO, PRIORITY_LOW);
-                PlaySound(EXTRABALL_ROUND, false);
-                delay(3000);
-                AnimLight(MODE_EXTRA_BALL);
-                PlayMusic(JAZZ);
-                DisplayScreen(SCREEN_WORD_GAME, PRIORITY_LOW);
-                PlayWordGame();
-                timeInHole2 = 5000;
-                
-              }else if (hasardMode == 8) {
-                alreadyActivatedModes[8] = true;
-                activeMode = STARWARS_MODE;
-                //ALL LIGHTS OFF
-                AllLightsOff();
-                AnimLight(ALL_MODE_OFF);
-                DisableFlippers();
-                StopMusic();
-                DisplayScreen(SCREEN_STARWARS_INTRO_2, PRIORITY_LOW);
-                delay(3000);
-                PlayMusic(STARWARSTHEME);
-                delay(500);
-                DisplayScreen(SCREEN_STARWARS_INTRO, PRIORITY_LOW);
-                
-                //Possibilite de switch l introduction star Wars
-                unsigned long timeDepart = millis();
-                unsigned long timeTps = millis();
-                ReadSolenoidSwitches();
-                while (!RIGHT_FLIPPER || !LEFT_FLIPPER) {
-                  ReadSolenoidSwitches();
-                  if(timeTps - timeDepart > 33000 || timeTps - timeDepart < 0) break;
-                  timeTps = millis();
-                  delay(100);
-                }
-              
-                AnimLight(MODE_EXTRA_BALL);
-                DisplayScreen(SCREEN_STARWARS_GAME, PRIORITY_LOW);
-                PlayStarWarsGame();
-                timeInHole2 = 5000;
-                
-              }else if (hasardMode == 9) {
-                alreadyActivatedModes[9] = true;
-                activeMode = DOUBLE_MODE;
-                //ALL LIGHTS OFF
-                AllLightsOff();
-                AnimLight(BLINK_MODES);
-
-                DisplayScreen(SCREEN_MODE_DOUBLE_INTRO, PRIORITY_LOW);
-                PlaySound(DOUBLE_ROUND_INTRO, false);
-                delay(3000);
-                AnimLight(MODE_DOUBLE);
-                //StopMusic();
-  
-                timeInHole2 = 5000;
-                
-              }
-  
-              //Pas de delais supplementaire si on est dans un jeu
-              if (activeMode != EXTRA_BALL_MODE && activeMode != WORD_GAME_MODE && activeMode != STARWARS_MODE && hasardMode != 6) delay(100);
-              else EnableFlippers();
             }
           }
         }
@@ -1339,7 +1154,7 @@ void ManageGame() {
          AnimLight(SNAKE_KO1);
       }
     }
-    if(ballInPlay ==0 && score - lastScore < 50 ) {
+    if(ballInPlay ==0 && score - lastScore < 50 && !TILT_Active) {
      FireANewBall();
      delay(3000);
     }
@@ -1353,6 +1168,11 @@ void ManageGame() {
       PlaySound(BALL_LOOSE, true);
       nbBall = nbBall - 1;
       scoreCoef = 1;
+      
+      //Set if the score is good enough
+      if (score >= scoreToBeat) {
+        willEnterTheHighScore = true;
+      }
 
       DisplayScreen(SCREEN_BALLLEFT, PRIORITY_LOW);
       delay(2000);
@@ -1515,4 +1335,227 @@ byte NumberToData(byte number){
  else if(number == 4) return 0b1111;
  else if(number == 5) return 0b11111;
  
+}
+
+void SelectAMode(bool screenGame){
+  byte hasardMode;
+  if(screenGame) {
+    hasardMode = random(3);
+    if(hasardMode == 0) hasardMode = 5;
+    else if(hasardMode == 1) hasardMode = 7;
+    else hasardMode = 8;
+  }else{
+    hasardMode = random(10);
+    while (psitModeActive && hasardMode == 6) hasardMode = random(10);
+  
+    if ( alreadyActivatedModes[0] && alreadyActivatedModes[1] && alreadyActivatedModes[2] && alreadyActivatedModes[3] && alreadyActivatedModes[4] &&
+         alreadyActivatedModes[5] && alreadyActivatedModes[6] && alreadyActivatedModes[7] && alreadyActivatedModes[8] && alreadyActivatedModes[9]) {
+      RestoreModesRandom();
+    }
+    while (alreadyActivatedModes[hasardMode]) hasardMode = random(10);
+  }
+ 
+  //Serial.print("Rand = "); Serial.print(hasardMode); Serial.print("\n");
+  modeStarted = false;
+  DisableKickers();
+  if (hasardMode == 0) {
+    alreadyActivatedModes[0] = true;
+    activeMode = BUMPERS_MODE;
+    //ALL LIGHTS OFF
+    AllLightsOff();
+    AnimLight(BLINK_MODES);
+    timeInHole2 = 5000;
+
+    DisplayScreen(SCREEN_3BUMPERS_MODE_STATE, PRIORITY_LOW);
+    DisplayScreen(SCREEN_3BUMPERS_MODE, PRIORITY_HIGH);
+
+    //STOP MUSIC
+    StopMusic();
+    bumpersState = 0;
+    SendScreenData(BUMPER_STATUS, bumpersState);
+    SendScreenData(COUNTDOWN, MODES_DURATION_SEC);
+    PlaySound(BUMPERS_ROUND, true);
+    delay(3000);
+    delay(PlayRandomMusic());
+
+  } else if (hasardMode == 1) {
+    alreadyActivatedModes[1] = true;
+    activeMode = GREEN_TARGET_MODE;
+    //ALL LIGHTS OFF
+    AllLightsOff();
+    AnimLight(BLINK_MODES);
+    timeInHole2 = 5000;
+
+    DisplayScreen(SCREEN_GREEN_TARGET_MODE_STATE, PRIORITY_LOW);
+    DisplayScreen(SCREEN_GREEN_TARGET_MODE, PRIORITY_HIGH);
+
+    StopMusic();
+    nb_hits = 0;
+    SendScreenData(COUNTDOWN, MODES_DURATION_SEC);
+    SendScreenData(NB_HITS, nb_hits);
+    PlaySound(GREEN_TARGETS_ROUND, true);
+    delay(1000);
+    delay(PlayRandomMusic());
+    
+  } else if (hasardMode == 2) {
+    alreadyActivatedModes[2] = true;
+    activeMode = RED_TARGET_MODE;
+    //ALL LIGHTS OFF
+    AllLightsOff();
+    AnimLight(BLINK_MODES);
+    timeInHole2 = 4800;
+
+    DisplayScreen(SCREEN_RED_TARGET_MODE_STATE, PRIORITY_LOW);
+    DisplayScreen(SCREEN_RED_TARGET_MODE, PRIORITY_HIGH);
+
+    StopMusic();
+    nb_hits = 0;
+    SendScreenData(COUNTDOWN, MODES_DURATION_SEC);
+    SendScreenData(NB_HITS, nb_hits);
+
+    PlaySound(RED_TARGET_ROUND, true);
+    delay(3000);
+    delay(PlayRandomMusic());
+  } else if (hasardMode == 3) {
+    alreadyActivatedModes[3] = true;
+    activeMode = MIDDLE_TARGET_MODE;
+    //ALL LIGHTS OFF
+    AllLightsOff();
+    AnimLight(BLINK_MODES);
+    timeInHole2 = 5000;
+
+    DisplayScreen(SCREEN_MIDDLE_TARGET_MODE_STATE, PRIORITY_LOW);
+    DisplayScreen(SCREEN_MIDDLE_TARGET_MODE, PRIORITY_HIGH);
+
+    StopMusic();
+    nb_hits = 0;
+    SendScreenData(COUNTDOWN, MODES_DURATION_SEC);
+    SendScreenData(NB_HITS, nb_hits);
+
+    byte randSound = random(2);
+    if (randSound == 0) PlaySound(MIDDLE_TARGET_ROUND, true);
+    else PlaySound(MIDDLE_SHOT_ROUND, true);
+    delay(2000);
+    delay(PlayRandomMusic());
+  } else if (hasardMode == 4) {
+    alreadyActivatedModes[4] = true;
+    activeMode = ALL_TARGET_MODE;
+    //ALL LIGHTS OFF
+    AllLightsOff();
+    AnimLight(BLINK_MODES);
+    timeInHole2 = 5000;
+
+    DisplayScreen(SCREEN_RED_TARGET_MODE_STATE, PRIORITY_LOW);
+    DisplayScreen(SCREEN_ALL_TARGET_MODE, PRIORITY_HIGH);
+
+    StopMusic();
+    nb_hits = 0;
+    SendScreenData(COUNTDOWN, MODES_DURATION_SEC);
+    SendScreenData(NB_HITS, nb_hits);
+    PlaySound(HITALLTHETARGETUCAN, true);
+    delay(2000);
+
+    delay(PlayRandomMusic());
+  } else if (hasardMode == 5) {
+    alreadyActivatedModes[5] = true;
+    activeMode = EXTRA_BALL_MODE;
+    //ALL LIGHTS OFF
+    AllLightsOff();
+    AnimLight(BLINK_MODES);
+    DisableFlippers();
+    DisplayScreen(SCREEN_BALL_GAME_INTRO, PRIORITY_LOW);
+    PlaySound(EXTRABALL_ROUND, true);
+    delay(3000);
+    AnimLight(MODE_EXTRA_BALL);
+    StopMusic();
+    DisplayScreen(SCREEN_BALL_GAME, PRIORITY_LOW);
+    PlayBallGame();
+    timeInHole2 = 5000;
+
+  } else if (hasardMode == 6) {
+    alreadyActivatedModes[6] = true;
+    AllLightsOff();
+    AnimLight(BLINK_MODES);
+    DisplayScreen(SCREEN_PSIT_MODE_ACTIVE, PRIORITY_LOW);
+    StopMusic();
+    PlaySound(PSIT_MODE, true);
+    delay(4000);
+    DisplayScreen(SCREEN_PSIT_ANIM, PRIORITY_LOW);
+    delay(PlayRandomMusic());
+    
+    
+    DisplayScreen(SCREEN_SCORE, PRIORITY_LOW);
+    psitModeActive = true;
+    psitModeState = 0;
+    timeInHole2 = 5000;
+  }else if (hasardMode == 7) {
+    alreadyActivatedModes[7] = true;
+    activeMode = WORD_GAME_MODE;
+    //ALL LIGHTS OFF
+    AllLightsOff();
+    AnimLight(BLINK_MODES);
+    DisableFlippers();
+    DisplayScreen(SCREEN_BALL_GAME_INTRO, PRIORITY_LOW);
+    PlaySound(EXTRABALL_ROUND, false);
+    delay(3000);
+    AnimLight(MODE_EXTRA_BALL);
+    PlayMusic(JAZZ);
+    DisplayScreen(SCREEN_WORD_GAME, PRIORITY_LOW);
+    PlayWordGame();
+    timeInHole2 = 5000;
+    
+  }else if (hasardMode == 8) {
+    alreadyActivatedModes[8] = true;
+    activeMode = STARWARS_MODE;
+    //ALL LIGHTS OFF
+    AllLightsOff();
+    AnimLight(ALL_MODE_OFF);
+    DisableFlippers();
+    StopMusic();
+    DisplayScreen(SCREEN_STARWARS_INTRO_2, PRIORITY_LOW);
+    delay(3000);
+    PlayMusic(STARWARSTHEME);
+    delay(500);
+    DisplayScreen(SCREEN_STARWARS_INTRO, PRIORITY_LOW);
+    
+    //Possibilite de switch l introduction star Wars
+    unsigned long timeDepart = millis();
+    unsigned long timeTps = millis();
+    ReadSolenoidSwitches();
+    while (!RIGHT_FLIPPER || !LEFT_FLIPPER) {
+      ReadSolenoidSwitches();
+      if(timeTps - timeDepart > 33000 || timeTps - timeDepart < 0) break;
+      timeTps = millis();
+      delay(100);
+    }
+  
+    AnimLight(MODE_EXTRA_BALL);
+    DisplayScreen(SCREEN_STARWARS_GAME, PRIORITY_LOW);
+    PlayStarWarsGame();
+    timeInHole2 = 5000;
+    
+  }else if (hasardMode == 9) {
+    alreadyActivatedModes[9] = true;
+    activeMode = DOUBLE_MODE;
+    //ALL LIGHTS OFF
+    AllLightsOff();
+    AnimLight(BLINK_MODES);
+
+    DisplayScreen(SCREEN_MODE_DOUBLE_INTRO, PRIORITY_LOW);
+    PlaySound(DOUBLE_ROUND_INTRO, false);
+    delay(3000);
+    AnimLight(MODE_DOUBLE);
+    //StopMusic();
+
+    timeInHole2 = 5000;
+    
+  }
+
+  //Pas de delais supplementaire si on est dans un jeu
+  if (activeMode != EXTRA_BALL_MODE && activeMode != WORD_GAME_MODE && activeMode != STARWARS_MODE && hasardMode != 6) delay(100);
+  else EnableFlippers(); 
+  
+  if (ballInRamp > 0) {
+    OpenGate();
+  }
 }

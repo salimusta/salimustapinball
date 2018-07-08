@@ -220,6 +220,10 @@
 #define COIN_ON 16
 #define COIN_OFF 17
 
+#define GATE_ON 18
+#define GATE_OFF 19
+#define GATE_ONE_BALL 20
+
 #define FLASH_WHITE 100
 #define SNAKE_ALL_COLORS 101
 

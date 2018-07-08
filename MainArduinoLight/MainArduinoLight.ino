@@ -100,6 +100,9 @@ void setup() {
   if(KO1 || KO1_Old || KO2 || KO2_Old){
     delay(1000); 
   }
+  
+  LeaveOneBall();delay(1000);
+  OpenGate();
 }
 
 void loop() {

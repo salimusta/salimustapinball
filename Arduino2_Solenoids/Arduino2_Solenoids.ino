@@ -93,17 +93,18 @@ bool reset = false;
 unsigned long timeRampABall = 0;
 
 //FILPPER CONFIGURATION
-const int POWER_TIME_LEFT_MS =  300;
-const int POWER_TIME_RIGHT_MS =  300;
+const int POWER_TIME_LEFT_MS =  24;
+const int POWER_TIME_RIGHT_MS =  24;
 const int HOLDON_PERIOD_MS =  15;
-const int HOLDON_DURATION_MS =  2;
+const int HOLDON_DURATION_MS =  3;
 
-const int BUMPER1_FIRE_DURATION = 130;
-const int BUMPER2_FIRE_DURATION = 200;
-const int BUMPER3_FIRE_DURATION = 150;
+const int BUMPER1_FIRE_DURATION = 120;
+const int BUMPER2_FIRE_DURATION = 120;
+const int BUMPER3_FIRE_DURATION = 120;
 
-const int KICKER_FIRE_DURATION = 200;
-int KICKOUT1_FIRE_DURATION = 100;
+const int KICKER_FIRE_DURATION = 150;
+const int TOP_KICKER_FIRE_DURATION = 200;
+int KICKOUT1_FIRE_DURATION = 120;
 int KICKOUT2_FIRE_DURATION = 100;
 int SHOOTER_FIRE_DURATION = 250;
 
@@ -602,7 +603,7 @@ void loop() {
    LeftKicker_Duration= 9999;
   }
   
-  if(TopKicker_Duration < KICKER_FIRE_DURATION && kickersEnabled){
+  if(TopKicker_Duration < TOP_KICKER_FIRE_DURATION && kickersEnabled){
    TopKicker_State = 1; 
    TopKicker_Duration++;
   }else{

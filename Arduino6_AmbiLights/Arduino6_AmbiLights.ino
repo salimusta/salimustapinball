@@ -1,4 +1,5 @@
 #include <Wire.h>
+#include <Servo.h>
 
 #define RED_ON 1
 #define RED_OFF 2
@@ -19,9 +20,16 @@
 #define COIN_ON 16
 #define COIN_OFF 17
 
+#define GATE_ON 18
+#define GATE_OFF 19
+#define GATE_ONE_BALL 20
+
 #define FLASH_WHITE 100
 #define SNAKE_ALL_COLORS 101
 
+Servo gateServo;
+int tpos1 = 0;
+float angle = 0;
 
 void setup() {
   // put your setup code here, to run once:
@@ -46,6 +54,10 @@ void setup() {
   digitalWrite(8, HIGH);
   digitalWrite(7, HIGH);
   digitalWrite(6, HIGH); //Coin power activator
+  
+  gateServo.attach(3); 
+  
+  Gate(false);
   
   
   Boost(true);
@@ -167,6 +179,13 @@ void Coin(bool activate){
   else digitalWrite(6, HIGH);
 }
 
+void Gate(bool activate) {
+  if (activate) angle = -0.6;
+  else angle = 0.8;
+  tpos1 = (1+ sin(angle))*100;
+  gateServo.write(tpos1);
+}
+
 void receiveEvent(int howMany) {
   Serial.print("Event\n");
   animOldState = modeAnim;
@@ -189,7 +208,15 @@ void receiveEvent(int howMany) {
     else if(byte0 == BOOST_OFF) Boost(false);
     else if(byte0 == COIN_ON) Coin(true);
     else if(byte0 == COIN_OFF) Coin(false);
-    else if(byte0 == ALL_ON){
+    else if(byte0 == GATE_ON) Gate(true);
+    else if(byte0 == GATE_OFF) Gate(false);
+    else if(byte0 == GATE_ONE_BALL){
+      Gate(true);
+      delay(500);
+      Gate(false);
+      delay(250);
+      Gate(true);
+    }else if(byte0 == ALL_ON){
       Red(true);
       Green(true);
       Yellow(true);
