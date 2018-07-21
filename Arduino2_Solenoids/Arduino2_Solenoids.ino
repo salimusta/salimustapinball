@@ -173,8 +173,7 @@ void receiveEvent(int howMany) {
       if(DEBUG) Serial.print("KICKOUT 1\n");
       kickout1Requested = true;
       Kickout1_Duration = 0;
-      randomTime = random(10);
-      KICKOUT1_FIRE_DURATION = 50;
+      KICKOUT1_FIRE_DURATION = 80;
     }else if(data == 60){
       if(DEBUG) Serial.print("KICKOUT 2\n");
       kickout2Requested = true;
