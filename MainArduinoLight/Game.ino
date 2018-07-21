@@ -44,14 +44,19 @@ bool alreadyActivatedModes[10] = {false, false, false, false, false, false, fals
 
 //Bumpers
 byte bumpersState = 0;
-int timeSinceBumper1Hit = 100;
-int timeSinceBumper2Hit = 100;
-int timeSinceBumper3Hit = 100;
+int timeSinceBumper1Hit = 10;
+int timeSinceBumper2Hit = 10;
+int timeSinceBumper3Hit = 10;
 
 //Targets
 int timeSinceLeftRedTargetHit = 100; int timeSinceRightRedTargetHit = 100;
 int timeSinceLeftGreenTargetHit = 100; int timeSinceRightGreenTargetHit = 100;
 int timeSinceYellowTargetHit = 100;
+
+//Roll Over Switches
+int timeSinceROSW1Hit = 100;
+int timeSinceROSW2Hit = 100;
+int timeSinceROSW3Hit = 100;
 
 //Kickers
 int timeSinceKickerLeftHit = 100;
@@ -612,8 +617,12 @@ void ManageGame() {
       }
   
       //GATES-------------------------------------------------
-      if (ROSW1) {
+      if (timeSinceROSW1Hit < 100) timeSinceROSW1Hit ++;
+      if (timeSinceROSW2Hit < 100) timeSinceROSW2Hit ++;
+      if (timeSinceROSW3Hit < 100) timeSinceROSW3Hit ++;
+      if (ROSW1 && timeSinceROSW1Hit > 50) {
         score += 100* scoreCoef;
+        timeSinceROSW1Hit = 0;
         if (gate1Passed) {
           PlaySound(GATE_BUZZ, false);
         } else {
@@ -623,8 +632,9 @@ void ManageGame() {
           PlaySound(GATE1, true);
         }
       }
-      if (ROSW2) {
+      if (ROSW2 && timeSinceROSW2Hit > 50) {
         score += 200* scoreCoef;
+        timeSinceROSW2Hit = 0;
         if (gate2Passed) {
           PlaySound(GATE_BUZZ, false);
         } else {
@@ -634,10 +644,11 @@ void ManageGame() {
           PlaySound(GATE2, true);
         }
       }
-      if (ROSW3) {
+      if (ROSW3 && timeSinceROSW3Hit > 50) {
         score += 300* scoreCoef;
+        timeSinceROSW3Hit = 0;
         if (gate3Passed) {
-          PlaySound(DESIREHEY, true);
+          PlaySound(GATE_BUZZ, false);
         } else {
           DisplayScreen(SCREEN_ROSW3, PRIORITY_HIGH);
           AnimLight(GATE_3_OFF);

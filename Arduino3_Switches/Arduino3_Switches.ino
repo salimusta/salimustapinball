@@ -9,7 +9,6 @@ const int I5 = 5;
 const int I6 = 6;
 const int I7 = 7;
 
-//const int D8 = 8;
 const int D9 = 9;
 const int D10 = 10;
 const int D11 = 11;
@@ -18,7 +17,6 @@ const int D12 = 12;
 void setup() {
   if(DEBUG) Serial.begin(9600); 
   
-  //pinMode(D8, OUTPUT);
   pinMode(D9, OUTPUT);
   pinMode(D10, OUTPUT);
   pinMode(D11, OUTPUT);
@@ -31,6 +29,14 @@ void setup() {
   pinMode(I5, INPUT);  
   pinMode(I6, INPUT);
   pinMode(I7, INPUT);
+
+  digitalWrite(I1,LOW); // pull up on
+  digitalWrite(I2,LOW); // pull up on
+  digitalWrite(I3,LOW); // pull up on
+  digitalWrite(I4,LOW); // pull up on
+  digitalWrite(I5,LOW); // pull up on
+  digitalWrite(I6,LOW); // pull up on
+  digitalWrite(I7,LOW); // pull up on
   
   Wire.begin(3);
   Wire.onRequest(requestEvent);
@@ -115,31 +121,32 @@ int START_Old = 0;
 int TILT_Old = 0;
 int COIN_Old = 0;
 
-short delayMs = 300;
+short delayMs = 400;
+
+void ActivateLine(const int line) {
+  digitalWrite(D9, LOW);
+  digitalWrite(D10, LOW);
+  digitalWrite(D11, LOW);
+  digitalWrite(D12, LOW);
+  digitalWrite(line, HIGH);
+}
 
 void loop(){
-  
+  delay(10);
   //Read the coin state
   COIN_State = digitalRead(I1);
   
   //DRIVE LINE 11
-  digitalWrite(D9, LOW);
-  digitalWrite(D10, LOW);
-  digitalWrite(D11, HIGH);
-  digitalWrite(D12, LOW);
+  ActivateLine(D11);
   delayMicroseconds(delayMs);
   ROSW1_State = digitalRead(I2);
   ROSW2_State = digitalRead(I3);
   ROSW3_State = digitalRead(I4);
-  //LT2P_State = digitalRead(I5);
   LT2_State = digitalRead(I6);
   RAMPA2_State = digitalRead(I7);
   
   //DRIVE LINE 9
-  digitalWrite(D9, HIGH);
-  digitalWrite(D10, LOW);
-  digitalWrite(D11, LOW);
-  digitalWrite(D12, LOW);
+  ActivateLine(D9);
   delayMicroseconds(delayMs);
   RT1_State = digitalRead(I2);
   GATE_State = digitalRead(I3);
@@ -149,28 +156,20 @@ void loop(){
   RAMPA1_State = digitalRead(I7);
   
   //DRIVE LINE 10
-  digitalWrite(D9, LOW);
-  digitalWrite(D10, HIGH);
-  digitalWrite(D11, LOW);
-  digitalWrite(D12, LOW);
+  ActivateLine(D10);
   delayMicroseconds(delayMs);
   KO2_State = digitalRead(I2);
   LOSW_State = digitalRead(I3);
   RLOSW_State = digitalRead(I4);
-  //RAMP_State = digitalRead(I5);
   LLOSW_State = digitalRead(I6);
   START_State = digitalRead(I7);
   
   //DRIVE LINE 12
-  digitalWrite(D9, LOW);
-  digitalWrite(D10, LOW);
-  digitalWrite(D11, LOW);
-  digitalWrite(D12, HIGH);
+  ActivateLine(D12);
   delayMicroseconds(delayMs);
   BSW1_State = digitalRead(I2);
   BSW2_State = digitalRead(I3);
   BSW3_State = digitalRead(I4);
-  //CTP_State = digitalRead(I5);
   CT_State = digitalRead(I6);
   TILT_State = digitalRead(I7);
   

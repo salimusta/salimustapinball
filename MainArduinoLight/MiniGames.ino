@@ -93,6 +93,7 @@ void PlayStarWarsGame(){
   unsigned long gameScore = 0;
    modeBeginTime = millis();
   gameStatus = GAME_IDLE;
+  int loosingLights = 0;
   while(gameStatus != GAME_WIN && gameStatus != GAME_LOST){
     time = millis();
     ReadSolenoidSwitches();
@@ -115,6 +116,9 @@ void PlayStarWarsGame(){
     }else if(gameStatus == SHIP_DESTROYED){
       PlaySound(BIGEXPLOSION, true);
       AnimLightFor(FLASH_TOP_LIGHTS, 30);
+      AmbiLight(BOOST_ON);
+      AmbiLight(RED_ON);
+      loosingLights = 30;
     }else if(gameStatus == LASER_SHOT){
       PlaySound(BLASTER, true);
     }else if(gameStatus == GAME_WIN){
@@ -129,6 +133,14 @@ void PlayStarWarsGame(){
       FireANewBall();
       PlayRandomMultiballMusic();
       delay(4000);
+    }
+
+    if(loosingLights == 1) {
+      AmbiLight(BOOST_OFF);
+      AmbiLight(ALL_OFF);
+      loosingLights = 0;
+    }else if (loosingLights > 1) {
+      loosingLights --;
     }
     DisplayScore(gameScore);
     delay(50);

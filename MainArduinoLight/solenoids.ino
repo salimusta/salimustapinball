@@ -40,7 +40,7 @@ void DisableFlippers(){
 }
 void DisableKickers(){
   //send a Launch command to the Solenoid arduino
-  SendSolenoidCommand(80);
+  //SendSolenoidCommand(80);
 }
 void FireKickout1(){
   //send a Launch command to the Solenoid arduino

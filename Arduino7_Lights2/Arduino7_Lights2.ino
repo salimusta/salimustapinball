@@ -53,8 +53,8 @@ bool allAnim = false;
        
 //RAMP GATE --------------------
 byte RampGateAnim = 1;
-byte RampGateAnimMode = RAMPGATE_DUAL_SNAKE;
-byte RampGateAnimMode_Old = RAMPGATE_DUAL_SNAKE;
+byte RampGateAnimMode = RAMPGATE_OFF;
+byte RampGateAnimMode_Old = RAMPGATE_OFF;
 int RampGateAnimTime = 0;
 byte RampGateData = 0;
 bool RampGateSide = true; 
@@ -132,7 +132,7 @@ void receiveEvent(int howMany) {
       RampGateAnim = 0;
       RampGateAnimMode = RAMPGATE_OFF;
       
-    }else if(byte0 == RAMPGATE_SNAKE){
+    /*}else if(byte0 == RAMPGATE_SNAKE){
       ManageRampGateMode(duration);
       
       RampGateAnim = 1;
@@ -161,7 +161,7 @@ void receiveEvent(int howMany) {
       ManageRampGateMode(duration);
       
       RampGateAnim = 0b01010;
-      RampGateAnimMode = RAMPGATE_ALTERNATE;
+      RampGateAnimMode = RAMPGATE_ALTERNATE;*/
     
     //RAMP MODE--------------------------------------------------
     }else if(byte0 == RAMP_OFF){
