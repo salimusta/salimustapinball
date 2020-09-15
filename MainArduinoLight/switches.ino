@@ -10,7 +10,7 @@ void TestSwitches() {
     if (COIN) lcd.print("COIN"); if (KO2) lcd.print("KO2"); if (RKSW) lcd.print("Right Kick"); if (LKSW) lcd.print("Left Kick");if (TKSW) lcd.print("Top Kick");
     if (LOSW) lcd.print("LOSW"); if (RLOSW) lcd.print("RLOSW"); if (LLOSW) lcd.print("LLOSW");
     if (CT) lcd.print("CT"); if (GATE) lcd.print("GATE"); if (RT1) lcd.print("RT1"); if (RT1P) lcd.print("RT1P"); if (RT2) lcd.print("RT2");
-    if (LT1) lcd.print("LT1"); if (LT2) lcd.print("LT2"); if (LT2P) lcd.print("LT2P"); if (KO1) lcd.print("KO1"); if (RAMP1) lcd.print("RAMP1");
+    if (LT1) lcd.print("LT1"); if (LT2) lcd.print("LT2"); if (LT2P) lcd.print("LT2P"); if (KO1) lcd.print("KO1");
     if (RAMP2) lcd.print("RAMP2");
     if (digitalRead(BackBoutonPin) == HIGH) break;
   }
@@ -48,14 +48,13 @@ void ReadSwitches() {
     CT = (newCT && CT_Old != newCT); GATE = (newGATE && GATE_Old != newGATE); RT1 = (newRT1 && RT1_Old != newRT1);
     RT1P = (newRT1P && RT1P_Old != newRT1P); RT2 = (newRT2 && RT2_Old != newRT2); LT1 = (newLT1 && LT1_Old != newLT1); LT2 = (newLT2 && LT2_Old != newLT2);
     LT2P = (newLT2P && LT2P_Old != newLT2P); KO1 = (newKO1 && KO1_Old != newKO1);
-    RAMP1 = (newRAMP1 && RAMP1_Old != newRAMP1);
     RAMP2 = (newRAMP2 && RAMP2_Old != newRAMP2);
     START = (newSTART && START_Old != newSTART);
     TILT = (newTILT && TILT_Old != newTILT);
   }
   BSW1_Old = newBSW1; BSW2_Old = newBSW2; BSW3_Old = newBSW3; ROSW1_Old = newROSW1; ROSW2_Old = newROSW2; ROSW3_Old = newROSW3; COIN_Old = newCOIN;
   KO2_Old = newKO2; LOSW_Old = newLOSW; RLOSW_Old = newRLOSW; LLOSW_Old = newLLOSW; CT_Old = newCT; GATE_Old = newGATE; RT1_Old = newRT1; RT1P_Old = newRT1P;
-  RT2_Old = newRT2; LT1_Old = newLT1; LT2_Old = newLT2; LT2P_Old = newLT2P; KO1_Old = newKO1; RAMP1_Old = newRAMP1; RAMP2_Old = newRAMP2; START_Old = newSTART;
+  RT2_Old = newRT2; LT1_Old = newLT1; LT2_Old = newLT2; LT2P_Old = newLT2P; KO1_Old = newKO1; RAMP2_Old = newRAMP2; START_Old = newSTART;
   TILT_Old = newTILT;
 }
 

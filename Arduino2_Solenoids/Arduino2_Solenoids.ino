@@ -1,9 +1,9 @@
-#include <Wire.h> 
-#include <SPI.h> 
+#include <Wire.h>
+#include <SPI.h>
 
-#define PDB_COMMAND_WRITE 1 
-#define BANK_ONE 1 
-#define BANK_ZERO 0 
+#define PDB_COMMAND_WRITE 1
+#define BANK_ONE 1
+#define BANK_ZERO 0
 #define pinMOSI 11
 #define DEBUG 0
 
@@ -70,10 +70,11 @@ long LeftKicker_Duration = 9999;
 
 long Kickout1_Duration = 9999;
 long Kickout2_Duration = 9999;
-
 long TopKicker_Duration = 9999;
-
 long Shooter_Duration = 9999;
+long SmallChime_Duration = 9999;
+long MediumChime_Duration = 9999;
+long LargeChime_Duration = 9999;
 
 bool KICKER_LEFT = 0;
 bool KICKER_RIGHT = 0;
@@ -87,6 +88,10 @@ bool kickout1Requested = false;
 bool kickout2Requested = false;
 bool shooterRequested = false;
 bool shooterOnlyRequested = false;
+
+bool smallChimeRequested = false;
+bool mediumChimeRequested = false;
+bool largeChimeRequested = false;
 
 bool reset = false;
 
@@ -108,6 +113,10 @@ int KICKOUT1_FIRE_DURATION = 120;
 int KICKOUT2_FIRE_DURATION = 100;
 int SHOOTER_FIRE_DURATION = 250;
 
+int SMALL_CHIME_FIRE_DURATION = 200;
+int MEDIUM_CHIME_FIRE_DURATION = 200;
+int LARGE_CHIME_FIRE_DURATION = 200;
+
 short decalage = 130;
 short decalage2 = 110;
 short decalage3 = 130;
@@ -115,13 +124,13 @@ short decalage3 = 130;
 long randomTime = 0;
 
 void setup() {
- if(DEBUG) Serial.begin(9600); 
+ if(DEBUG) Serial.begin(9600);
 
- SPI.begin(); 
- SPI.setBitOrder(MSBFIRST); 
- SPI.setClockDivider(SPI_CLOCK_DIV2);  // Need 8 MHz.  So use DIV2 on a 16 MHz board. 
+ SPI.begin();
+ SPI.setBitOrder(MSBFIRST);
+ SPI.setClockDivider(SPI_CLOCK_DIV2);  // Need 8 MHz.  So use DIV2 on a 16 MHz board.
 
- pinMode(buttonLeftPin, INPUT);  
+ pinMode(buttonLeftPin, INPUT);
  pinMode(buttonRightPin, INPUT);
  pinMode(BASW1Pin, INPUT);
  pinMode(BASW2Pin, INPUT);
@@ -130,16 +139,17 @@ void setup() {
  pinMode(LKickerPin, INPUT);
  pinMode(RampPin, INPUT);
  pinMode(TopKickerPin, INPUT);
- 
+
  Wire.begin(2);
  Wire.onReceive(receiveEvent);
  Wire.onRequest(requestEvent);
 
- SolenoidStatesBankA(0, 0, 0, 0, 0);
- SolenoidStatesBankB(0, 0, 0, 0, 0, 0);
+ SolenoidStatesBankA(0, 0, 0, 0, 0, 0);
+ SolenoidStatesBankB(0, 0, 0, 0, 0, 0, 0, 0);
  SolenoidOff(2);
  SolenoidOff(3);
  if(DEBUG) Serial.print("ARDUINO 1 SOLENOID\n");
+
 }
 
 
@@ -152,9 +162,14 @@ void receiveEvent(int howMany) {
   //60 to Fire Kickout 2
   //80 to disable side kickers
   //90 to Shoot a Ball
-  for(int x=0; x<howMany;x++){
+  //100 Ramp and shoot
+  //200 Reset All
+  //110 Small Chime
+  //120 Medium Chime
+  //130 Large Chime
+  for(int x = 0; x < howMany; x++){
     byte data = Wire.read();
-    
+
     if(data == 10){
       rampABallRequested = true;
       timeRampABall = millis();
@@ -193,6 +208,18 @@ void receiveEvent(int howMany) {
       shooterOnlyRequested = true;
       Shooter_Duration = 0;
       if(DEBUG) Serial.print("Ramp and Shoot\n");
+    }else if(data == 110){
+      smallChimeRequested = true;
+      SmallChime_Duration = 0;
+      if(DEBUG) Serial.print("Small Chime\n");
+    }else if(data == 120){
+      mediumChimeRequested = true;
+      MediumChime_Duration = 0;
+      if(DEBUG) Serial.print("Medium Chime\n");
+    }else if(data == 130){
+      largeChimeRequested = true;
+      LargeChime_Duration = 0;
+      if(DEBUG) Serial.print("Large Chime\n");
     }else if(data == 200){
       reset = true;
       if(DEBUG) Serial.print("RESET ALL\n");
@@ -207,15 +234,15 @@ void receiveEvent(int howMany) {
 
 void requestEvent()
 {
-  //write a byte like 
+  //write a byte like
   //order starting from bit 0: KickerTop, KickerLeft, KickerRight, LeftFLipper, RightFLipper
   byte response = buttonRightState;
   response = (response << 1) | buttonLeftState;
   response = (response << 1) | KICKER_RIGHT;
   response = (response << 1) | KICKER_LEFT;
   response = (response << 1) | KICKER_TOP;
-  
-  Wire.write(response); 
+
+  Wire.write(response);
 }
 
 
@@ -232,20 +259,9 @@ unsigned long TopKickerSW_startTime = 0;
 unsigned long leftFlipper_Time = 0;
 unsigned long rightFlipper_Time = 0;
 
-
 unsigned long time;
 unsigned long old_time = 0;
 
-void d() {
-
-  bool btLeftButton, btRightButton;
-  Wire.requestFrom(8, 1);
-  while (Wire.available()) {
-    char c = Wire.read(); // receive a byte as character
-    
-  }
-  
-}
 unsigned long timeInc = 0;
 void loop() {
   //Delay of 1ms divides by 8
@@ -256,7 +272,7 @@ void loop() {
     timeInc = 0;
   }
   time = millis();
-  
+
   buttonLeftState = digitalRead(buttonLeftPin);
   buttonRightState = digitalRead(buttonRightPin);
   BASW1State = digitalRead(BASW1Pin);
@@ -266,7 +282,7 @@ void loop() {
   LKickerState = digitalRead(LKickerPin);
   RampState = digitalRead(RampPin);
   TopKickerState = digitalRead(TopKickerPin);
-  
+
   //Bluetooth
   if(btButtonLeftState == 1) buttonLeftState = HIGH;
   if(btButtonRightState == 1) buttonRightState = HIGH;
@@ -282,8 +298,39 @@ void loop() {
   int Kickout1_State = 0;
   int Kickout2_State = 0;
   int Shooter_State = 0;
-  
+  int SmallChime_State = 0;
+  int MediumChime_State = 0;
+  int LargeChime_State = 0;
+
   bool Ramping = false;
+
+  // CHIMES
+  if(smallChimeRequested){
+    SmallChime_State = 1;
+    SmallChime_Duration++;
+    if(SmallChime_Duration > SMALL_CHIME_FIRE_DURATION){
+      SmallChime_Duration = 9999;
+      smallChimeRequested = false;
+    }
+  }
+
+  if(mediumChimeRequested){
+    MediumChime_State = 1;
+    MediumChime_Duration++;
+    if(MediumChime_Duration > MEDIUM_CHIME_FIRE_DURATION){
+      MediumChime_Duration = 9999;
+      mediumChimeRequested = false;
+    }
+  }
+
+  if(largeChimeRequested){
+    LargeChime_State = 1;
+    LargeChime_Duration++;
+    if(LargeChime_Duration > LARGE_CHIME_FIRE_DURATION){
+      LargeChime_Duration = 9999;
+      largeChimeRequested = false;
+    }
+  }
 
   //KICKOUTS------------------------------------
   if(kickout1Requested){
@@ -306,20 +353,20 @@ void loop() {
   //TEST---------------------------------------
   if(testRequested){
     if(DEBUG) Serial.print("SEQUENCE DE TEST RECU\n");
-    SolenoidStatesBankA(0, 0, 0, 0, 0);
-    SolenoidStatesBankB(0, 0, 0, 0, 0, 0);
+    SolenoidStatesBankA(0, 0, 0, 0, 0, 0);
+    SolenoidStatesBankB(0, 0, 0, 0, 0, 0, 0, 0);
     delay(2000);
     if(DEBUG) Serial.print("LEFT FLIPPER\n");
     //LEFT FLIPPER
-    SolenoidStatesBankA(1, 0, 0, 0, 0);
+    SolenoidStatesBankA(1, 0, 0, 0, 0, 0);
     delay(200);
-    SolenoidStatesBankA(0, 0, 0, 0, 0);
+    SolenoidStatesBankA(0, 0, 0, 0, 0, 0);
     delay(2000);
     if(DEBUG) Serial.print("RIGHT FLIPPER\n");
     //RIGHT FLIPPER
-    SolenoidStatesBankA(0, 1, 0, 0, 0);
+    SolenoidStatesBankA(0, 1, 0, 0, 0, 0);
     delay(200);
-    SolenoidStatesBankA(0, 0, 0, 0, 0);
+    SolenoidStatesBankA(0, 0, 0, 0, 0, 0);
     delay(2000);
     if(DEBUG) Serial.print("TRIEUR\n");
     //TRIEUR
@@ -333,79 +380,97 @@ void loop() {
     delay(50);
     SolenoidOff(3);
     delay(2000);
-    
+
     if(DEBUG) Serial.print("Bumper 1\n");
     //Bumper 1
-    SolenoidStatesBankA(0, 0, 1, 0, 0);
+    SolenoidStatesBankA(0, 0, 1, 0, 0, 0);
     delay(100);
-    SolenoidStatesBankA(0, 0, 0, 0, 0);
+    SolenoidStatesBankA(0, 0, 0, 0, 0, 0);
     delay(2000);
-    
+
     if(DEBUG) Serial.print("Bumper 2\n");
     //Bumper 2
-    SolenoidStatesBankA(0, 0, 0, 1, 0);
+    SolenoidStatesBankA(0, 0, 0, 1, 0, 0);
     delay(100);
-    SolenoidStatesBankA(0, 0, 0, 0, 0);
+    SolenoidStatesBankA(0, 0, 0, 0, 0, 0);
     delay(2000);
-    
+
     if(DEBUG) Serial.print("Bumper 3\n");
     //Bumper 3
-    SolenoidStatesBankA(0, 0, 0, 0, 1);
+    SolenoidStatesBankA(0, 0, 0, 0, 1, 0);
     delay(100);
-    SolenoidStatesBankA(0, 0, 0, 0, 0);
+    SolenoidStatesBankA(0, 0, 0, 0, 0, 0);
     delay(2000);
-    
+
     if(DEBUG) Serial.print("Kicker Left\n");
     //Kicker Left
-    SolenoidStatesBankB(0, 1, 0, 0, 0, 0);
+    SolenoidStatesBankB(0, 1, 0, 0, 0, 0, 0, 0);
     delay(200);
-    SolenoidStatesBankB(0, 0, 0, 0, 0, 0);
+    SolenoidStatesBankB(0, 0, 0, 0, 0, 0, 0, 0);
     delay(2000);
-    
+
     if(DEBUG) Serial.print("Kicker Right\n");
     //Kicker Right
-    SolenoidStatesBankB(1, 0, 0, 0, 0, 0);
+    SolenoidStatesBankB(1, 0, 0, 0, 0, 0, 0, 0);
     delay(200);
-    SolenoidStatesBankB(0, 0, 0, 0, 0, 0);
+    SolenoidStatesBankB(0, 0, 0, 0, 0, 0, 0, 0);
     delay(2000);
-    
+
     if(DEBUG) Serial.print("Kicker Top\n");
     //Kicker Right
-    SolenoidStatesBankB(0, 0, 0, 0, 0, 1);
+    SolenoidStatesBankB(0, 0, 0, 0, 0, 1, 0, 0);
     delay(200);
-    SolenoidStatesBankB(0, 0, 0, 0, 0, 0);
+    SolenoidStatesBankB(0, 0, 0, 0, 0, 0, 0, 0);
     delay(2000);
-    
+
     if(DEBUG) Serial.print("Kickout 1\n");
     //Kickout 1
-    SolenoidStatesBankB(0, 0, 1, 0, 0, 0);
+    SolenoidStatesBankB(0, 0, 1, 0, 0, 0, 0, 0);
     delay(50);
-    SolenoidStatesBankB(0, 0, 0, 0, 0, 0);
+    SolenoidStatesBankB(0, 0, 0, 0, 0, 0, 0, 0);
     delay(1000);
-    
+
     if(DEBUG) Serial.print("Kickout 1\n");
     //Kickout 1
-    SolenoidStatesBankB(0, 0, 0, 1, 0, 0);
+    SolenoidStatesBankB(0, 0, 0, 1, 0, 0, 0, 0);
     delay(50);
-    SolenoidStatesBankB(0, 0, 0, 0, 0, 0);
+    SolenoidStatesBankB(0, 0, 0, 0, 0, 0, 0, 0);
     delay(1000);
-    
+
     //Shooter
-    SolenoidStatesBankB(0, 0, 0, 0, 1, 0);
+    SolenoidStatesBankB(0, 0, 0, 0, 1, 0, 0, 0);
     delay(50);
-    SolenoidStatesBankB(0, 0, 0, 0, 0, 0);
+    SolenoidStatesBankB(0, 0, 0, 0, 0, 0, 0, 0);
     delay(1000);
-    
+
+    //Chime
+    SolenoidStatesBankB(0, 0, 0, 0, 0, 0, 0, 1);
+    delay(100);
+    SolenoidStatesBankB(0, 0, 0, 0, 0, 0, 0, 0);
+    delay(1000);
+
+    //Chime
+    SolenoidStatesBankB(0, 0, 0, 0, 0, 0, 1, 0);
+    delay(100);
+    SolenoidStatesBankB(0, 0, 0, 0, 0, 0, 0, 0);
+    delay(1000);
+
+    //Chime
+    SolenoidStatesBankA(0, 0, 0, 0, 0, 1);
+    delay(100);
+    SolenoidStatesBankA(0, 0, 0, 0, 0, 0);
+    delay(1000);
+
     if(DEBUG) Serial.print("FIN DE SEQUENCE\n");
     testRequested = false;
   }
-  
+
   //At any time, if RAMP = ON Ramp the ball
   if(!rampABallRequested && RampState == HIGH){
      rampABallRequested = true;
      timeRampABall = millis() + 500;
   }
-  
+
   //Push the ball trough sequence, we shoot a need ball
   if(rampABallRequested){
     unsigned long timeSinceRequested = time - timeRampABall;
@@ -414,14 +479,14 @@ void loop() {
     if(timeSinceRequested > 3000 && timeSinceRequested < 10000){
       rampABallRequested = false;
       Ramping = false;
-      
+
     //Check if the ball fell down, refire again
     }else if(timeSinceRequested > 2500){
       Ramping = true;
       if(RampState == HIGH){
         timeRampABall = time - 500;
-      }  
-    
+      }
+
     //Cut the powering session Ramp off
     }else if(timeSinceRequested > 1026){
       SolenoidOff(3);
@@ -430,7 +495,7 @@ void loop() {
     }else if(timeSinceRequested > 1005){
       SolenoidOn(3);
       Ramping = true;
-      
+
     //Close Trieur
     }else if(timeSinceRequested > 300){
       SolenoidOff(2);
@@ -441,27 +506,27 @@ void loop() {
       Ramping = true;
     }
   }
-  
+
   //Shooting sequence
   if((shooterRequested || shooterOnlyRequested) && !rampABallRequested){
     Shooter_Duration++;
     Shooter_State = 1;
-    
+
     if(Shooter_Duration > SHOOTER_FIRE_DURATION ){
       Shooter_Duration = 9999;
       shooterRequested = false;
       shooterOnlyRequested = false;
     }
   }
-  
+
   //Ramp switch management
   if(RampState != RampOldState && RampState == HIGH){
-    if(DEBUG) Serial.print("RAMP ON\n"); 
+    if(DEBUG) Serial.print("RAMP ON\n");
   }else if(RampState != RampOldState && RampState == LOW){
-    if(DEBUG) Serial.print("RAMP OFF\n"); 
+    if(DEBUG) Serial.print("RAMP OFF\n");
   }
-  
-  
+
+
   if(buttonLeftState != buttonLeftOldState && buttonLeftState == HIGH){
     leftFlipper_startTime = time;
     if(DEBUG)  Serial.print("LEFT ON\n");
@@ -470,7 +535,7 @@ void loop() {
     rightFlipper_startTime = time;
     if(DEBUG) Serial.print("RIGHT ON\n");
   }
-  
+
   if(buttonLeftState == HIGH){
     leftFlipper_Time = time - leftFlipper_startTime;
     if(leftFlipper_Time < POWER_TIME_LEFT_MS) leftSolenoidState = 1;
@@ -482,7 +547,7 @@ void loop() {
   }else{
     leftFlipper_Time = 0;
   }
-  
+
   if(buttonRightState == HIGH){
     rightFlipper_Time = time - rightFlipper_startTime;
     if(rightFlipper_Time < POWER_TIME_RIGHT_MS) rightSolenoidState = 1;
@@ -494,7 +559,7 @@ void loop() {
   }else{
     rightFlipper_Time = 0;
   }
-  
+
   //BUMPER ACTIVATION SWITHES
   if(BASW1State != BASW1OldState && BASW1State == HIGH){
     if(time - BASW1_startTime > 100){
@@ -517,12 +582,12 @@ void loop() {
       if(DEBUG) Serial.print("BASW3 ON\n");
     }
   }
-  
+
   //BUMPER FIRE ACTIVATION
   //BUMPER1_FIRE_DURATION
   if(timeSinceFiredBumper1 > 500 && Bumper1_Duration < BUMPER1_FIRE_DURATION + decalage){
    if (Bumper1_Duration > decalage) {
-     Bumper1_State = 1; 
+     Bumper1_State = 1;
    }else Bumper1_State = 0;
    Bumper1_Duration++;
    if(Bumper1_Duration == BUMPER1_FIRE_DURATION + decalage) timeSinceFiredBumper1 = 0;
@@ -530,7 +595,7 @@ void loop() {
    Bumper1_State = 0;
    Bumper1_Duration= 9999;
   }
-  
+
   if(timeSinceFiredBumper2 > 500 && Bumper2_Duration < BUMPER2_FIRE_DURATION + decalage2){
    if (Bumper2_Duration > decalage2) {
      Bumper2_State = 1;
@@ -541,7 +606,7 @@ void loop() {
    Bumper2_State = 0;
    Bumper2_Duration= 9999;
   }
-  
+
   if(timeSinceFiredBumper3 > 500 && Bumper3_Duration < BUMPER3_FIRE_DURATION + decalage3){
    if (Bumper3_Duration > decalage3) Bumper3_State = 1;
    else Bumper3_State = 0;
@@ -551,11 +616,11 @@ void loop() {
    Bumper3_State = 0;
    Bumper3_Duration= 9999;
   }
-  
+
   if(timeSinceFiredBumper1 < 10000) timeSinceFiredBumper1++;
   if(timeSinceFiredBumper2 < 10000) timeSinceFiredBumper2++;
   if(timeSinceFiredBumper3 < 10000) timeSinceFiredBumper3++;
-  
+
   //Kicker activation switches
   if(RKickerState != RKickerOldState ){
     KICKER_RIGHT = (RKickerState == HIGH);
@@ -565,7 +630,7 @@ void loop() {
       if(DEBUG) Serial.print("Right Kicker Activated ON\n");
     }
   }
-  
+
   if(LKickerState != LKickerOldState){
     KICKER_LEFT = (LKickerState == HIGH);
     if(time > LKickerSW_startTime + 500 && time > LKickerSW_startTime ){
@@ -574,7 +639,7 @@ void loop() {
       if(DEBUG) Serial.print("Left Kicker Activated ON\n");
     }
   }
-  
+
   //Top Kicker
   if(TopKickerState != TopKickerOldState){
     KICKER_TOP = (TopKickerState == HIGH);
@@ -584,33 +649,32 @@ void loop() {
       if(DEBUG) Serial.print("TOP Kicker Activated ON\n");
     }
   }
-  
+
   //Kicker ACTIVATION
   if(RightKicker_Duration < KICKER_FIRE_DURATION && kickersEnabled){
-   RightKicker_State = 1; 
+   RightKicker_State = 1;
    RightKicker_Duration++;
   }else{
    RightKicker_State = 0;
    RightKicker_Duration= 9999;
   }
-  
+
   if(LeftKicker_Duration < KICKER_FIRE_DURATION && kickersEnabled){
-   LeftKicker_State = 1; 
+   LeftKicker_State = 1;
    LeftKicker_Duration++;
   }else{
    LeftKicker_State = 0;
    LeftKicker_Duration= 9999;
   }
-  
+
   if(TopKicker_Duration < TOP_KICKER_FIRE_DURATION && kickersEnabled){
-   TopKicker_State = 1; 
+   TopKicker_State = 1;
    TopKicker_Duration++;
   }else{
    TopKicker_State = 0;
    TopKicker_Duration= 9999;
   }
-  
-  
+
   if(reset) {
     if(DEBUG){
       Serial.print("RESET Action \n");
@@ -621,18 +685,18 @@ void loop() {
     reset = false;
   }else  if(flippersEnabled){
     if(Ramping == false){
-      SolenoidStatesBankA(leftSolenoidState, rightSolenoidState, Bumper1_State, Bumper2_State, Bumper3_State);
-      SolenoidStatesBankB(RightKicker_State, LeftKicker_State, Kickout1_State, Kickout2_State, Shooter_State, TopKicker_State);
+      SolenoidStatesBankA(leftSolenoidState, rightSolenoidState, Bumper1_State, Bumper2_State, Bumper3_State, MediumChime_State);
+      SolenoidStatesBankB(RightKicker_State, LeftKicker_State, Kickout1_State, Kickout2_State, Shooter_State, TopKicker_State, SmallChime_State, LargeChime_State);
     }else{
-      SolenoidStatesBankA(0, 0, 0, 0, 0);
-      SolenoidStatesBankB(0, 0, Kickout1_State, Kickout2_State, Shooter_State, 0);
+      SolenoidStatesBankA(0, 0, 0, 0, 0, 0);
+      SolenoidStatesBankB(0, 0, Kickout1_State, Kickout2_State, Shooter_State, 0, 0, 0);
     }
-    
+
   }else {
-    SolenoidStatesBankA(0, 0, 0, 0, 0);
-    SolenoidStatesBankB(0, 0, Kickout1_State, Kickout2_State, Shooter_State, 0);
+    SolenoidStatesBankA(0, 0, 0, 0, 0, 0);
+    SolenoidStatesBankB(0, 0, Kickout1_State, Kickout2_State, Shooter_State, 0, 0, 0);
   }
-  
+
   buttonLeftOldState = buttonLeftState;
   buttonRightOldState = buttonRightState;
   BASW1OldState = BASW1State;
@@ -642,28 +706,31 @@ void loop() {
   LKickerOldState = LKickerState;
   TopKickerOldState = TopKickerState;
   RampOldState = RampState;
-  
+
  old_time = time;
 } // loop
 
 //0 is left, 1 i right
-void SolenoidStatesBankA(byte leftFlipper, byte rightFlipper, byte Bumper1_Solenoid, byte Bumper2_Solenoid, byte Bumper3_Solenoid){
+void SolenoidStatesBankA(byte leftFlipper, byte rightFlipper, byte Bumper1_Solenoid, byte Bumper2_Solenoid, byte Bumper3_Solenoid, byte SmallChime_Solenoid){
   dataSolenoid = 0;
   if(leftFlipper == 1) dataSolenoid |= 1;
   else dataSolenoid &= ~1;
-  
+
   if(rightFlipper == 1) dataSolenoid |= 1 << 1;
   else dataSolenoid &= ~(1 << 1);
-  
+
   if(Bumper1_Solenoid == 1) dataSolenoid |= 1 << 4;
   else dataSolenoid &= ~(1 << 4);
-  
+
   if(Bumper2_Solenoid == 1) dataSolenoid |= 1 << 5;
   else dataSolenoid &= ~(1 << 5);
-  
+
   if(Bumper3_Solenoid == 1) dataSolenoid |= 1 << 6;
   else dataSolenoid &= ~(1 << 6);
-  
+
+  if(SmallChime_Solenoid == 1) dataSolenoid |= 1 << 7;
+  else dataSolenoid &= ~(1 << 7);
+
   if(dataSolenoid != dataSolenoidOld || (dataSolenoid == 0 && timeInc%2 == 0)){
     bool override = dataSolenoid == 0 ;
     sendPDBCommand(board, PDB_COMMAND_WRITE, BANK_ZERO, dataSolenoid, override);
@@ -671,26 +738,32 @@ void SolenoidStatesBankA(byte leftFlipper, byte rightFlipper, byte Bumper1_Solen
   dataSolenoidOld = dataSolenoid;
 }
 
-void SolenoidStatesBankB(byte RightKicker, byte LeftKicker, byte Kickout1, byte Kickout2, byte Shooter, byte TopKicker){
+void SolenoidStatesBankB(byte RightKicker, byte LeftKicker, byte Kickout1, byte Kickout2, byte Shooter, byte TopKicker, byte MediumChime, byte LargeChime){
   dataSolenoidBankB = 0;
   if(LeftKicker == 1) dataSolenoidBankB |= 1;
   else dataSolenoidBankB &= ~1;
-  
+
   if(RightKicker == 1) dataSolenoidBankB |= 1 << 1;
   else dataSolenoidBankB &= ~(1 << 1);
-  
+
   if(Kickout1 == 1) dataSolenoidBankB |= 1 << 2;
   else dataSolenoidBankB &= ~(1 << 2);
-  
+
   if(Kickout2 == 1) dataSolenoidBankB |= 1 << 3;
   else dataSolenoidBankB &= ~(1 << 3);
-  
+
   if(Shooter == 1) dataSolenoidBankB |= 1 << 4;
   else dataSolenoidBankB &= ~(1 << 4);
-  
+
   if(TopKicker == 1) dataSolenoidBankB |= 1 << 5;
   else dataSolenoidBankB &= ~(1 << 5);
-  
+
+  if(MediumChime == 1) dataSolenoidBankB |= 1 << 6;
+  else dataSolenoidBankB &= ~(1 << 6);
+
+  if(LargeChime == 1) dataSolenoidBankB |= 1 << 7;
+  else dataSolenoidBankB &= ~(1 << 7);
+
   if(dataSolenoidBankB != dataSolenoidBankBOld || (dataSolenoidBankB == 0 && timeInc%2 ==0)){
     bool override = dataSolenoidBankB == 0;
     sendPDBCommand(board, PDB_COMMAND_WRITE, BANK_ONE, dataSolenoidBankB, override);
@@ -706,14 +779,14 @@ void SolenoidOn(byte solenoidNumber)
 }
 
 void SolenoidOff(byte solenoidNumber)
-{ 
+{
   dataSolenoid = 0;
  dataSolenoid &= ~(1 << solenoidNumber); // set solenoid bit to zero
  sendPDBCommand(board, PDB_COMMAND_WRITE, 0, dataSolenoid, false);
 }
 
-void sendPDBCommand(byte addr, byte command, byte bankAddr, byte data, bool override) 
-{ 
+void sendPDBCommand(byte addr, byte command, byte bankAddr, byte data, bool override)
+{
   if (override == false) {
     if(bankAddr == BANK_ZERO && data == lastData0) return;
     if(bankAddr == BANK_ONE && data == lastData1) return;
@@ -721,28 +794,27 @@ void sendPDBCommand(byte addr, byte command, byte bankAddr, byte data, bool over
   if(DEBUG){
       Serial.print(bankAddr); Serial.print("-");Serial.print(data);Serial.print("\n");
    }
- byte cmdWord[5]; 
- cmdWord[0] = addr; 
- cmdWord[1] = command; 
- cmdWord[2] = bankAddr; 
- cmdWord[3] = (data >> 4) & 0xF; 
- cmdWord[4] = data & 0xF; 
+ byte cmdWord[5];
+ cmdWord[0] = addr;
+ cmdWord[1] = command;
+ cmdWord[2] = bankAddr;
+ cmdWord[3] = (data >> 4) & 0xF;
+ cmdWord[4] = data & 0xF;
 
- // Turn off interrupts so the transfer doesn't get interrupted. 
- noInterrupts(); 
- // Hardcode transfers to minimize IDLEs between transfers. 
- // Using a for-loop adds 5 extra IDLEs between transfers.  
- SPI.transfer(cmdWord[0]); 
- SPI.transfer(cmdWord[1]); 
- SPI.transfer(cmdWord[2]); 
- SPI.transfer(cmdWord[3]); 
- SPI.transfer(cmdWord[4]); 
- 
+ // Turn off interrupts so the transfer doesn't get interrupted.
+ noInterrupts();
+ // Hardcode transfers to minimize IDLEs between transfers.
+ // Using a for-loop adds 5 extra IDLEs between transfers.
+ SPI.transfer(cmdWord[0]);
+ SPI.transfer(cmdWord[1]);
+ SPI.transfer(cmdWord[2]);
+ SPI.transfer(cmdWord[3]);
+ SPI.transfer(cmdWord[4]);
+
  if(bankAddr == BANK_ZERO) lastData0 = data;
  else if(bankAddr == BANK_ONE) lastData1 = data;
- // Re-enable interrupts 
- interrupts(); 
+ // Re-enable interrupts
+ interrupts();
  //Serial.println("Transferred ");
- return; 
+ return;
 } // sendPDBCommand
-

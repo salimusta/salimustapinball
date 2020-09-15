@@ -29,6 +29,18 @@ void ResetSolenoids(){
   SendSolenoidCommand(200);
 }
 
+void RingSmallChime(){
+  SendSolenoidCommand(110);
+}
+
+void RingMediumChime(){
+  SendSolenoidCommand(120);
+}
+
+void RingLargeChime(){
+  SendSolenoidCommand(130);
+}
+
 
 void EnableFlippers(){
   //send a Launch command to the Solenoid arduino
@@ -40,7 +52,7 @@ void DisableFlippers(){
 }
 void DisableKickers(){
   //send a Launch command to the Solenoid arduino
-  //SendSolenoidCommand(80);
+  SendSolenoidCommand(80);
 }
 void FireKickout1(){
   //send a Launch command to the Solenoid arduino
@@ -64,7 +76,7 @@ void TestSolenoids(){
   delay(24000);
   lcd.setCursor(0, 1);
   lcd.print("Done!-");
-  
+
 }
 void EmptyAllBalls(){
   RampABall();
@@ -78,5 +90,3 @@ void SendSolenoidData(byte data){
   Wire.write(data);
   Wire.endTransmission();
 }
-
-

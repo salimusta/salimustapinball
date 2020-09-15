@@ -19,11 +19,12 @@ void TestSounds(){
 }
 
 void PlaySound(byte sound, bool override){
+  if (vintageMode) return;
   if(override || (time - timeOfLastSoundPlayed > 0 && time - timeOfLastSoundPlayed > 400)) {
     timeOfLastSoundPlayed = time;
     wTrig.trackPlayPoly(sound);
   }
-  
+
   //delay(50);
 }
 
@@ -61,15 +62,15 @@ void PlayRandomLoose(){
   }else  if(rand == 11){
      PlaySound(WHYDIDUDOTHAT, false);
   }
-  
+
 }
 int PlayRandomMusic(){
   StopMusic();
-  
+
   long hasardSound;
   randomSeed(analogRead(0));
   hasardSound = random(15);
-  
+
   //wTrig.masterGain(0);
   byte i;
   int timeRelease = 0;
@@ -77,7 +78,7 @@ int PlayRandomMusic(){
     wTrig.trackLoop(i, true);
     wTrig.trackGain(i, -10);
   }
-  
+
   if(hasardSound == 0){
     PlaySound(JIVE_BUNNY, true);
     timeRelease = 3000;
@@ -124,7 +125,7 @@ int PlayRandomMusic(){
      PlaySound(HIDEHO, true);
      timeRelease = 6800;
   }
-  
+
   return 2000;
   return timeRelease;
 
@@ -132,42 +133,42 @@ int PlayRandomMusic(){
 
 void SetVolume(int volume) {
  double number = (volume - 100) * 0.7;
- wTrig.masterGain((int)(number)); 
+ wTrig.masterGain((int)(number));
 }
 
 void PlayRandomMultiballMusic(){
   StopMusic();
-  
+
   long hasardSound;
   randomSeed(analogRead(0));
   hasardSound = random(2);
-  
+
   byte i;
   int timeRelease = 0;
   for(i = 100; i< 121; i++){
     wTrig.trackLoop(i, true);
     wTrig.trackGain(i, -10);
   }
-  
+
   if(hasardSound == 0){
     PlaySound(MISIRLOU, true);
   }else{
     PlaySound(CANCANYOU, true);
   }
-  
+
 
 }
 
 void PlayMusic(short musicId){
   StopMusic();
-  
+
   byte i;
   int timeRelease = 0;
   for(i = 100; i< 121; i++){
     wTrig.trackLoop(i, true);
     wTrig.trackGain(i, -10);
   }
-  
+
   PlaySound(musicId, true);
 
 }
